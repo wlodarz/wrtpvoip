@@ -1,0 +1,4 @@
+config AR7VOIP
+	tristate "AR7 VOIP driver"
+	depends on AR7
+	select ar7voip
