@@ -810,11 +810,9 @@ int strange_function2()
 
 /* probably read function */
 /* DONE, TODO: magic numbers, magic functions */
-int func01(int a, int b, int cnt, int a4)
+int func01(int tid, int ecVal, int ptr, int count)
 {
-	int tid;
 	int ret = 1;
-	int b1;
 /*
      714:	27bdffd8 	addiu	$sp,$sp,-40
      718:	afbf0024 	sw	$ra,36($sp)
@@ -829,7 +827,7 @@ int func01(int a, int b, int cnt, int a4)
      73c:	3094ffff 	andi	$s4,$a0,0xffff
      740:	02802021 	move	$a0,$s4
 */
-	tid = a & 0xffff;
+	tid &= 0xffff;
 	
 /*
      744:	3c020000 	lui	$v0,0x0
@@ -839,7 +837,6 @@ int func01(int a, int b, int cnt, int a4)
 */
 	tiuhw_select_tid(tid);
 
-	b1 = b&0xff; // s0
 
 /*
      754:	3c020000 	lui	$v0,0x0
@@ -849,7 +846,7 @@ int func01(int a, int b, int cnt, int a4)
      764:	080001dc 	j	770 <init_module-0x1cc>
      768:	00000000 	nop
 */
-	strange_function1(b1);
+	strange_function1(ecVal&0xff);
 
 /*
      76c:	2652ffff 	addiu	$s2,$s2,-1
@@ -866,7 +863,7 @@ int func01(int a, int b, int cnt, int a4)
      78c:	1660fff7 	bnez	$s3,76c <init_module-0x1d0>
      790:	26310001 	addiu	$s1,$s1,1
 */
-	while(a4 !=0  && ((ret = strange_function2(cnt)) != 0)) { cnt++; a4--; }
+	while(count !=0  && ((ret = strange_function2(ptr)) != 0)) { ptr++; count--; }
 
 /*
      794:	3c020000 	lui	$v0,0x0
