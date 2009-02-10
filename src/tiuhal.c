@@ -26,6 +26,19 @@ typedef struct {
 	int (*field3)(void);
 } ptrs;
 
+int func00(struct_s1 *a);
+int func01(int tid, int b, int cnt, int a4);
+int func02(int a1, int a2, int a3);
+int func03(void);
+int func10(void);
+int func11(void);
+int func12(void);
+int func13(void);
+int func20(void);
+int func21(void);
+int func22(int a, int b);
+int func23(int a, int b);
+
 char *prom_getenv(char *);
 irqreturn_t null_interrupt_handler1(int i, void *data);
 int hwu_get_tiuhw_if(void);
@@ -41,34 +54,8 @@ int tiuhw_get_tnetv1050_tid_type(void);
 #define DSP_RESET_ON 1
 #define DSP_RESET_OFF 0
 
-int unknown_global1 = 1; // data + 0x0034
-int should_reset_tid = 1; // data + 0x0070
-int tmp_variable0 = 0; // data + 0x00ac
-int not_initialized = 1; // data + 0x00b0
-int interface_type = TIHW_EXTERNAL; // data + 0x00b4
-int tmp_variable1 = 0; // data + 0x00bc
-int tmp_variable2 = 0; // data + ......
-char *stub_text = "tele_if_stub";
-int tiuhw_dsp_clock_mult;
-int tiuhw_dsp_input_clock_speed;
-
-int func00(struct_s1 *a);
-int func01(int tid, int b, int cnt, int a4);
-int func02(int a1, int a2, int a3);
-int func03(void);
-int func10(void);
-int func11(void);
-int func12(void);
-int func13(void);
-int func20(void);
-int func21(void);
-int func22(int a, int b);
-int func23(int a, int b);
-
-
-
 /* pointers from data + 0x0000 */
-ptrs pointer_with_defaults[3] = {
+ptrs tnetv1050_api[3] = {
 	{
 		func00, // 0x000
 		func01, // 0x714
@@ -88,6 +75,24 @@ ptrs pointer_with_defaults[3] = {
 		func23  // 0x904
 	}
 };
+
+int unknown_global1 = 1; // data + 0x0034
+ptrs hw_apis[3];	// data + 0x0038
+int should_reset_tid = 1; // data + 0x0070
+int tmp_variable0 = 0; // data + 0x00ac
+int not_initialized = 1; // data + 0x00b0
+int interface_type = TIHW_EXTERNAL; // data + 0x00b4
+void *tiuhw_api = NULL;		    // data + 0x00b8
+int tiuhw_dsp_clock_mult = 0; // data + 0x00bc
+int tiuhw_dsp_input_clock_speed = 0; // data + 0x00c0
+int hwu_settings_mod[4]; // data + 0x00c4
+char *stub_text = "tele_if_stub";
+int tiuhw_dsp_clock_mult;
+int tiuhw_dsp_input_clock_speed;
+
+
+
+
 void *other_pointer_src = 0;
 void *other_pointer_dst = 0;
 
@@ -322,14 +327,20 @@ int func00(struct_s1 *a)
      1b0:	00500019 	multu	$v0,$s0
      1b4:	3c05a508 	lui	$a1,0xa508
      1b8:	34a51010 	ori	$a1,$a1,0x1010
+
+/*
      1bc:	3c040000 	lui	$a0,0x0
      1c0:	248400c8 	addiu	$a0,$a0,200
+*/
+/*
      1c4:	00001010 	mfhi	$v0
      1c8:	3c038108 	lui	$v1,0x8108
      1cc:	00021502 	srl	$v0,$v0,0x14
      1d0:	2442ffff 	addiu	$v0,$v0,-1
      1d4:	00431025 	or	$v0,$v0,$v1
      1d8:	aca20000 	sw	$v0,0($a1)
+*/
+/*
      1dc:	8ca50000 	lw	$a1,0($a1)
 */
 /*
@@ -338,6 +349,8 @@ int func00(struct_s1 *a)
      1e8:	0240f809 	jalr	$s2
      1ec:	00000000 	nop
 */
+	reg = *(volatile int *)0xa5081010; // SPCR1
+	printk(KERN_ERR "SPCR1 = %08lx\n", reg);
 /*
      1f0:	3c060000 	lui	$a2,0x0
      1f4:	8cc60000 	lw	$a2,0($a2)
@@ -536,7 +549,7 @@ irqreturn_t null_interrupt_handler1(int i, void *data)
 int strange_function1(int a) {
 	int dsp_mult;
 	int dsp_speed;
-	int a1;
+	int a0, a1;
 	long long tmp0, tmp1;
 	int tmp2, tmp3, tmp4;
 /*
@@ -577,10 +590,6 @@ int strange_function1(int a) {
      494:	ace40000 	sw	$a0,0($a3)
 */
 	tmp2 = (tmp1 >> 32) & 0xffffffff;
-
-
-
-
 	*(volatile int *)0xa5081018 = a1;
 //	0xa5081010;					// a2
 /*
@@ -613,28 +622,39 @@ int strange_function1(int a) {
      4b8:	000210c0 	sll	$v0,$v0,0x3
      4bc:	00451023 	subu	$v0,$v0,$a1
 */
+	tmp3 >>= 0x03;
+	tmp3 -= tmp2;
 
 /*
      4c0:	00021100 	sll	$v0,$v0,0x4
      4c4:	00451021 	addu	$v0,$v0,$a1
 */
+	tmp3 >>= 0x04;
+	tmp3 += tmp2;
 
 /*
      4c8:	8ce30000 	lw	$v1,0($a3)
      4cc:	04610029 	bgez	$v1,574 <init_module-0x3c8>
      4d0:	00022100 	sll	$a0,$v0,0x4
 */
-
+	a1 = tmp3 >> 0x04;
+	reg = *(volatile int *)0xa5081018;
+	a0 = reg;
+	if(reg<0) {
 
 /*
      4d4:	2484ffff 	addiu	$a0,$a0,-1
 */
+		reg -= 1;
 
 /*
      4d8:	2402ffff 	li	$v0,-1
      4dc:	10820025 	beq	$a0,$v0,574 <init_module-0x3c8>
      4e0:	01002821 	move	$a1,$t0
 */
+		tmp3 = -1;	
+		tmp2 = dsp_mult;
+		if(reg != -1) {
 
 /*
      4e4:	00a04021 	move	$t0,$a1
@@ -673,11 +693,14 @@ int strange_function1(int a) {
      568:	2484ffff 	addiu	$a0,$a0,-1
      56c:	1482ffde 	bne	$a0,$v0,4e8 <init_module-0x454>
      570:	00a04021 	move	$t0,$a1
+*/
+		}
+	}
+/*
      574:	03e00008 	jr	$ra
      578:	0004102b 	sltu	$v0,$zero,$a0
 */
-	// return (0 < a0);
-	return 0;
+	return (0 < a0);
 }
 
 /* TODO: implement */
@@ -1158,7 +1181,7 @@ static int __init tihw_an_init_module(void) {
 	// 	v0 = pointer_with_defaults[i];
 	// 	v1 = some_table_of_structures[i];
 	// 	v0 = pointer_with_defaults[i];
-		some_table_of_structures[i].field0 = pointer_with_defaults[i].field0;
+		some_table_of_structures[i].field0 = tnetv1050_api[i].field0;
 
 		// v1->field0 = v0->field0;
 		// v1->field1 = v0->field1;
@@ -1230,7 +1253,7 @@ int tiuhw_get_dsp_clk_values(void)
 {
 	int ret = -1;
 	char *dsp_clk_str;
-	int a1, a2, a3;
+	unsigned long int a1, a2, a3;
 
 /* prologue
 00000000000009f0 <tiuhw_get_dsp_clk_values>:
@@ -1355,27 +1378,27 @@ int tiuhw_get_dsp_clk_values(void)
      b30:	3c010000 	lui	$at,0x0
      b34:	ac2200bc 	sw	$v0,188($at)
 */
-		tmp_variable1 = 0x1f;
+		tiuhw_dsp_clock_mult = 0x1f;
 
 /*
      b38:	3c02007d 	lui	$v0,0x7d
      b3c:	3c010000 	lui	$at,0x0
      b40:	ac2200c0 	sw	$v0,192($at)
 */
-		tmp_variable2 = 0x7d;
+		tiuhw_dsp_input_clock_speed = 0x7d;
 	}
 
 /*
      b44:	3c050000 	lui	$a1,0x0
      b48:	8ca500bc 	lw	$a1,188($a1)
 */
-	a1 = tmp_variable1;
+	a1 = tiuhw_dsp_clock_mult;
 
 /*
      b4c:	3c060000 	lui	$a2,0x0
      b50:	8cc600c0 	lw	$a2,192($a2)
 */
-	a2 = tmp_variable2;
+	a2 = tiuhw_dsp_input_clock_speed;
 	a3 = a1 * a2;
 
 /*
