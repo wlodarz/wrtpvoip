@@ -26,9 +26,9 @@ typedef struct {
 	int (*field3)(void);
 } ptrs;
 
-int func00(struct_s1 *a);
-int func01(int tid, int b, int cnt, int a4);
-int func02(int a1, int a2, int a3);
+int tnetv1050_tid_init(struct_s1 *a);
+int tnetv1050_tid_read(int tid, int b, int cnt, int a4);
+int tnetv1050_tid_write(int a1, int a2, int a3);
 int func03(void);
 int func10(void);
 int func11(void);
@@ -57,9 +57,9 @@ int tiuhw_get_tnetv1050_tid_type(void);
 /* pointers from data + 0x0000 */
 ptrs tnetv1050_api[3] = {
 	{
-		func00, // 0x000
-		func01, // 0x714
-		func02, // 0x7c8
+		tnetv1050_tid_init, // 0x000
+		tnetv1050_tid_read, // 0x714
+		tnetv1050_tid_write, // 0x7c8
 		func03  // 0x878
 	},
 	{
@@ -108,7 +108,7 @@ Disassembly of section .text:
 
 /* probably init function */
 /* TODO: implement */
-int func00(struct_s1 *a)
+int tnetv1050_tid_init(struct_s1 *a)
 {
 	int reg;
 	int tmp0, tmp1, tmp2, tmp3, tmp4;
@@ -552,6 +552,7 @@ int strange_function1(int a) {
 	int a0, a1;
 	long long tmp0, tmp1;
 	int tmp2, tmp3, tmp4;
+	int reg;
 /*
      450:	308400ff 	andi	$a0,$a0,0xff
 */
@@ -833,7 +834,7 @@ int strange_function2()
 
 /* probably read function */
 /* DONE, TODO: magic numbers, magic functions */
-int func01(int tid, int ecVal, int ptr, int count)
+int tnetv1050_tid_read(int tid, int ecVal, int ptr, int count)
 {
 	int ret = 1;
 /*
@@ -911,7 +912,7 @@ int func01(int tid, int ecVal, int ptr, int count)
 
 /* probably write function */
 /* TODO: implement */
-int func02(int a1, int a2, int a3)
+int tnetv1050_tid_write(int a1, int a2, int a3)
 {
 	int tid;
 	int tmp1;
