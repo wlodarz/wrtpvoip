@@ -106,8 +106,8 @@ tiuhal.o:     file format elf32-tradlittlemips
 Disassembly of section .text:
 */
 
+/* JUST REVIEWED */
 /* probably init function */
-/* TODO: implement */
 int tnetv1050_tid_init(struct_s1 *a)
 {
 	int reg;
@@ -324,6 +324,8 @@ int tnetv1050_tid_init(struct_s1 *a)
      1a4:	00001012 	mflo	$v0
      1a8:	3610de83 	ori	$s0,$s0,0xde83
      1ac:	00000000 	nop
+*/
+/*
      1b0:	00500019 	multu	$v0,$s0
      1b4:	3c05a508 	lui	$a1,0xa508
      1b8:	34a51010 	ori	$a1,$a1,0x1010
