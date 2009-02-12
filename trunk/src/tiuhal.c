@@ -27,8 +27,8 @@ typedef struct {
 } ptrs;
 
 int tnetv1050_tid_init(struct_s1 *a);
-int tnetv1050_tid_read(int tid, int b, int cnt, int a4);
-int tnetv1050_tid_write(int a1, int a2, int a3);
+int tnetv1050_tid_read(int tid, int ecval_arg, int data, int len);
+int tnetv1050_tid_write(int tid_arg, int ecval_arg, char *data, int len);
 int func03(void);
 int func10(void);
 int func11(void);
@@ -40,7 +40,7 @@ int func22(int a, int b);
 int func23(int a, int b);
 
 char *prom_getenv(char *);
-irqreturn_t null_interrupt_handler1(int i, void *data);
+irqreturn_t tnetv1050_tid_interrupt_handler(int i, void *data);
 int hwu_get_tiuhw_if(void);
 int tiuhw_reset_tid(int a, int cmd);
 void tiuhw_select_tid(int tid);
@@ -77,7 +77,7 @@ ptrs tnetv1050_api[3] = {
 };
 
 int unknown_global1 = 1; // data + 0x0034
-ptrs hw_apis[3];	// data + 0x0038
+ptrs hw_apis[3];	// data + 0x0038 - (+0x0034)
 int should_reset_tid = 1; // data + 0x0070
 int tmp_variable0 = 0; // data + 0x00ac
 int not_initialized = 1; // data + 0x00b0
@@ -106,7 +106,7 @@ tiuhal.o:     file format elf32-tradlittlemips
 Disassembly of section .text:
 */
 
-/* JUST REVIEWED */
+/* JUST REVIEWING */
 /* probably init function */
 int tnetv1050_tid_init(struct_s1 *a)
 {
@@ -538,7 +538,7 @@ int tnetv1050_tid_init(struct_s1 *a)
 }
 
 /* DONE */
-irqreturn_t null_interrupt_handler1(int i, void *data)
+irqreturn_t tnetv1050_tid_interrupt_handler1(int i, void *data)
 {
 /*
      448:	03e00008 	jr	$ra
@@ -548,7 +548,7 @@ irqreturn_t null_interrupt_handler1(int i, void *data)
 }
 
 /* TODO: implement */
-int strange_function1(int a) {
+int tnetv1050_tid_writebyte(int a) {
 	int dsp_mult;
 	int dsp_speed;
 	int a0, a1;
@@ -707,7 +707,7 @@ int strange_function1(int a) {
 }
 
 /* TODO: implement */
-int strange_function2()
+int tnetv1050_tid_readbyte()
 {
 	int tmp;
 	int tmp_t0, tmp_t1;
@@ -836,7 +836,7 @@ int strange_function2()
 
 /* probably read function */
 /* DONE, TODO: magic numbers, magic functions */
-int tnetv1050_tid_read(int tid, int ecVal, int ptr, int count)
+int tnetv1050_tid_read(int tid, int ecval, int ptr, int count)
 {
 	int ret = 1;
 /*
@@ -853,7 +853,6 @@ int tnetv1050_tid_read(int tid, int ecVal, int ptr, int count)
      73c:	3094ffff 	andi	$s4,$a0,0xffff
      740:	02802021 	move	$a0,$s4
 */
-	tid &= 0xffff;
 	
 /*
      744:	3c020000 	lui	$v0,0x0
@@ -861,7 +860,7 @@ int tnetv1050_tid_read(int tid, int ecVal, int ptr, int count)
      74c:	0040f809 	jalr	$v0
      750:	30b000ff 	andi	$s0,$a1,0xff
 */
-	tiuhw_select_tid(tid);
+	tiuhw_select_tid(tid & 0xffff);
 
 
 /*
@@ -872,7 +871,7 @@ int tnetv1050_tid_read(int tid, int ecVal, int ptr, int count)
      764:	080001dc 	j	770 <init_module-0x1cc>
      768:	00000000 	nop
 */
-	strange_function1(ecVal&0xff);
+	tnetv1050_tid_writebyte(ecval & 0xff);
 
 /*
      76c:	2652ffff 	addiu	$s2,$s2,-1
@@ -889,7 +888,7 @@ int tnetv1050_tid_read(int tid, int ecVal, int ptr, int count)
      78c:	1660fff7 	bnez	$s3,76c <init_module-0x1d0>
      790:	26310001 	addiu	$s1,$s1,1
 */
-	while(count !=0  && ((ret = strange_function2(ptr)) != 0)) { ptr++; count--; }
+	while(count !=0  && ((ret = tnetv1050_tid_readbyte(ptr)) != 0)) { ptr++; count--; }
 
 /*
      794:	3c020000 	lui	$v0,0x0
@@ -898,7 +897,7 @@ int tnetv1050_tid_read(int tid, int ecVal, int ptr, int count)
      7a0:	02802021 	move	$a0,$s4
      7a4:	02601021 	move	$v0,$s3
 */
-	tiuhw_deselect_tid(tid);
+	tiuhw_deselect_tid(tid & 0xffff);
 /*
      7a8:	8fbf0024 	lw	$ra,36($sp)
      7ac:	8fb40020 	lw	$s4,32($sp)
@@ -912,13 +911,15 @@ int tnetv1050_tid_read(int tid, int ecVal, int ptr, int count)
 	return ret;
 }
 
-/* probably write function */
-/* TODO: implement */
-int tnetv1050_tid_write(int a1, int a2, int a3)
+/* DONE */
+int tnetv1050_tid_write(int tid, int ecval, char *data, int len)
 {
-	int tid;
 	int tmp1;
-/*
+	int cnt = len;
+	int byte;
+	int ret;
+
+/* prologue
      7c8:	27bdffd8 	addiu	$sp,$sp,-40
      7cc:	afbf0024 	sw	$ra,36($sp)
      7d0:	afb40020 	sw	$s4,32($sp)
@@ -934,7 +935,6 @@ int tnetv1050_tid_write(int a1, int a2, int a3)
      7ec:	24130001 	li	$s3,1
      7f0:	3094ffff 	andi	$s4,$a0,0xffff
 */
-	tid = (a1 & 0xffff);
 
 /*
      7f4:	02802021 	move	$a0,$s4
@@ -942,11 +942,10 @@ int tnetv1050_tid_write(int a1, int a2, int a3)
      7fc:	24420000 	addiu	$v0,$v0,0
      800:	0040f809 	jalr	$v0
 */
-	tiuhw_select_tid(tid);
+	tiuhw_select_tid(tid & 0xffff);
 /*
      804:	30b000ff 	andi	$s0,$a1,0xff
 */
-	tmp1 = a2&0xff;
 
 /*
      808:	02002021 	move	$a0,$s0
@@ -955,7 +954,7 @@ int tnetv1050_tid_write(int a1, int a2, int a3)
      814:	0200f809 	jalr	$s0
      818:	00000000 	nop
 */
-	strange_function1(tmp1);
+	tnetv1050_tid_writebyte(ecval & 0xff);
 
 /*
      81c:	0800020a 	j	828 <init_module-0x114>
@@ -966,18 +965,34 @@ int tnetv1050_tid_write(int a1, int a2, int a3)
      824:	2652ffff 	addiu	$s2,$s2,-1
 */
 
+	ret = 1;
+	while(ret && cnt) {
 /*
      828:	12400006 	beqz	$s2,844 <init_module-0xf8>
      82c:	00000000 	nop
      830:	0200f809 	jalr	$s0
      834:	92240000 	lbu	$a0,0($s1)
+*/
+		byte = *data;
+		ret = tnetv1050_tid_writebyte(byte);
+
+/*
      838:	00409821 	move	$s3,$v0
      83c:	1660fff9 	bnez	$s3,824 <init_module-0x118>
      840:	26310001 	addiu	$s1,$s1,1
+*/
+		data++;
+		cnt--;
+     	}
+
+/*
      844:	3c020000 	lui	$v0,0x0
      848:	24420000 	addiu	$v0,$v0,0
      84c:	0040f809 	jalr	$v0
      850:	02802021 	move	$a0,$s4
+*/
+	tiuhw_deselect_tid(tid & 0xffff);
+/*
      854:	02601021 	move	$v0,$s3
      858:	8fbf0024 	lw	$ra,36($sp)
      85c:	8fb40020 	lw	$s4,32($sp)
@@ -988,7 +1003,7 @@ int tnetv1050_tid_write(int a1, int a2, int a3)
      870:	03e00008 	jr	$ra
      874:	27bd0028 	addiu	$sp,$sp,40
 */
-	return 0;
+	return ret;
 }
 
 /* DONE */
@@ -1215,7 +1230,7 @@ static int __init tihw_an_init_module(void) {
      9ac:	0040f809 	jalr	$v0
      9b0:	00003021 	move	$a2,$zero
 */
-	ret = request_irq(AR7_IRQ_DSP,null_interrupt_handler1, IRQF_SHARED, stub_text,0);
+	ret = request_irq(AR7_IRQ_DSP, tnetv1050_tid_interrupt_handler, IRQF_SHARED, stub_text,0);
 
 /*
      9b4:	8fbf0018 	lw	$ra,24($sp)
@@ -1577,15 +1592,14 @@ int tiuhw_init_hal(int a, int b)
      cb0:	3c010000 	lui	$at,0x0
      cb4:	ac2200b8 	sw	$v0,184($at)
 */
-#warning TODO:
-/*			my_hardware_api_pointers = hw_apis; */
+		tiuhw_api = hw_apis;
 
 /*
      cb8:	02602021 	move	$a0,$s3
      cbc:	8c420000 	lw	$v0,0($v0)
      cc0:	0040f809 	jalr	$v0
      cc4:	02202821 	move	$a1,$s1
-     			// call hw_apis + 0(a,b);
+     		// call hw_apis + 0(a,b);
 
      cc8:	3c021fff 	lui	$v0,0x1fff
      ccc:	3442fc70 	ori	$v0,$v0,0xfc70
@@ -1594,7 +1608,7 @@ int tiuhw_init_hal(int a, int b)
      cd0:	3c030000 	lui	$v1,0x0
      cd4:	8c630000 	lw	$v1,0($v1)
 */
-	tmp = loops_per_jiffy;
+		tmp = loops_per_jiffy;
 /*
      cd8:	00430019 	multu	$v0,$v1
      cdc:	00001010 	mfhi	$v0
@@ -1606,7 +1620,7 @@ int tiuhw_init_hal(int a, int b)
      cf0:	10400034 	beqz	$v0,dc4 <tiuhw_init_hal+0x234>
      cf4:	00008021 	move	$s0,$zero
 */
-     			if(should_reset_tid) {
+     		if(should_reset_tid) {
 
 /*
      cf8:	02002021 	move	$a0,$s0
@@ -1626,7 +1640,9 @@ int tiuhw_init_hal(int a, int b)
      d1c:	08000371 	j	dc4 <tiuhw_init_hal+0x234>
      d20:	00000000 	nop
 */
-			}
+
+
+		}
 	} else if(if_type == TIHW_EXTERNAL) {
 		// not necessery - cause we have INTERNAL (no-FPGA)
 /*
