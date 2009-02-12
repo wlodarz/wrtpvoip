@@ -119,6 +119,7 @@ int tnetv1050_tid_init(struct_s1 *a)
 	int tmp_a1;
 	int tid_type = 0;
 	int tid=0;
+	int index = 0;
 
 /* prologue
 0000000000000000 <init_module-0x93c>:
@@ -617,8 +618,8 @@ int tnetv1050_tid_writebyte(int a) {
 	int dsp_mult;
 	int dsp_speed;
 	int a0, a1;
-	long long tmp0, tmp1;
-	int tmp2, tmp3, tmp4;
+	long long tmp0, tmp1, ltmp2;
+	int tmp2, tmp3, tmp4, tmp9, tmp10;
 	int reg;
 /*
      450:	308400ff 	andi	$a0,$a0,0xff
@@ -752,8 +753,8 @@ int tnetv1050_tid_writebyte(int a) {
      514:	1040000f 	beqz	$v0,554 <init_module-0x3e8>
      518:	00003021 	move	$a2,$zero
 */
-			a2 = 0;
-#error ALA
+			// a2 = 0;
+// #error ALA
 			if(tmp10 != 0) {
 /*
      51c:	01070018 	mult	$t0,$a3
@@ -772,7 +773,7 @@ int tnetv1050_tid_writebyte(int a) {
      544:	00021100 	sll	$v0,$v0,0x4
 */
 				tmp10 = ((((ltmp2 >> 32) & 0xffffffff)) * 0x431bde83);
-				tmp >>= 0x14;
+				tmp10 >>= 0x14;
 				tmp10 -= 1;
 /*
      548:	00c2102b 	sltu	$v0,$a2,$v0
@@ -2223,7 +2224,7 @@ int tiuhw_map_tcid_to_tid(int tcid)
     1198:	00101042 	srl	$v0,$s0,0x1
 */
 		} else if(if_type == TIHW_EXTERNAL) {
-			ret = (a << 1) & 0xff;	
+			ret = (tcid << 1) & 0xff;	
 /*
     119c:	0800046c 	j	11b0 <tiuhw_map_tcid_to_tid+0x58>
     11a0:	240200ff 	li	$v0,255
