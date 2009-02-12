@@ -1506,6 +1506,8 @@ int tiuhw_init_hal(int a, int b)
 	int if_type = -1;
 	int reg;
 	int tmp;
+	int (*init_function)(int a, int b);
+	int ret;
 
 /* prologue
 0000000000000b90 <tiuhw_init_hal>:
@@ -1656,22 +1658,35 @@ int tiuhw_init_hal(int a, int b)
      cbc:	8c420000 	lw	$v0,0($v0)
      cc0:	0040f809 	jalr	$v0
      cc4:	02202821 	move	$a1,$s1
+*/
      		// call hw_apis + 0(a,b);
+		init_function = hw_apis[0].field0;
+		ret = init_function(a,b);
 
+/*
      cc8:	3c021fff 	lui	$v0,0x1fff
      ccc:	3442fc70 	ori	$v0,$v0,0xfc70
 */
+		ret &= 0x1fff;
+		ret |= 0xfc70;
+
 /*
      cd0:	3c030000 	lui	$v1,0x0
      cd4:	8c630000 	lw	$v1,0($v1)
 */
 		tmp = loops_per_jiffy;
+
 /*
      cd8:	00430019 	multu	$v0,$v1
      cdc:	00001010 	mfhi	$v0
      ce0:	1440ffff 	bnez	$v0,ce0 <tiuhw_init_hal+0x150>
      ce4:	2442ffff 	addiu	$v0,$v0,-1
+*/
+		ltmp1 = ret * tmp;
+		tmp2 = (ltmp1 >> 23) & 0xffffffff;
+		while(tmp2--);
 
+/*
      ce8:	3c020000 	lui	$v0,0x0
      cec:	8c420070 	lw	$v0,112($v0)
      cf0:	10400034 	beqz	$v0,dc4 <tiuhw_init_hal+0x234>
