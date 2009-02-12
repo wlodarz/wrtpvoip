@@ -111,10 +111,12 @@ Disassembly of section .text:
 int tnetv1050_tid_init(struct_s1 *a)
 {
 	int reg;
-	int tmp0, tmp1, tmp2, tmp3, tmp4;
+	int tmp0, tmp1, tmp2, tmp5, tmp6;
+	unsigned long long tmp3, tmp4, tmp5;
 	int tmp;
 	int tmp_v0, tmp_v1;
 	int tmp_a1;
+	int tid_type = 0;
 
 /* prologue
 0000000000000000 <init_module-0x93c>:
@@ -248,26 +250,30 @@ int tnetv1050_tid_init(struct_s1 *a)
 	*(volatile int *)0xa8611640 = reg;
 
 
-/*
-*/
 
 /*
       e8:	3c03431b 	lui	$v1,0x431b
       f8:	3463de83 	ori	$v1,$v1,0xde83
+*/
+	tmp0 = 0x431bde83;
 
+/*
       c8:	3c0a0000 	lui	$t2,0x0
       cc:	8d4a0000 	lw	$t2,0($t2)
+*/
+	tmp1 = tiuhw_dsp_clock_mult; // t2
+/*
       d0:	3c0b0000 	lui	$t3,0x0
       d4:	8d6b0000 	lw	$t3,0($t3)
+*/
+	tmp2 = tiuhw_dsp_input_clock_speed; // t3
+/*
       dc:	014b0018 	mult	$t2,$t3
      104:	00002812 	mflo	$a1
      110:	00a30019 	multu	$a1,$v1
 */
-	tmp0 = 0x431bde83;
-	tmp1 = tiuhw_dsp_clock_mult; // t2
-	tmp2 = tiuhw_dsp_input_clock_speed; // t3
 	tmp3 = tmp1 * tmp2; // a1
-	tmp4 = tmp3 * tmp0; // a1 * v1
+	tmp4 = (tmp3 & 0xffffffff) * tmp0; // a1 * v1
 
 /*
      11c:	2542ffff 	addiu	$v0,$t2,-1
@@ -283,6 +289,7 @@ int tnetv1050_tid_init(struct_s1 *a)
      134:	34420004 	ori	$v0,$v0,0x4
      13c:	ad020000 	sw	$v0,0($t0)
 */
+/* DONE TILL HERE */
 	reg = *(volatile int *)0xa5080000;
 	reg |= 0x00000004;
 	*(volatile int *)0xa5080000 = reg;
@@ -291,15 +298,34 @@ int tnetv1050_tid_init(struct_s1 *a)
      140:	00031d02 	srl	$v1,$v1,0x14
      144:	2463ffff 	addiu	$v1,$v1,-1
      148:	00031880 	sll	$v1,$v1,0x2
+*/
+	tmp5 = ((((tmp4 >> 32) & 0xffffffff) << 0x14) - 1) >> 0x02;
+
+/*
      14c:	1060000f 	beqz	$v1,18c <init_module-0x7b0>
      150:	01402821 	move	$a1,$t2
+*/
+	tmp3 = tmp1;	
+	if (tmp5 != 0) {
+/*
      154:	00ab0018 	mult	$a1,$t3
+*/
+		{
+/*
      158:	3c02431b 	lui	$v0,0x431b
      15c:	00001812 	mflo	$v1
      160:	3442de83 	ori	$v0,$v0,0xde83
      164:	00000000 	nop
+*/
+		tmp5 = (tmp3 * 	tmp2) & 0xffffffff;
+/*
      168:	00620019 	multu	$v1,$v0
      16c:	00001010 	mfhi	$v0
+*/
+		tmp6 = ((tmp5 * 0x431bde83) >> 32) & 0xffffffff;
+		
+
+/*
      170:	24840001 	addiu	$a0,$a0,1
      174:	00021502 	srl	$v0,$v0,0x14
      178:	2442ffff 	addiu	$v0,$v0,-1
@@ -308,6 +334,8 @@ int tnetv1050_tid_init(struct_s1 *a)
      184:	1440fff4 	bnez	$v0,158 <init_module-0x7e4>
      188:	00ab0018 	mult	$a1,$t3
 */
+		}
+	}
 /*
      18c:	3c020000 	lui	$v0,0x0
      190:	8c420000 	lw	$v0,0($v0)
@@ -329,6 +357,7 @@ int tnetv1050_tid_init(struct_s1 *a)
      1b0:	00500019 	multu	$v0,$s0
      1b4:	3c05a508 	lui	$a1,0xa508
      1b8:	34a51010 	ori	$a1,$a1,0x1010
+*/
 
 /*
      1bc:	3c040000 	lui	$a0,0x0
@@ -462,6 +491,8 @@ int tnetv1050_tid_init(struct_s1 *a)
      340:	0240f809 	jalr	$s2
      344:	248400dc 	addiu	$a0,$a0,220
 */
+	reg = *(volatile int *)0xa5081000;
+	printk(KERN_ERR "PCMCR1 = %08lx\n", reg);
 /*
      348:	3c060000 	lui	$a2,0x0
      34c:	8cc60000 	lw	$a2,0($a2)
@@ -503,9 +534,15 @@ int tnetv1050_tid_init(struct_s1 *a)
      3c4:	34421020 	ori	$v0,$v0,0x1020
      3c8:	ac400000 	sw	$zero,0($v0)
      3cc:	00008021 	move	$s0,$zero
+*/
+/*
      3d0:	3c110000 	lui	$s1,0x0
      3d4:	26310000 	addiu	$s1,$s1,0
      3d8:	0220f809 	jalr	$s1
+*/
+	tid_type = tiuhw_get_tid_type();
+
+/*
      3dc:	02002021 	move	$a0,$s0
      3e0:	00401821 	move	$v1,$v0
      3e4:	18600006 	blez	$v1,400 <init_module-0x53c>
@@ -517,15 +554,25 @@ int tnetv1050_tid_init(struct_s1 *a)
      3fc:	26020001 	addiu	$v0,$s0,1
      400:	0220f809 	jalr	$s1
      404:	02002021 	move	$a0,$s0
+*/
+	tid_type = tiuhw_get_tid_type();
+/*
      408:	3c040000 	lui	$a0,0x0
      40c:	248400f0 	addiu	$a0,$a0,240
      410:	0240f809 	jalr	$s2
+*/
+	printk(KERN_ERR "TNETV1050_HAL : unsupported TID type detected %u\n", tid_type);
+
+/*
      414:	00402821 	move	$a1,$v0
      418:	00009821 	move	$s3,$zero
      41c:	26020001 	addiu	$v0,$s0,1
      420:	305000ff 	andi	$s0,$v0,0xff
      424:	1200ffea 	beqz	$s0,3d0 <init_module-0x56c>
      428:	02601021 	move	$v0,$s3
+*/
+
+/*
      42c:	8fbf0020 	lw	$ra,32($sp)
      430:	8fb3001c 	lw	$s3,28($sp)
      434:	8fb20018 	lw	$s2,24($sp)
@@ -667,6 +714,8 @@ int tnetv1050_tid_writebyte(int a) {
      4f4:	00001812 	mflo	$v1
      4f8:	3442de83 	ori	$v0,$v0,0xde83
      4fc:	00000000 	nop
+*/
+/*
      500:	00620019 	multu	$v1,$v0
      504:	00001010 	mfhi	$v0
      508:	00021502 	srl	$v0,$v0,0x14
@@ -674,11 +723,15 @@ int tnetv1050_tid_writebyte(int a) {
      510:	00021100 	sll	$v0,$v0,0x4
      514:	1040000f 	beqz	$v0,554 <init_module-0x3e8>
      518:	00003021 	move	$a2,$zero
+*/
+/*
      51c:	01070018 	mult	$t0,$a3
      520:	3c02431b 	lui	$v0,0x431b
      524:	00001812 	mflo	$v1
      528:	3442de83 	ori	$v0,$v0,0xde83
      52c:	00000000 	nop
+*/
+/*
      530:	00620019 	multu	$v1,$v0
      534:	00001010 	mfhi	$v0
      538:	24c60001 	addiu	$a2,$a2,1
@@ -688,11 +741,15 @@ int tnetv1050_tid_writebyte(int a) {
      548:	00c2102b 	sltu	$v0,$a2,$v0
      54c:	1440fff4 	bnez	$v0,520 <init_module-0x41c>
      550:	01070018 	mult	$t0,$a3
+*/
+/*
      554:	3c02a508 	lui	$v0,0xa508
      558:	34421018 	ori	$v0,$v0,0x1018
      55c:	8c420000 	lw	$v0,0($v0)
      560:	04410004 	bgez	$v0,574 <init_module-0x3c8>
      564:	2402ffff 	li	$v0,-1
+*/
+/*
      568:	2484ffff 	addiu	$a0,$a0,-1
      56c:	1482ffde 	bne	$a0,$v0,4e8 <init_module-0x454>
      570:	00a04021 	move	$t0,$a1
