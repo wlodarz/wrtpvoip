@@ -46,6 +46,7 @@ int tiuhw_reset_tid(int a, int cmd);
 void tiuhw_select_tid(int tid);
 void tiuhw_deselect_tid(int tid);
 int tiuhw_get_tnetv1050_tid_type(void);
+int tiuhw_get_tid_type(int tid);
 
 #define TIHW_INTERNAL 1
 #define TIHW_EXTERNAL 2
@@ -112,11 +113,12 @@ int tnetv1050_tid_init(struct_s1 *a)
 {
 	int reg;
 	int tmp0, tmp1, tmp2, tmp5, tmp6;
-	unsigned long long tmp3, tmp4, tmp5;
+	unsigned long long tmp3, tmp4;
 	int tmp;
 	int tmp_v0, tmp_v1;
 	int tmp_a1;
 	int tid_type = 0;
+	int tid=0;
 
 /* prologue
 0000000000000000 <init_module-0x93c>:
@@ -310,6 +312,7 @@ int tnetv1050_tid_init(struct_s1 *a)
 /*
      154:	00ab0018 	mult	$a1,$t3
 */
+		index = 0;
 		{
 /*
      158:	3c02431b 	lui	$v0,0x431b
@@ -317,35 +320,47 @@ int tnetv1050_tid_init(struct_s1 *a)
      160:	3442de83 	ori	$v0,$v0,0xde83
      164:	00000000 	nop
 */
-		tmp5 = (tmp3 * 	tmp2) & 0xffffffff;
+			tmp5 = (tmp3 * 	tmp2) & 0xffffffff;
+
 /*
      168:	00620019 	multu	$v1,$v0
      16c:	00001010 	mfhi	$v0
 */
-		tmp6 = ((tmp5 * 0x431bde83) >> 32) & 0xffffffff;
-		
+			tmp6 = ((tmp5 * 0x431bde83) >> 32) & 0xffffffff;
 
 /*
      170:	24840001 	addiu	$a0,$a0,1
+*/
+			index++;
+
+/*
      174:	00021502 	srl	$v0,$v0,0x14
      178:	2442ffff 	addiu	$v0,$v0,-1
      17c:	00021080 	sll	$v0,$v0,0x2
      180:	0082102b 	sltu	$v0,$a0,$v0
+*/
+			tmp6 >>= 0x14;
+			tmp6 -= 1;
+			tmp6 <<= 0x02;
+		
+/*
      184:	1440fff4 	bnez	$v0,158 <init_module-0x7e4>
      188:	00ab0018 	mult	$a1,$t3
 */
-		}
+		} while(tmp6>=index);
 	}
 /*
      18c:	3c020000 	lui	$v0,0x0
      190:	8c420000 	lw	$v0,0($v0)
 */
-		tmp_v0 = tiuhw_dsp_clock_mult;
+	tmp_v0 = tiuhw_dsp_clock_mult;
+
 /*
      194:	3c030000 	lui	$v1,0x0
      198:	8c630000 	lw	$v1,0($v1)
 */
-		tmp_v1 = tiuhw_dsp_input_clock_speed;
+	tmp_v1 = tiuhw_dsp_input_clock_speed;
+
 /*
      19c:	00430018 	mult	$v0,$v1
      1a0:	3c10431b 	lui	$s0,0x431b
@@ -486,6 +501,9 @@ int tnetv1050_tid_init(struct_s1 *a)
      32c:	2463ffff 	addiu	$v1,$v1,-1
      330:	00621825 	or	$v1,$v1,$v0
      334:	ac830000 	sw	$v1,0($a0)
+*/
+	*(volatile int *)0xa5081000 = reg;
+/*
      338:	8c850000 	lw	$a1,0($a0)
      33c:	3c040000 	lui	$a0,0x0
      340:	0240f809 	jalr	$s2
@@ -540,7 +558,7 @@ int tnetv1050_tid_init(struct_s1 *a)
      3d4:	26310000 	addiu	$s1,$s1,0
      3d8:	0220f809 	jalr	$s1
 */
-	tid_type = tiuhw_get_tid_type();
+	tid_type = tiuhw_get_tid_type(tid);
 
 /*
      3dc:	02002021 	move	$a0,$s0
@@ -555,7 +573,7 @@ int tnetv1050_tid_init(struct_s1 *a)
      400:	0220f809 	jalr	$s1
      404:	02002021 	move	$a0,$s0
 */
-	tid_type = tiuhw_get_tid_type();
+	tid_type = tiuhw_get_tid_type(tid);
 /*
      408:	3c040000 	lui	$a0,0x0
      40c:	248400f0 	addiu	$a0,$a0,240
@@ -704,7 +722,7 @@ int tnetv1050_tid_writebyte(int a) {
 */
 		tmp3 = -1;	
 		tmp2 = dsp_mult;
-		if(reg != -1) {
+		while(reg != -1) {
 
 /*
      4e4:	00a04021 	move	$t0,$a1
@@ -715,15 +733,28 @@ int tnetv1050_tid_writebyte(int a) {
      4f8:	3442de83 	ori	$v0,$v0,0xde83
      4fc:	00000000 	nop
 */
+			dsp_mult = tmp2;
+			tmp9 = dsp_speed;
+			ltmp2 = dsp_mult * tmp9;
+			
 /*
      500:	00620019 	multu	$v1,$v0
      504:	00001010 	mfhi	$v0
      508:	00021502 	srl	$v0,$v0,0x14
      50c:	2442ffff 	addiu	$v0,$v0,-1
      510:	00021100 	sll	$v0,$v0,0x4
+*/
+			tmp10 = ((((ltmp2 >> 32) & 0xffffffff)) * 0x431bde83);
+			tmp10 >>= 0x14;
+			tmp10 -= 1;
+			tmp10 <<= 0x04;
+/*
      514:	1040000f 	beqz	$v0,554 <init_module-0x3e8>
      518:	00003021 	move	$a2,$zero
 */
+			a2 = 0;
+#error ALA
+			if(tmp10 != 0) {
 /*
      51c:	01070018 	mult	$t0,$a3
      520:	3c02431b 	lui	$v0,0x431b
@@ -731,6 +762,7 @@ int tnetv1050_tid_writebyte(int a) {
      528:	3442de83 	ori	$v0,$v0,0xde83
      52c:	00000000 	nop
 */
+				ltmp2 = dsp_mult * tmp9;
 /*
      530:	00620019 	multu	$v1,$v0
      534:	00001010 	mfhi	$v0
@@ -738,10 +770,18 @@ int tnetv1050_tid_writebyte(int a) {
      53c:	00021502 	srl	$v0,$v0,0x14
      540:	2442ffff 	addiu	$v0,$v0,-1
      544:	00021100 	sll	$v0,$v0,0x4
+*/
+				tmp10 = ((((ltmp2 >> 32) & 0xffffffff)) * 0x431bde83);
+				tmp >>= 0x14;
+				tmp10 -= 1;
+/*
      548:	00c2102b 	sltu	$v0,$a2,$v0
+*/
+/*
      54c:	1440fff4 	bnez	$v0,520 <init_module-0x41c>
      550:	01070018 	mult	$t0,$a3
 */
+			}
 /*
      554:	3c02a508 	lui	$v0,0xa508
      558:	34421018 	ori	$v0,$v0,0x1018
@@ -749,6 +789,11 @@ int tnetv1050_tid_writebyte(int a) {
      560:	04410004 	bgez	$v0,574 <init_module-0x3c8>
      564:	2402ffff 	li	$v0,-1
 */
+			reg = *(volatile int *)0xa5081018;
+			if(reg < 0) {
+				a0 = -1;
+				break;
+			}
 /*
      568:	2484ffff 	addiu	$a0,$a0,-1
      56c:	1482ffde 	bne	$a0,$v0,4e8 <init_module-0x454>
@@ -1225,7 +1270,7 @@ int func23(int a, int b)
 }
 
 /* TODO : pointers & internal structures */
-static int __init tihw_an_init_module(void) {
+static int __init tihw_hal_init_module(void) {
 	int i;
 	int ret;
 /*
@@ -1299,7 +1344,7 @@ static int __init tihw_an_init_module(void) {
 }
 
 /* TODO: implement */
-static void __exit tihw_an_cleanup_module(void)
+static void __exit tihw_hal_cleanup_module(void)
 {
 /*
 00000000000009c4 <cleanup_module>:
@@ -1505,9 +1550,10 @@ int tiuhw_init_hal(int a, int b)
 {
 	int if_type = -1;
 	int reg;
-	int tmp;
+	int tmp, tmp2;
 	int (*init_function)(int a, int b);
 	int ret;
+	unsigned long long ltmp1;
 
 /* prologue
 0000000000000b90 <tiuhw_init_hal>:
@@ -2137,7 +2183,7 @@ out:
 /* DONE TILL HERE : FROM THE BOTTOM */
 
 /* DONE */
-int tiuhw_map_tcid_to_tid(int a)
+int tiuhw_map_tcid_to_tid(int tcid)
 {
 	int ret = 255;
 	int tmp;
@@ -2155,8 +2201,7 @@ int tiuhw_map_tcid_to_tid(int a)
     116c:	10400010 	beqz	$v0,11b0 <tiuhw_map_tcid_to_tid+0x58>
     1170:	240200ff 	li	$v0,255
 */
-	tmp = a&0xffff;
-	if(tmp < 4) {
+	if(tcid & 0xffff < 4) {
 /*
     1174:	3c020000 	lui	$v0,0x0
     1178:	2442127c 	addiu	$v0,$v0,4732
@@ -2247,9 +2292,9 @@ int tiuhw_get_dsp_mult(int interface)
 }
 
 /* DONE */
-int tiuhw_reset_tid(int a, int cmd)
+int tiuhw_reset_tid(int tid, int cmd)
 {
-	int tmp1, reg;
+	int reg;
 /*
 0000000000001200 <tiuhw_reset_tid>:
     1200:	27bdffe8 	addiu	$sp,$sp,-24
@@ -2268,8 +2313,7 @@ int tiuhw_reset_tid(int a, int cmd)
     1228:	02003021 	move	$a2,$s0
 */
 	
-	tmp1 = a & 0xff;
-	printk(KERN_ERR "tiuhw_reset_tid: %u %u\n", tmp1, cmd);
+	printk(KERN_ERR "tiuhw_reset_tid: %u %u\n", tid & 0xff, cmd);
 /*
     122c:	12000009 	beqz	$s0,1254 <tiuhw_reset_tid+0x54>
 */
@@ -2456,5 +2500,5 @@ void tiuhw_led(void) {
 	return;
 }
 
-module_init(tihw_an_init_module);
-module_exit(tihw_an_cleanup_module);
+module_init(tihw_hal_init_module);
+module_exit(tihw_hal_cleanup_module);
