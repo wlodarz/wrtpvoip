@@ -122,6 +122,8 @@ int tnetv1050_tid_init(struct_s1 *a)
 	int index = 0;
 	int dsp_clock_mult;
 	int dsp_input_clock_speed;
+	long long ltmp1;
+	int tmp_s0;
 
 /* prologue
 0000000000000000 <init_module-0x93c>:
@@ -330,7 +332,8 @@ int tnetv1050_tid_init(struct_s1 *a)
      168:	00620019 	multu	$v1,$v0
      16c:	00001010 	mfhi	$v0
 */
-			tmp6 = ((tmp5 * 0x431bde83) >> 32) & 0xffffffff;
+			ltmp1 = tmp5 * 0x431bde83;
+			tmp6 = (ltmp1 >> 32) & 0xffffffff;
 
 /*
      170:	24840001 	addiu	$a0,$a0,1
@@ -521,7 +524,7 @@ int tnetv1050_tid_init(struct_s1 *a)
 			ltmp1 = tmp_v1 * 0x431bde83;	
 			tmp_v0 = (((((ltmp1 >> 32) & 0xffffffff) >> 0x14) - 1) << 0x02);
 			index++;
-		while(index < tmp_v0);
+		} while(index < tmp_v0);
 		
 	}
 /*
@@ -592,7 +595,7 @@ int tnetv1050_tid_init(struct_s1 *a)
      380:	1040000f 	beqz	$v0,3c0 <init_module-0x57c>
      384:	00002021 	move	$a0,$zero
 */
-	ltmp1 = dsp_clock_mul * dsp_input_clock_speed;
+	ltmp1 = dsp_clock_mult * dsp_input_clock_speed;
 	tmp_v1 = ltmp1 & 0xffffffff;
 	ltmp1 = tmp_v1 * 0x431bde83;
 	tmp_v0 = (ltmp1 >> 32) & 0xffffffff;
@@ -635,16 +638,17 @@ int tnetv1050_tid_init(struct_s1 *a)
      3cc:	00008021 	move	$s0,$zero
 */
 	*(volatile int *)0xa5081020 = 0;
+
+	{
 /*
      3d0:	3c110000 	lui	$s1,0x0
      3d4:	26310000 	addiu	$s1,$s1,0
      3d8:	0220f809 	jalr	$s1
+     3dc:	02002021 	move	$a0,$s0
 */
-	{
 		tid_type = tiuhw_get_tid_type(tid);
 
 /*
-     3dc:	02002021 	move	$a0,$s0
      3e0:	00401821 	move	$v1,$v0
      3e4:	18600006 	blez	$v1,400 <init_module-0x53c>
      3e8:	28620004 	slti	$v0,$v1,4
@@ -672,14 +676,20 @@ int tnetv1050_tid_init(struct_s1 *a)
      418:	00009821 	move	$s3,$zero
      41c:	26020001 	addiu	$v0,$s0,1
 */
-		} else if(tid_type>=4) {
-		
+			tmp_s3 = 0;
+			index = cond + 1;
+		} else if(tid_type < 4) {
+			index = cond + 1;	
+		} else if(tid_type == 12) {
+		} else {
 		}
+		cond = index & 0xff;
 /*
      420:	305000ff 	andi	$s0,$v0,0xff
      424:	1200ffea 	beqz	$s0,3d0 <init_module-0x56c>
      428:	02601021 	move	$v0,$s3
 */
+	} while(cond == 0);
 
 /*
      42c:	8fbf0020 	lw	$ra,32($sp)
