@@ -497,6 +497,7 @@ int tnetv1050_tid_init(struct_s1 *a)
 	*(volatile int *)0xa5081004 = 0x1;
 	tmp_v0 = ((((ltmp1 >> 32) & 0xffffffff) >> 0x14) - 1) >> 0x02;
 	if(tmp_v0 != 0) {
+
 /*
      2b4:	00c50018 	mult	$a2,$a1
      2b8:	3c02431b 	lui	$v0,0x431b
@@ -519,19 +520,20 @@ int tnetv1050_tid_init(struct_s1 *a)
 			tmp_v1 = ltmp1 & 0xffffffff;
 			ltmp1 = tmp_v1 * 0x431bde83;	
 			tmp_v0 = (((((ltmp1 >> 32) & 0xffffffff) >> 0x14) - 1) << 0x02);
-		while();
+			index++;
+		while(index < tmp_v0);
 		
 	}
 /*
      2ec:	3c030000 	lui	$v1,0x0
      2f0:	8c630000 	lw	$v1,0($v1)
 */
-	tmp = tiuhw_dsp_clock_mult;
+	dsp_clock_mult = tiuhw_dsp_clock_mult;
 /*
      2f4:	3c020000 	lui	$v0,0x0
      2f8:	8c420000 	lw	$v0,0($v0)
 */
-	tmp_v0 = tiuhw_dsp_input_clock_speed;
+	dsp_input_clock_speed = tiuhw_dsp_input_clock_speed;
 /*
      2fc:	00620018 	mult	$v1,$v0
      300:	3c021062 	lui	$v0,0x1062
@@ -549,7 +551,15 @@ int tnetv1050_tid_init(struct_s1 *a)
      330:	00621825 	or	$v1,$v1,$v0
      334:	ac830000 	sw	$v1,0($a0)
 */
-	*(volatile int *)0xa5081000 = reg;
+	ltmp1 = dsp_clock_mult * dsp_input_clock_speed;	
+	tmp_v1 = ltmp1 & 0xffffffff;
+	ltmp1 = tmp_v1 * 0x10624dd3;
+	tmp_v1 = (ltmp1 >> 32) & 0xffffffff;
+	tmp_v1 >>= 0x12;
+	tmp_v1 -= 1;
+	tmp_v1 = tmp_v1 | 0x00ff8000;
+
+	*(volatile int *)0xa5081000 = tmp_v1;
 /*
      338:	8c850000 	lw	$a1,0($a0)
      33c:	3c040000 	lui	$a0,0x0
@@ -581,6 +591,18 @@ int tnetv1050_tid_init(struct_s1 *a)
      37c:	00021080 	sll	$v0,$v0,0x2
      380:	1040000f 	beqz	$v0,3c0 <init_module-0x57c>
      384:	00002021 	move	$a0,$zero
+*/
+	ltmp1 = dsp_clock_mul * dsp_input_clock_speed;
+	tmp_v1 = ltmp1 & 0xffffffff;
+	ltmp1 = tmp_v1 * 0x431bde83;
+	tmp_v0 = (ltmp1 >> 32) & 0xffffffff;
+	tmp_v0 >>= 0x14;
+	tmp_v0 -= 1;
+	tmp_v0 <<= 0x02;
+	index = 0;
+	if(tmp_v0 != 0) {
+		{
+/*
      388:	00c50018 	mult	$a2,$a1
      38c:	3c02431b 	lui	$v0,0x431b
      390:	00001812 	mflo	$v1
@@ -595,17 +617,31 @@ int tnetv1050_tid_init(struct_s1 *a)
      3b4:	0082102b 	sltu	$v0,$a0,$v0
      3b8:	1440fff4 	bnez	$v0,38c <init_module-0x5b0>
      3bc:	00c50018 	mult	$a2,$a1
+*/
+			ltmp1 = dsp_clock_mult * dsp_input_clock_speed;
+			tmp_v1 = ltmp1 & 0xffffffff;
+			ltmp1 = tmp_v1 * 0x431bde83;
+			tmp_v0 = (ltmp1 >> 32) & 0xffffffff;
+			tmp_v0 >>= 0x14;
+			tmp_v0 -= 1;
+			tmp_v0 <<= 0x02;
+			index++;
+		} while(index < tmp_v0);
+	}
+/*
      3c0:	3c02a508 	lui	$v0,0xa508
      3c4:	34421020 	ori	$v0,$v0,0x1020
      3c8:	ac400000 	sw	$zero,0($v0)
      3cc:	00008021 	move	$s0,$zero
 */
+	*(volatile int *)0xa5081020 = 0;
 /*
      3d0:	3c110000 	lui	$s1,0x0
      3d4:	26310000 	addiu	$s1,$s1,0
      3d8:	0220f809 	jalr	$s1
 */
-	tid_type = tiuhw_get_tid_type(tid);
+	{
+		tid_type = tiuhw_get_tid_type(tid);
 
 /*
      3dc:	02002021 	move	$a0,$s0
@@ -617,21 +653,29 @@ int tnetv1050_tid_init(struct_s1 *a)
      3f4:	2402000c 	li	$v0,12
      3f8:	10620009 	beq	$v1,$v0,420 <init_module-0x51c>
      3fc:	26020001 	addiu	$v0,$s0,1
+*/
+		if(tid_type < 0) {
+/*
      400:	0220f809 	jalr	$s1
      404:	02002021 	move	$a0,$s0
 */
-	tid_type = tiuhw_get_tid_type(tid);
+			tid_type = tiuhw_get_tid_type(tid);
 /*
      408:	3c040000 	lui	$a0,0x0
      40c:	248400f0 	addiu	$a0,$a0,240
      410:	0240f809 	jalr	$s2
+     414:	00402821 	move	$a1,$v0
 */
-	printk(KERN_ERR "TNETV1050_HAL : unsupported TID type detected %u\n", tid_type);
+			printk(KERN_ERR "TNETV1050_HAL : unsupported TID type detected %u\n", tid_type);
 
 /*
-     414:	00402821 	move	$a1,$v0
      418:	00009821 	move	$s3,$zero
      41c:	26020001 	addiu	$v0,$s0,1
+*/
+		} else if(tid_type>=4) {
+		
+		}
+/*
      420:	305000ff 	andi	$s0,$v0,0xff
      424:	1200ffea 	beqz	$s0,3d0 <init_module-0x56c>
      428:	02601021 	move	$v0,$s3
