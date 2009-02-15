@@ -120,6 +120,8 @@ int tnetv1050_tid_init(struct_s1 *a)
 	int tid_type = 0;
 	int tid=0;
 	int index = 0;
+	int dsp_clock_mult;
+	int dsp_input_clock_speed;
 
 /* prologue
 0000000000000000 <init_module-0x93c>:
@@ -164,7 +166,7 @@ int tnetv1050_tid_init(struct_s1 *a)
       68:	00431024 	and	$v0,$v0,$v1
       6c:	acc20000 	sw	$v0,0($a2)
 */
-	/* config latch */
+	/* DSP clock set to telephony ock I/O */
 	reg = *(volatile int *)0xa8611a00;
 	reg &= 0xffcfffff;
 	*(volatile int *)0xa8611a00;
@@ -208,7 +210,7 @@ int tnetv1050_tid_init(struct_s1 *a)
       c0:	00451024 	and	$v0,$v0,$a1
       c4:	ac820000 	sw	$v0,0($a0)
 */
-	/* some GPIO/PIN settings */
+	/* PIN_SEL_13 */
 	reg = *(volatile int *)0xa861163c;
 	reg &= 0x00f00fff;
 	*(volatile int *)0xa861163c = reg;
@@ -223,9 +225,9 @@ int tnetv1050_tid_init(struct_s1 *a)
       ec:	00471025 	or	$v0,$v0,$a3
       f0:	ac820000 	sw	$v0,0($a0)
 */
-	// another GPIO/PIN?
+	/* set primary PIN_SEL_13 functions - telephony interface */
 	reg = *(volatile int *)0xa861163c;
-	reg |= 0x00005000;
+	reg |= 0x55055000;
 	*(volatile int *)0xa861163c = reg;
 
 /*
@@ -236,6 +238,7 @@ int tnetv1050_tid_init(struct_s1 *a)
       fc:	30423000 	andi	$v0,$v0,0x3000
      100:	acc20000 	sw	$v0,0($a2)
 */
+        /* PIN_SEL_14 functions - telephony interface */
 	reg = *(volatile int *)0xa8611640;
 	reg &= 0x00003000;
 	*(volatile int *)0xa8611640 = reg;
@@ -348,7 +351,7 @@ int tnetv1050_tid_init(struct_s1 *a)
      184:	1440fff4 	bnez	$v0,158 <init_module-0x7e4>
      188:	00ab0018 	mult	$a1,$t3
 */
-		} while(tmp6>=index);
+		} while(tmp6>index);
 	}
 /*
      18c:	3c020000 	lui	$v0,0x0
@@ -369,16 +372,19 @@ int tnetv1050_tid_init(struct_s1 *a)
      1a8:	3610de83 	ori	$s0,$s0,0xde83
      1ac:	00000000 	nop
 */
+	ltmp1 = tmp_v0 * tmp_v1;
 /*
      1b0:	00500019 	multu	$v0,$s0
      1b4:	3c05a508 	lui	$a1,0xa508
      1b8:	34a51010 	ori	$a1,$a1,0x1010
 */
+	ltmp1 = (ltmp1 & 0xffffffff) * 0x431bde83;
 
-/*
+/* arg for printk
      1bc:	3c040000 	lui	$a0,0x0
      1c0:	248400c8 	addiu	$a0,$a0,200
 */
+	
 /*
      1c4:	00001010 	mfhi	$v0
      1c8:	3c038108 	lui	$v1,0x8108
@@ -387,6 +393,8 @@ int tnetv1050_tid_init(struct_s1 *a)
      1d4:	00431025 	or	$v0,$v0,$v1
      1d8:	aca20000 	sw	$v0,0($a1)
 */
+	tmp_v0 = ((((ltmp1 >> 32) & 0xffffffff) << 0x14) - 1) | 0x81080000;
+	*(volatile int *)0xa5081010 = tmp_v0;
 /*
      1dc:	8ca50000 	lw	$a1,0($a1)
 */
@@ -402,12 +410,12 @@ int tnetv1050_tid_init(struct_s1 *a)
      1f0:	3c060000 	lui	$a2,0x0
      1f4:	8cc60000 	lw	$a2,0($a2)
 */
-	tmp = tiuhw_dsp_clock_mult;
+	dsp_clock_mult = tiuhw_dsp_clock_mult;
 /*
      1f8:	3c050000 	lui	$a1,0x0
      1fc:	8ca50000 	lw	$a1,0($a1)
 */
-	tmp_a1 = tiuhw_dsp_input_clock_speed;
+	dsp_input_clock_speed = tiuhw_dsp_input_clock_speed;
 /*
      200:	00c50018 	mult	$a2,$a1
      204:	00001012 	mflo	$v0
@@ -419,7 +427,20 @@ int tnetv1050_tid_init(struct_s1 *a)
      220:	00108080 	sll	$s0,$s0,0x2
      224:	12000013 	beqz	$s0,274 <init_module-0x6c8>
      228:	00002021 	move	$a0,$zero
+*/
+	ltmp1 = dsp_clock_mult * dsp_input_clock_speed;	
+	tmp_v0 = ltmp1 & 0xffffffff;
+	ltmp1 = tmp_v0 * 0x431bde83;
+
+	tmp_s0 = (((((ltmp1 >> 32) & 0xffffffff) << 0x14) - 1) >> 0x02);
+	if(tmp_s0 != 0) {
+
+/*
      22c:	00c50018 	mult	$a2,$a1
+*/
+		index = 0;
+		{
+/*
      230:	3c02431b 	lui	$v0,0x431b
      234:	00001812 	mflo	$v1
      238:	3442de83 	ori	$v0,$v0,0xde83
@@ -434,16 +455,24 @@ int tnetv1050_tid_init(struct_s1 *a)
      25c:	1440fff4 	bnez	$v0,230 <init_module-0x70c>
      260:	00c50018 	mult	$a2,$a1
 */
+			ltmp1 = dsp_clock_mult * dsp_input_clock_speed;
+			tmp_v1 = ltmp1 & 0xffffffff;
+			ltmp1 = tmp_v1 * 0x431bde83;
+			tmp_v0 = (ltmp1 >> 32) & 0xffffffff;
+			index++;
+			tmp_v0 = (((tmp_v0 >> 0x14) - 1) << 0x02);
+		} while(index<tmp_v0);
 /*
      264:	3c060000 	lui	$a2,0x0
      268:	8cc60000 	lw	$a2,0($a2)
 */
-	tmp = tiuhw_dsp_clock_mult;
+		dsp_clock_mult = tiuhw_dsp_clock_mult;
 /*
      26c:	3c050000 	lui	$a1,0x0
      270:	8ca50000 	lw	$a1,0($a1)
 */
-	tmp_a1 = tiuhw_dsp_input_clock_speed;
+		dsp_input_clock_speed = tiuhw_dsp_input_clock_speed;
+	}
 /*
      274:	00c50018 	mult	$a2,$a1
      278:	3c02431b 	lui	$v0,0x431b
@@ -461,6 +490,14 @@ int tnetv1050_tid_init(struct_s1 *a)
      2a8:	00021080 	sll	$v0,$v0,0x2
      2ac:	1040000f 	beqz	$v0,2ec <init_module-0x650>
      2b0:	00002021 	move	$a0,$zero
+*/
+	ltmp1 = dsp_clock_mult * dsp_input_clock_speed;
+	tmp_v1 = ltmp1 & 0xffffffff;
+	ltmp1 = tmp_v1 * 0x431bde83;
+	*(volatile int *)0xa5081004 = 0x1;
+	tmp_v0 = ((((ltmp1 >> 32) & 0xffffffff) >> 0x14) - 1) >> 0x02;
+	if(tmp_v0 != 0) {
+/*
      2b4:	00c50018 	mult	$a2,$a1
      2b8:	3c02431b 	lui	$v0,0x431b
      2bc:	00001812 	mflo	$v1
@@ -476,6 +513,15 @@ int tnetv1050_tid_init(struct_s1 *a)
      2e4:	1440fff4 	bnez	$v0,2b8 <init_module-0x684>
      2e8:	00c50018 	mult	$a2,$a1
 */
+		index = 0;
+		{
+			ltmp1 = dsp_clock_mult * dsp_input_clock_speed;
+			tmp_v1 = ltmp1 & 0xffffffff;
+			ltmp1 = tmp_v1 * 0x431bde83;	
+			tmp_v0 = (((((ltmp1 >> 32) & 0xffffffff) >> 0x14) - 1) << 0x02);
+		while();
+		
+	}
 /*
      2ec:	3c030000 	lui	$v1,0x0
      2f0:	8c630000 	lw	$v1,0($v1)
