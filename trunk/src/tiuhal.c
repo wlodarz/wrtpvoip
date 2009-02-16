@@ -80,6 +80,7 @@ ptrs tnetv1050_api[3] = {
 int unknown_global1 = 1; // data + 0x0034
 ptrs hw_apis[3];	// data + 0x0038 - (+0x0034)
 int should_reset_tid = 1; // data + 0x0070
+int tmp_variable2 = 
 int tmp_variable0 = 0; // data + 0x00ac
 int not_initialized = 1; // data + 0x00b0
 int interface_type = TIHW_EXTERNAL; // data + 0x00b4
@@ -659,7 +660,7 @@ int tnetv1050_tid_init(struct_s1 *a)
      3f8:	10620009 	beq	$v1,$v0,420 <init_module-0x51c>
      3fc:	26020001 	addiu	$v0,$s0,1
 */
-		if(tid_type < 0) {
+		if((tid_type < 0) || (tid_type >= 4 && tid_type != 12)) {
 /*
      400:	0220f809 	jalr	$s1
      404:	02002021 	move	$a0,$s0
@@ -677,20 +678,17 @@ int tnetv1050_tid_init(struct_s1 *a)
      418:	00009821 	move	$s3,$zero
      41c:	26020001 	addiu	$v0,$s0,1
 */
-			tmp_s3 = 0;
-			index = cond + 1;
-		} else if(tid_type < 4) {
-			index = cond + 1;	
-		} else if(tid_type == 12) {
-		} else {
+			cond = 0;
 		}
-		cond = index & 0xff;
 /*
      420:	305000ff 	andi	$s0,$v0,0xff
      424:	1200ffea 	beqz	$s0,3d0 <init_module-0x56c>
      428:	02601021 	move	$v0,$s3
 */
-	} while(cond == 0);
+		tmp_v0 = tid + 1;
+		tid = tmp_v0 & 0xff;
+		ret = cond;
+	} while(tid == 0);
 
 /*
      42c:	8fbf0020 	lw	$ra,32($sp)
@@ -701,7 +699,7 @@ int tnetv1050_tid_init(struct_s1 *a)
      440:	03e00008 	jr	$ra
      444:	27bd0028 	addiu	$sp,$sp,40
 */
-	return 0;
+	return ret;
 }
 
 /* DONE */
@@ -1355,8 +1353,8 @@ int func23(int a, int b)
      91c:	00001021 	move	$v0,$zero
 */
 		ret = 0;
-/*
 	} else {
+/*
      920:	3c020000 	lui	$v0,0x0
      924:	24420000 	addiu	$v0,$v0,0
      928:	0040f809 	jalr	$v0
@@ -1971,6 +1969,7 @@ int tiuhw_get_tid_type(int tid)
 	int tmp0, tmp1, tmp3;
 	char *tele_id = NULL, *tmp_tele_id = NULL, *end_buf = NULL;
 	int some_tmp;
+	char *str1 = NULL;
 
 /* prologue
 0000000000000e14 <tiuhw_get_tid_type>:
@@ -1988,7 +1987,7 @@ int tiuhw_get_tid_type(int tid)
      e38:	24130001 	li	$s3,1
      e3c:	309600ff 	andi	$s6,$a0,0xff
 */
-	tmp0 = 1; // s3
+	tmp_s3 = 1; // s3
 	tmp1 = tid & 0xff; // s6
 
 /*
@@ -2021,8 +2020,8 @@ int tiuhw_get_tid_type(int tid)
      e7c:	50400001 	0x50400001 // sb 
      e80:	24130001 	li	$s3,1
 */
-		num_tids &= 0xff;
-		if(num_tids<2) tmp0 = 1;
+		tmp_s3 = num_tids & 0xff;
+		if(tmp_s3 < 2) tmp_s3 = 1;
 	}
 /*
      e84:	3c030000 	lui	$v1,0x0
@@ -2096,7 +2095,7 @@ int tiuhw_get_tid_type(int tid)
      f10:	02a02821 	move	$a1,$s5
 */
 			tmp_tele_id = substring;
-			strsep(&tmp_tele_id, ":");
+			str1 = strsep(&tmp_tele_id, ":");
 		
 			// HERE
 
@@ -2105,21 +2104,21 @@ int tiuhw_get_tid_type(int tid)
      f18:	10a00082 	beqz	$a1,1124 <tiuhw_get_tid_type+0x310>
      f1c:	00000000 	nop
 */
-			// tmp_tele_id now holds reference to integer value
-			// if(tmp_tele_id == NULL) goto out;
+			// tmp_tele_id now holds reference to 'AUTO' string (WRTP54G)
+			if(tmp_tele_id == NULL) goto out;
 
 /*
      f20:	12600080 	beqz	$s3,1124 <tiuhw_get_tid_type+0x310>
      f24:	00008821 	move	$s1,$zero
 */
-     			if(tmp0) {
-				some_tmp = 0; // s1
+			tmp_s1 = 0;
+     			if(tmp_s3 == 0) goto out;
 /*
      f28:	080003cd 	j	f34 <tiuhw_get_tid_type+0x120>
      f2c:	00000000 	nop
 */
-			}
 
+			{
 /*
      f30:	305100ff 	andi	$s1,$v0,0xff
      f34:	001110c0 	sll	$v0,$s1,0x3
@@ -2130,8 +2129,14 @@ int tiuhw_get_tid_type(int tid)
      f48:	10c0000e 	beqz	$a2,f84 <tiuhw_get_tid_type+0x170>
      f4c:	00a02021 	move	$a0,$a1
 */
-			
-
+#warning TODO: COMPLETE IT!! 
+// it just checks strings : AUTO / VE88... / SI / etc. and converts them to integer (TYPE)
+				tmp_v0 = tmp_s1	<< 3;
+				tmp_ptr = some_table1[tmp_v0];
+				tmp_a2 = tmp_ptr->ifname; // do not know 
+				tmp_a0 = str1;
+				if(tmp_a2 != 0) break;
+				
 /*
      f50:	8e020000 	lw	$v0,0($s0)
      f54:	00401821 	move	$v1,$v0
@@ -2142,20 +2147,29 @@ int tiuhw_get_tid_type(int tid)
      f68:	24630001 	addiu	$v1,$v1,1
      f6c:	1440fffb 	bnez	$v0,f5c <tiuhw_get_tid_type+0x148>
      f70:	90820000 	lbu	$v0,0($a0)
+*/
+/*
      f74:	00201021 	move	$v0,$at
      f78:	00411023 	subu	$v0,$v0,$at
      f7c:	1440ffec 	bnez	$v0,f30 <tiuhw_get_tid_type+0x11c>
      f80:	26220001 	addiu	$v0,$s1,1
+*/
+			} while();
+/*
      f84:	241100ff 	li	$s1,255
      f88:	14d1001d 	bne	$a2,$s1,1000 <tiuhw_get_tid_type+0x1ec>
      f8c:	02402021 	move	$a0,$s2
      f90:	24050001 	li	$a1,1
-     f94:	3c020000 	lui	$v0,0x0
+     f94:	3c020000 	lui	$v0,0x0 // tiuhw_api
      f98:	8c4200b8 	lw	$v0,184($v0)
      f9c:	00003021 	move	$a2,$zero
      fa0:	8c42002c 	lw	$v0,44($v0)
      fa4:	0040f809 	jalr	$v0
      fa8:	00003821 	move	$a3,$zero
+*/
+			func_ptr = tiuhw_api[11];
+			func_ptr();
+/*
      fac:	304300ff 	andi	$v1,$v0,0xff
      fb0:	24020003 	li	$v0,3
      fb4:	1062000c 	beq	$v1,$v0,fe8 <tiuhw_get_tid_type+0x1d4>
