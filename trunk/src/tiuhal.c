@@ -123,7 +123,8 @@ int tnetv1050_tid_init(struct_s1 *a)
 	int dsp_clock_mult;
 	int dsp_input_clock_speed;
 	long long ltmp1;
-	int tmp_s0;
+	int tmp_s0, tmp_s3;
+	int cond;
 
 /* prologue
 0000000000000000 <init_module-0x93c>:
@@ -297,7 +298,7 @@ int tnetv1050_tid_init(struct_s1 *a)
      134:	34420004 	ori	$v0,$v0,0x4
      13c:	ad020000 	sw	$v0,0($t0)
 */
-/* DONE TILL HERE */
+
 	reg = *(volatile int *)0xa5080000;
 	reg |= 0x00000004;
 	*(volatile int *)0xa5080000 = reg;
@@ -721,6 +722,7 @@ int tnetv1050_tid_writebyte(int a) {
 	long long tmp0, tmp1, ltmp2;
 	int tmp2, tmp3, tmp4, tmp9, tmp10;
 	int reg;
+	int tmp_s3;
 /*
      450:	308400ff 	andi	$a0,$a0,0xff
 */

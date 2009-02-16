@@ -17,8 +17,10 @@ define KernelPackage/ar7voip
   SUBMENU:=AR7VOIP support
   TITLE:=AR7VOIP subsystem support
   DEPENDS:=
-  FILES:=$(PKG_BUILD_DIR)/ar7dsp.$(LINUX_KMOD_SUFFIX)
-  AUTOLOAD:=$(call AutoLoad,55,ar7voip)
+  FILES:= \
+  	$(PKG_BUILD_DIR)/ar7dsp.$(LINUX_KMOD_SUFFIX) \
+  	$(PKG_BUILD_DIR)/ar7hal.$(LINUX_KMOD_SUFFIX)
+  AUTOLOAD:=$(call AutoLoad,55,ar7dsp ar7hal)
 endef
 
 define KernelPackage/ar7voip/description
