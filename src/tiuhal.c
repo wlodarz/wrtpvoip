@@ -77,10 +77,23 @@ ptrs tnetv1050_api[3] = {
 	}
 };
 
+typedef struct {
+	char *tidname;
+	int tidtype;
+} s_tidname2type;
+
 int unknown_global1 = 1; // data + 0x0034
 ptrs hw_apis[3];	// data + 0x0038 - (+0x0034)
 int should_reset_tid = 1; // data + 0x0070
-int tmp_variable2 = 
+s_tidname2type tidname2type[8] = {
+	{"SI3210_SI3050", 1},
+	{"DUAL_SI3210", 2},
+	{"DUAL_SI3050", 3},
+	{"DUAL_SI3034", 5},
+	{"VE882XX", 12},
+	{"AUTO", 255},
+	{NULL, 0},
+};
 int tmp_variable0 = 0; // data + 0x00ac
 int not_initialized = 1; // data + 0x00b0
 int interface_type = TIHW_EXTERNAL; // data + 0x00b4
@@ -108,7 +121,7 @@ tiuhal.o:     file format elf32-tradlittlemips
 Disassembly of section .text:
 */
 
-/* JUST REVIEWING */
+/* FUNCTION: DONE, need review */
 /* probably init function */
 int tnetv1050_tid_init(struct_s1 *a)
 {
@@ -126,6 +139,7 @@ int tnetv1050_tid_init(struct_s1 *a)
 	long long ltmp1;
 	int tmp_s0, tmp_s3;
 	int cond;
+	int ret;
 
 /* prologue
 0000000000000000 <init_module-0x93c>:
@@ -702,7 +716,7 @@ int tnetv1050_tid_init(struct_s1 *a)
 	return ret;
 }
 
-/* DONE */
+/* FUNCTION: DONE, need review */
 irqreturn_t tnetv1050_tid_interrupt_handler1(int i, void *data)
 {
 /*
@@ -712,7 +726,7 @@ irqreturn_t tnetv1050_tid_interrupt_handler1(int i, void *data)
 	return IRQ_HANDLED;
 }
 
-/* TODO: implement */
+/* FUNCTION: TODO, need review */
 int tnetv1050_tid_writebyte(int a) {
 	int dsp_mult;
 	int dsp_speed;
@@ -909,7 +923,7 @@ int tnetv1050_tid_writebyte(int a) {
 	return (0 < a0);
 }
 
-/* TODO: implement */
+/* FUNCTION: TODO, need review */
 int tnetv1050_tid_readbyte()
 {
 	int tmp;
@@ -1039,6 +1053,7 @@ int tnetv1050_tid_readbyte()
 
 /* probably read function */
 /* DONE, TODO: magic numbers, magic functions */
+/* FUNCTION: DONE, need review */
 int tnetv1050_tid_read(int tid, int ecval, int ptr, int count)
 {
 	int ret = 1;
@@ -1114,7 +1129,7 @@ int tnetv1050_tid_read(int tid, int ecval, int ptr, int count)
 	return ret;
 }
 
-/* DONE */
+/* FUNCTION: DONE, need review */
 int tnetv1050_tid_write(int tid, int ecval, char *data, int len)
 {
 	int tmp1;
@@ -1209,7 +1224,7 @@ int tnetv1050_tid_write(int tid, int ecval, char *data, int len)
 	return ret;
 }
 
-/* DONE */
+/* FUNCTION: DONE, need review */
 int func03(void)
 {
 /*
@@ -1220,7 +1235,7 @@ int func03(void)
 }
 
 
-/* DONE */
+/* FUNCTION: DONE, need review */
 int func11(void)
 {
 /*
@@ -1230,7 +1245,7 @@ int func11(void)
 	return 0;
 }
 
-/* DONE */
+/* FUNCTION: DONE, need review */
 int func10(void)
 {
 /*
@@ -1240,7 +1255,7 @@ int func10(void)
 	return 0;
 }
 
-/* DONE */
+/* FUNCTION: DONE, need review */
 int func12(void)
 {
 /*
@@ -1250,7 +1265,7 @@ int func12(void)
 	return 0;
 }
 
-/* DONE */
+/* FUNCTION: DONE, need review */
 int func13(void)
 {
 /*
@@ -1260,7 +1275,7 @@ int func13(void)
 	return 0;
 }
 
-/* DONE */
+/* FUNCTION: DONE, need review */
 int func20(void)
 {
 /*
@@ -1270,7 +1285,7 @@ int func20(void)
 	return 0;
 }
 
-/* DONE */
+/* FUNCTION: DONE, need review */
 int func21(void)
 {
 /*
@@ -1281,6 +1296,7 @@ int func21(void)
 }
 
 /* TODO: NOR, 'magic number sections' -> ar7_* functions */
+/* FUNCTION: TODO, need review */
 int func22(int a, int b)
 {
 	int c=a&0xffff;
@@ -1332,7 +1348,7 @@ int func22(int a, int b)
 	return 1;
 }
 
-/* DONE */
+/* FUNCTION: DONE, need review */
 int func23(int a, int b)
 {
 	int a1;
@@ -1371,6 +1387,7 @@ int func23(int a, int b)
 }
 
 /* TODO : pointers & internal structures */
+/* FUNCTION: DONE, need review */
 static int __init tihw_hal_init_module(void) {
 	int i;
 	int ret;
@@ -1444,7 +1461,7 @@ static int __init tihw_hal_init_module(void) {
 	return 0;
 }
 
-/* TODO: implement */
+/* FUNCTION: DONE, need review */
 static void __exit tihw_hal_cleanup_module(void)
 {
 /*
@@ -1470,6 +1487,7 @@ static void __exit tihw_hal_cleanup_module(void)
 }
 
 /* TODO : check, and make it more complete */
+/* FUNCTION: TODO, need review */
 int tiuhw_get_dsp_clk_values(void)
 {
 	int ret = -1;
@@ -1647,6 +1665,7 @@ int tiuhw_get_dsp_clk_values(void)
 }
 
 /* ALMOST DONE, fix pointers, change 'magic number sections' to ar7_* functions */
+/* FUNCTION: DONE, need review */
 int tiuhw_init_hal(int a, int b)
 {
 	int if_type = -1;
@@ -1938,6 +1957,7 @@ int tiuhw_init_hal(int a, int b)
 }
 
 /* DONE */
+/* FUNCTION: DONE, need review */
 void tiuhw_select_tid(int tid)
 {
 
@@ -1950,6 +1970,7 @@ void tiuhw_select_tid(int tid)
 }
 
 /* DONE */
+/* FUNCTION: DONE, need review */
 void tiuhw_deselect_tid(int tid)
 {
 /*
@@ -1961,6 +1982,7 @@ void tiuhw_deselect_tid(int tid)
 }
 
 /* TODO: implement */
+/* FUNCTION: TODO, need review */
 int tiuhw_get_tid_type(int tid)
 {
 	int ret = -1;
@@ -1970,6 +1992,8 @@ int tiuhw_get_tid_type(int tid)
 	char *tele_id = NULL, *tmp_tele_id = NULL, *end_buf = NULL;
 	int some_tmp;
 	char *str1 = NULL;
+	int tmp_s3, tmp_s1, tmp_s2, tmp_v0;
+	int index;
 
 /* prologue
 0000000000000e14 <tiuhw_get_tid_type>:
@@ -1987,7 +2011,7 @@ int tiuhw_get_tid_type(int tid)
      e38:	24130001 	li	$s3,1
      e3c:	309600ff 	andi	$s6,$a0,0xff
 */
-	tmp_s3 = 1; // s3
+	num_tids = 1; // s3
 	tmp1 = tid & 0xff; // s6
 
 /*
@@ -1999,7 +2023,7 @@ int tiuhw_get_tid_type(int tid)
      e54:	00009021 	move	$s2,$zero
 */
 	num_tids_str = prom_getenv("NUM_TIDS");
-	tmp3 = 0; // s2
+	tmp_s2 = 0; // s2
 
 /*
      e58:	1040000a 	beqz	$v0,e84 <tiuhw_get_tid_type+0x70>
@@ -2020,8 +2044,8 @@ int tiuhw_get_tid_type(int tid)
      e7c:	50400001 	0x50400001 // sb 
      e80:	24130001 	li	$s3,1
 */
-		tmp_s3 = num_tids & 0xff;
-		if(tmp_s3 < 2) tmp_s3 = 1;
+		num_tids &= 0xff;
+		if(num_tids < 2) num_tids = 1;
 	}
 /*
      e84:	3c030000 	lui	$v1,0x0
@@ -2112,15 +2136,15 @@ int tiuhw_get_tid_type(int tid)
      f24:	00008821 	move	$s1,$zero
 */
 			tmp_s1 = 0;
-     			if(tmp_s3 == 0) goto out;
+     			if(num_tids == 0) goto out;
 /*
      f28:	080003cd 	j	f34 <tiuhw_get_tid_type+0x120>
      f2c:	00000000 	nop
 */
 
-			{
 /*
      f30:	305100ff 	andi	$s1,$v0,0xff
+-----
      f34:	001110c0 	sll	$v0,$s1,0x3
      f38:	3c100000 	lui	$s0,0x0
      f3c:	26100074 	addiu	$s0,$s0,116
@@ -2131,12 +2155,9 @@ int tiuhw_get_tid_type(int tid)
 */
 #warning TODO: COMPLETE IT!! 
 // it just checks strings : AUTO / VE88... / SI / etc. and converts them to integer (TYPE)
-				tmp_v0 = tmp_s1	<< 3;
-				tmp_ptr = some_table1[tmp_v0];
-				tmp_a2 = tmp_ptr->ifname; // do not know 
-				tmp_a0 = str1;
-				if(tmp_a2 != 0) break;
-				
+
+			index = 0;
+			while(tidname2type[index].tidtype && strcmp(tidname2type[index].tidname, str1)) {
 /*
      f50:	8e020000 	lw	$v0,0($s0)
      f54:	00401821 	move	$v1,$v0
@@ -2154,11 +2175,15 @@ int tiuhw_get_tid_type(int tid)
      f7c:	1440ffec 	bnez	$v0,f30 <tiuhw_get_tid_type+0x11c>
      f80:	26220001 	addiu	$v0,$s1,1
 */
-			} while();
+				index++;
+			}
 /*
      f84:	241100ff 	li	$s1,255
      f88:	14d1001d 	bne	$a2,$s1,1000 <tiuhw_get_tid_type+0x1ec>
      f8c:	02402021 	move	$a0,$s2
+*/
+			if(tidname2type[index].tidtype == 255) {
+/*
      f90:	24050001 	li	$a1,1
      f94:	3c020000 	lui	$v0,0x0 // tiuhw_api
      f98:	8c4200b8 	lw	$v0,184($v0)
@@ -2167,13 +2192,15 @@ int tiuhw_get_tid_type(int tid)
      fa4:	0040f809 	jalr	$v0
      fa8:	00003821 	move	$a3,$zero
 */
-			func_ptr = tiuhw_api[11];
-			func_ptr();
+			// func_ptr = tiuhw_api[11];
+			// ret = func_ptr(tmp_s2, 1, 0, 0);
 /*
      fac:	304300ff 	andi	$v1,$v0,0xff
      fb0:	24020003 	li	$v0,3
      fb4:	1062000c 	beq	$v1,$v0,fe8 <tiuhw_get_tid_type+0x1d4>
      fb8:	28620004 	slti	$v0,$v1,4
+*/
+/*
      fbc:	10400005 	beqz	$v0,fd4 <tiuhw_get_tid_type+0x1c0>
      fc0:	24020001 	li	$v0,1
      fc4:	1062000c 	beq	$v1,$v0,ff8 <tiuhw_get_tid_type+0x1e4>
@@ -2191,6 +2218,9 @@ int tiuhw_get_tid_type(int tid)
      ff4:	2402000c 	li	$v0,12
      ff8:	08000414 	j	1050 <tiuhw_get_tid_type+0x23c>
      ffc:	24020002 	li	$v0,2
+*/
+			}
+/*
     1000:	54c0000c 	0x54c0000c
     1004:	02402821 	move	$a1,$s2
     1008:	3c040000 	lui	$a0,0x0
@@ -2200,7 +2230,8 @@ int tiuhw_get_tid_type(int tid)
     1018:	0040f809 	jalr	$v0
     101c:	00000000 	nop
 */
-		// printk(KERN_ERR "Unrecognized TID ID string detected: %s\n", some_string_from_s2);
+		printk(KERN_ERR "Unrecognized TID ID string detected: %s\n", tmp_s2);
+
 /*
     1020:	3c010000 	lui	$at,0x0
     1024:	00320821 	addu	$at,$at,$s2
@@ -2300,6 +2331,7 @@ out:
 /* DONE TILL HERE : FROM THE BOTTOM */
 
 /* DONE */
+/* FUNCTION: DONE, need review */
 int tiuhw_map_tcid_to_tid(int tcid)
 {
 	int ret = 255;
@@ -2365,6 +2397,7 @@ int tiuhw_map_tcid_to_tid(int tcid)
 }
 
 /* DONE */
+/* FUNCTION: DONE, need review */
 int tiuhw_get_tnetv1050_tid_type(void)
 {
 /*
@@ -2377,6 +2410,7 @@ int tiuhw_get_tnetv1050_tid_type(void)
 }
 
 /* DONE */
+/* FUNCTION: DONE, need review */
 int tiuhw_get_dsp_mult(int interface)
 {
 	int if_type;
@@ -2409,6 +2443,7 @@ int tiuhw_get_dsp_mult(int interface)
 }
 
 /* DONE */
+/* FUNCTION: DONE, need review */
 int tiuhw_reset_tid(int tid, int cmd)
 {
 	int reg;
@@ -2483,6 +2518,7 @@ int tiuhw_reset_tid(int tid, int cmd)
 }
 
 /* DONE */
+/* FUNCTION: DONE, need review */
 int hwu_get_tiuhw_if(void) {
 	char *teleif=NULL;
 	int ret=-1;
@@ -2613,6 +2649,7 @@ int hwu_get_tiuhw_if(void) {
 	...
 */ 
 /* DONE */
+/* FUNCTION: DONE, need review */
 void tiuhw_led(void) {
 	return;
 }
