@@ -184,7 +184,7 @@ int tnetv1050_tid_init(struct_s1 *a)
       68:	00431024 	and	$v0,$v0,$v1
       6c:	acc20000 	sw	$v0,0($a2)
 */
-	/* DSP clock set to telephony ock I/O */
+	/* DSP clock set to telephony clock I/O */
 	reg = *(volatile int *)0xa8611a00;
 	reg &= 0xffcfffff;
 	*(volatile int *)0xa8611a00;
@@ -2084,7 +2084,10 @@ int tiuhw_get_tid_type(int tid)
 	int some_tmp;
 	char *str1 = NULL;
 	int tmp_s3, tmp_s1, tmp_s2, tmp_v0;
-	int index;
+	int index, tele_id_index=0;
+	int (*func_ptr)(int a1, int a2, int a3, int a4);
+	int reg;
+	int tmp_tid_type;
 
 /* prologue
 0000000000000e14 <tiuhw_get_tid_type>:
@@ -2181,7 +2184,7 @@ int tiuhw_get_tid_type(int tid)
      ed4:	27a40010 	addiu	$a0,$sp,16
 */
 		if(tele_id) {
-			char substring[255];
+			char substring[128];
 
 
 /*
@@ -2189,28 +2192,30 @@ int tiuhw_get_tid_type(int tid)
      edc:	00802821 	move	$a1,$a0
 
      ee0:	92010000 	lbu	$at,0($s0)
-     ee4:	2442ffff 	addiu	$v0,$v0,-1
+     ee4:	2442ffff 	addiu	$v0,$v0,-1  // counter
      ee8:	a0a10000 	sb	$at,0($a1)
 
      eec:	10200003 	beqz	$at,efc <tiuhw_get_tid_type+0xe8>
-     ef0:	24a50001 	addiu	$a1,$a1,1
+     ef0:	24a50001 	addiu	$a1,$a1,1 //substring
 
      ef4:	1440fffa 	bnez	$v0,ee0 <tiuhw_get_tid_type+0xcc>
-     ef8:	26100001 	addiu	$s0,$s0,1
+     ef8:	26100001 	addiu	$s0,$s0,1 // tele_id
 */
-			strcpy(substring, tele_id);
+			strncpy(substring, tele_id, sizeof(substring));
 
 /*
 
      efc:	3c150000 	lui	$s5,0x0
      f00:	26b50210 	addiu	$s5,$s5,528
+     
      f04:	3c140000 	lui	$s4,0x0
      f08:	26940000 	addiu	$s4,$s4,0
      f0c:	0280f809 	jalr	$s4
      f10:	02a02821 	move	$a1,$s5
 */
 			tmp_tele_id = substring;
-			str1 = strsep(&tmp_tele_id, ":");
+			// f04 - a0 jest tmp_tele_id
+			while(((str1 = strsep(&tmp_tele_id, ":")) != NULL) && (tele_id_index < num_tids)) {
 		
 			// HERE
 
@@ -2226,26 +2231,24 @@ int tiuhw_get_tid_type(int tid)
      f20:	12600080 	beqz	$s3,1124 <tiuhw_get_tid_type+0x310>
      f24:	00008821 	move	$s1,$zero
 */
-			tmp_s1 = 0;
-     			if(num_tids == 0) goto out;
+     		if(num_tids == 0) goto out;
+
 /*
      f28:	080003cd 	j	f34 <tiuhw_get_tid_type+0x120>
      f2c:	00000000 	nop
 */
 
-/*
+/* while
      f30:	305100ff 	andi	$s1,$v0,0xff
 -----
      f34:	001110c0 	sll	$v0,$s1,0x3
      f38:	3c100000 	lui	$s0,0x0
      f3c:	26100074 	addiu	$s0,$s0,116
      f40:	02028021 	addu	$s0,$s0,$v0
-     f44:	92060004 	lbu	$a2,4($s0)
+     f44:	92060004 	lbu	$a2,4($s0) // tidtype
      f48:	10c0000e 	beqz	$a2,f84 <tiuhw_get_tid_type+0x170>
      f4c:	00a02021 	move	$a0,$a1
 */
-#warning TODO: COMPLETE IT!! 
-// it just checks strings : AUTO / VE88... / SI / etc. and converts them to integer (TYPE)
 
 			index = 0;
 			while(tidname2type[index].tidtype && strcmp(tidname2type[index].tidname, str1)) {
@@ -2258,14 +2261,14 @@ int tiuhw_get_tid_type(int tid)
      f64:	14220004 	bne	$at,$v0,f78 <tiuhw_get_tid_type+0x164>
      f68:	24630001 	addiu	$v1,$v1,1
      f6c:	1440fffb 	bnez	$v0,f5c <tiuhw_get_tid_type+0x148>
-     f70:	90820000 	lbu	$v0,0($a0)
+     f70:	90820000 	lbu	$v0,0($a0)  // strcmp
 */
 /*
      f74:	00201021 	move	$v0,$at
      f78:	00411023 	subu	$v0,$v0,$at
      f7c:	1440ffec 	bnez	$v0,f30 <tiuhw_get_tid_type+0x11c>
-     f80:	26220001 	addiu	$v0,$s1,1
-*/
+     f80:	26220001 	addiu	$v0,$s1,1 // index++
+while */
 				index++;
 			}
 /*
@@ -2283,21 +2286,22 @@ int tiuhw_get_tid_type(int tid)
      fa4:	0040f809 	jalr	$v0
      fa8:	00003821 	move	$a3,$zero
 */
-			// func_ptr = tiuhw_api[11];
-			// ret = func_ptr(tmp_s2, 1, 0, 0);
+//				func_ptr = tiuhw_api[2]->field3; /// check this out
+//				ret = func_ptr(index, 1, 0, 0);
+				ret = 4;
 /*
      fac:	304300ff 	andi	$v1,$v0,0xff
      fb0:	24020003 	li	$v0,3
      fb4:	1062000c 	beq	$v1,$v0,fe8 <tiuhw_get_tid_type+0x1d4>
      fb8:	28620004 	slti	$v0,$v1,4
-*/
-/*
      fbc:	10400005 	beqz	$v0,fd4 <tiuhw_get_tid_type+0x1c0>
      fc0:	24020001 	li	$v0,1
      fc4:	1062000c 	beq	$v1,$v0,ff8 <tiuhw_get_tid_type+0x1e4>
      fc8:	240200ff 	li	$v0,255
      fcc:	08000414 	j	1050 <tiuhw_get_tid_type+0x23c>
      fd0:	00000000 	nop
+*/
+/*
      fd4:	24020004 	li	$v0,4
      fd8:	10620005 	beq	$v1,$v0,ff0 <tiuhw_get_tid_type+0x1dc>
      fdc:	240200ff 	li	$v0,255
@@ -2310,7 +2314,20 @@ int tiuhw_get_tid_type(int tid)
      ff8:	08000414 	j	1050 <tiuhw_get_tid_type+0x23c>
      ffc:	24020002 	li	$v0,2
 */
-			}
+				reg &= 0xffff;
+				if(reg == 3) { // fe8
+					ret = 5;
+				} else if(reg >= 4) { // fd4
+					if(reg == 4) {
+						ret = 12;
+					} else ret = 255;
+				} else if(reg == 1) { // ff8
+					ret = 2;
+				} else {
+					ret = 255;
+				}
+
+			} else { //tidtype == 255
 /*
     1000:	54c0000c 	0x54c0000c
     1004:	02402821 	move	$a1,$s2
@@ -2321,7 +2338,8 @@ int tiuhw_get_tid_type(int tid)
     1018:	0040f809 	jalr	$v0
     101c:	00000000 	nop
 */
-		printk(KERN_ERR "Unrecognized TID ID string detected: %s\n", tmp_s2);
+				if(tmp_tid_type == 0) {
+					printk(KERN_ERR "Unrecognized TID ID string detected: %s\n", tmp_s2);
 
 /*
     1020:	3c010000 	lui	$at,0x0
@@ -2330,6 +2348,8 @@ int tiuhw_get_tid_type(int tid)
     1028:	a0310010 	sb	$s1,16($at)
     102c:	08000418 	j	1060 <tiuhw_get_tid_type+0x24c>
     1030:	26420001 	addiu	$v0,$s2,1
+    
+
     1034:	3c040000 	lui	$a0,0x0
     1038:	248403ec 	addiu	$a0,$a0,1004
     103c:	3c020000 	lui	$v0,0x0
@@ -2341,19 +2361,30 @@ int tiuhw_get_tid_type(int tid)
 		// printk(KERN_ERR "TID(M) %u is a %s\n", 0, str);
 /*
     104c:	92020004 	lbu	$v0,4($s0)
+*/
+			}
+/*
     1050:	3c010000 	lui	$at,0x0
     1054:	00320821 	addu	$at,$at,$s2
     1058:	a0220010 	sb	$v0,16($at)
     105c:	26420001 	addiu	$v0,$s2,1
+*/
+    	}
+/*
     1060:	305200ff 	andi	$s2,$v0,0xff
     1064:	00002021 	move	$a0,$zero
-    1068:	0280f809 	jalr	$s4
+    1068:	0280f809 	jalr	$s4			// strtok (which is in "while"
     106c:	02a02821 	move	$a1,$s5
+*/
+/*
     1070:	00402821 	move	$a1,$v0
     1074:	10a0002b 	beqz	$a1,1124 <tiuhw_get_tid_type+0x310>
     1078:	0253102b 	sltu	$v0,$s2,$s3
     107c:	1440ffad 	bnez	$v0,f34 <tiuhw_get_tid_type+0x120>
     1080:	00008821 	move	$s1,$zero
+*/
+		}
+/*
     1084:	08000449 	j	1124 <tiuhw_get_tid_type+0x310>
     1088:	00000000 	nop
 */
