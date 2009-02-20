@@ -1,4 +1,10 @@
 
+#include <linux/module.h>
+#include <linux/kernel.h>
+#include <linux/compiler.h>
+#include <asm/ar7/ar7.h>
+
+
 /*
 ../../../wrtp300-rootfs/lib/modules/2.4.17_mvl21-malta-mips_fp_le/kernel/drivers/mxpmod.o:     file format elf32-tradlittlemips
 
@@ -2055,6 +2061,7 @@ Disassembly of section .text:
     2144:	27bd0018 	addiu	$sp,$sp,24
 */
 
+irqreturn_t mxp_timer_irq_handler(int i, void *data)
 /*
 0000000000002148 <mxp_timer_irq_handle>:
     2148:	27bdffe8 	addiu	$sp,$sp,-24
@@ -2369,6 +2376,7 @@ Disassembly of section .text:
     2614:	00001021 	move	$v0,$zero
 */
 
+static int __init mxpmod_init_module(void) {
 /*
 0000000000002618 <init_module>:
     2618:	27bdffc8 	addiu	$sp,$sp,-56
@@ -2561,7 +2569,14 @@ Disassembly of section .text:
     2904:	8fb00020 	lw	$s0,32($sp)
     2908:	03e00008 	jr	$ra
     290c:	27bd0038 	addiu	$sp,$sp,56
+*/
+	return 0;
+}
 
+static void __exit mxpmod_cleanup_module(void)
+{
+
+/*
 0000000000002910 <cleanup_module>:
     2910:	27bdffe0 	addiu	$sp,$sp,-32
     2914:	afbf0018 	sw	$ra,24($sp)
@@ -2656,7 +2671,10 @@ Disassembly of section .text:
     2a78:	90a30000 	lbu	$v1,0($a1)
     2a7c:	03e00008 	jr	$ra
     2a80:	a0800000 	sb	$zero,0($a0)
+*/
+}
 
+/*
 0000000000002a84 <tmrobj_clock>:
     2a84:	27bdffe8 	addiu	$sp,$sp,-24
     2a88:	afbf0014 	sw	$ra,20($sp)
@@ -3026,3 +3044,8 @@ Disassembly of section .text:
     3048:	00001021 	move	$v0,$zero
     304c:	00000000 	nop
 */
+
+
+module_init(mxpmod_init_module);
+module_exit(mxpmod_cleanup_module);
+

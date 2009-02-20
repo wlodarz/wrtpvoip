@@ -1,4 +1,4 @@
-obj-$(CONFIG_AR7VOIP)	+= ar7dsp.o ar7hal.o
+obj-$(CONFIG_AR7VOIP)	+= ar7dsp.o ar7hal.o ar7mxpmod.o
 
 ar7dsp-objs :=  hwdsp.o
 ar7hal-objs :=  tiuhal.o

@@ -53,8 +53,8 @@ void hwu_lin_titan_dsp_reset(int core, int cmd) {
 #warning MAGIC NUMBERS
         int status = *(int *) (DSP_REG1);
         status |= 0x000000fb;
-        *(int *) (DSP_REG1) = status;
     }
+    *(int *) (DSP_REG1) = status;
 
     return;
 }
