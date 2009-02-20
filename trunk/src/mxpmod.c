@@ -2061,7 +2061,7 @@ Disassembly of section .text:
     2144:	27bd0018 	addiu	$sp,$sp,24
 */
 
-irqreturn_t mxp_timer_irq_handler(int i, void *data)
+// irqreturn_t mxp_timer_irq_handler(int i, void *data)
 /*
 0000000000002148 <mxp_timer_irq_handle>:
     2148:	27bdffe8 	addiu	$sp,$sp,-24
@@ -2149,7 +2149,7 @@ irqreturn_t mxp_timer_irq_handler(int i, void *data)
     2290:	3c020000 	lui	$v0,0x0
     2294:	24420000 	addiu	$v0,$v0,0
     2298:	0040f809 	jalr	$v0
-    229c:	2484fffc 	addiu	$a0,$a0,-4
+    229c:	2484fffc 	addiu	$a0,$a0,-4 // tasklet schedule
     22a0:	8fbf0010 	lw	$ra,16($sp)
     22a4:	03e00008 	jr	$ra
     22a8:	27bd0018 	addiu	$sp,$sp,24

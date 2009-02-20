@@ -1,10 +1,11 @@
 
+// mailbox base?
 #define TNETV1050_DSP_BASE 0xa5080000
 
 #define DSP_REG1 (TNETV1050_DSP_BASE + 0x000000)
-#define DSP_REG2 (TNETV1050_DSP_BASE + 0x000014)
-#define DSP_REG3 (TNETV1050_DSP_BASE + 0x000100)
-#define DSP_REG4 (TNETV1050_DSP_BASE + 0x000104)
+#define DSP_RST_REG (TNETV1050_DSP_BASE + 0x000014)
+#define DSP_ADDR100 (TNETV1050_DSP_BASE + 0x000100)
+#define DSP_ADDR104 (TNETV1050_DSP_BASE + 0x000104)
 
 #define DSP_RESET_ON 1
 #define DSP_RESET_OFF 0
@@ -37,6 +38,7 @@ int ar7_get_chip_version_info(void) {
 }
 
 void hwu_lin_titan_dsp_reset(int core, int cmd) {
+    int status;
 
     printk(KERN_ERR "hwu_lin_titan_dsp_reset(%d,%d)\n", core, cmd);
 
@@ -91,7 +93,7 @@ void hwu_lin_titan_dsp_halt(int core) {
 
     ar7_device_disable(AR7_RESET_BIT_DSP);
 
-#warning TO LEARN : delay, let's find out how long
+#warning LEARN : delay, let's find out how long & replace it with some defines
 
     cnt1 = 99;
     do {
@@ -110,9 +112,9 @@ void hwu_lin_titan_dsp_halt(int core) {
 
     ar7_device_enable(AR7_RESET_BIT_DSP);
 
-#warning TO LEARN : addesses & constants meaning
+#warning LEARN : addesses & constants meaning
 
-    *(volatile int *) (DSP_REG2) = 0x80;
+    *(volatile int *) (DSP_RST_REG) = 0x80;
     tmp = *(volatile int *) (DSP_REG1);
     printk(KERN_ERR "hwu_lin_titan_dsp_halt() Before: DSP_RST_REG=0x%08x\n",
            tmp);
@@ -155,9 +157,9 @@ void hwu_lin_dsp_loop(int core, int flag) {
     if (flag != 0)
     {
 
-        *(int *) (DSP_REG3) = 0x20202020;
-
-        *(int *) (DSP_REG4) = 0x6a000100;
+	// just small loop, (NOP? , JUMP to 0x100
+        *(int *) (DSP_ADDR100) = 0x20202020; 0x100;
+        *(int *) (DSP_ADDR104) = 0x6a000100; 0x104;
 
         printk(KERN_ERR "putting dsp in tight loop status=%d\n", flag);
 
@@ -165,7 +167,8 @@ void hwu_lin_dsp_loop(int core, int flag) {
     else
     {
 
-        *(int *) DSP_REG4 = 0x6a004000;
+	// this causes DSP to jump to 0x4000 (start of the program?)
+        *(int *) DSP_ADDR104 = 0x6a004000;
 
         printk(KERN_ERR "jumping to 0x4000 status=%d\n", 0);
     }
@@ -175,7 +178,6 @@ void hwu_lin_dsp_loop(int core, int flag) {
 
 void hwu_dsp_init(void) {
 
-#warning TODO: let's find out what '0' means
     hwu_lin_titan_dsp_halt(DSP_CORE_0);
 
     printk(KERN_ERR "Taking DSP out of reset\n");
