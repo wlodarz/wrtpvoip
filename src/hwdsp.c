@@ -1,3 +1,6 @@
+#define DRV_VERSION "0.0.1"
+#define DRV_DESC "HWDSP driver"
+
 
 // mailbox base?
 #define TNETV1050_DSP_BASE 0xa5080000
@@ -251,3 +254,14 @@ static void __exit tidsp_cleanup_module(void) {
 
 module_init(tidsp_init_module);
 module_exit(tidsp_cleanup_module);
+
+MODULE_DESCRIPTION(DRV_DESC);
+MODULE_VERSION(DRV_VERSION);
+MODULE_AUTHOR("Wlodzimierz Kalawski <wlk at poczta.fm>");
+MODULE_LICENSE("GPL v2");
+
+
+
+EXPORT_SYMBOL_GPL(hwu_lin_register_halt_hooks);
+
+
