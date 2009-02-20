@@ -1,10 +1,14 @@
 
 #include <linux/module.h>
 #include <linux/kernel.h>
-#include <linux/compiler.h>
+#include <linux/init.h>
+// #include <linux/compiler.h>
 #include <linux/interrupt.h>
 #include <asm/ar7/ar7.h>
 #include <asm/ar7/gpio.h>
+
+#define DRV_VERSION "0.0.1"
+#define DRV_DESC "TIUHal driver"
 
 typedef struct {
 	char field0;
@@ -40,7 +44,8 @@ int func22(int a, int b);
 int func23(int a, int b);
 
 char *prom_getenv(char *);
-irqreturn_t tnetv1050_tid_interrupt_handler(int i, void *data);
+static irqreturn_t tnetv1050_tid_interrupt_handler(int i, void *data);
+static irqreturn_t test_irq_handler(int i, void *data);
 int hwu_get_tiuhw_if(void);
 int tiuhw_reset_tid(int a, int cmd);
 void tiuhw_select_tid(int tid);
@@ -717,12 +722,17 @@ int tnetv1050_tid_init(struct_s1 *a)
 }
 
 /* FUNCTION: DONE, need review */
-irqreturn_t tnetv1050_tid_interrupt_handler1(int i, void *data)
+static irqreturn_t tnetv1050_tid_interrupt_handler(int i, void *data)
 {
 /*
      448:	03e00008 	jr	$ra
      44c:	00000000 	nop
 */
+	return IRQ_HANDLED;
+}
+
+static irqreturn_t test_irq_handler(int i, void *data)
+{
 	return IRQ_HANDLED;
 }
 
@@ -1506,6 +1516,7 @@ static int __init tihw_hal_init_module(void) {
      97c:	1444fff6 	bne	$v0,$a0,958 <init_module+0x1c>
      980:	24630010 	addiu	$v1,$v1,16
 */
+	printk(KERN_ERR "ala\n");
 	for(i=0; i<3; i++) {
 	// 	v0 = pointer_with_defaults[i];
 	// 	v1 = some_table_of_structures[i];
@@ -1541,7 +1552,8 @@ static int __init tihw_hal_init_module(void) {
      9ac:	0040f809 	jalr	$v0
      9b0:	00003021 	move	$a2,$zero
 */
-	ret = request_irq(AR7_IRQ_DSP, tnetv1050_tid_interrupt_handler, IRQF_SHARED, stub_text,0);
+	ret = request_irq(AR7_IRQ_DSP, tnetv1050_tid_interrupt_handler, IRQF_SHARED, stub_text, 0);
+	ret = request_irq(13, test_irq_handler, IRQF_SHARED, "test", 0);
 
 /*
      9b4:	8fbf0018 	lw	$ra,24($sp)
@@ -2244,8 +2256,13 @@ int tiuhw_get_tid_type(int tid)
      f34:	001110c0 	sll	$v0,$s1,0x3
      f38:	3c100000 	lui	$s0,0x0
      f3c:	26100074 	addiu	$s0,$s0,116
+<<<<<<< .mine
+     f40:	02028021 	addu	$s0,$s0,$v0 // first entry in tid2name table
+     f44:	92060004 	lbu	$a2,4($s0) /// get pointer to tidname
+=======
      f40:	02028021 	addu	$s0,$s0,$v0
      f44:	92060004 	lbu	$a2,4($s0) // tidtype
+>>>>>>> .r19
      f48:	10c0000e 	beqz	$a2,f84 <tiuhw_get_tid_type+0x170>
      f4c:	00a02021 	move	$a0,$a1
 */
@@ -2254,7 +2271,7 @@ int tiuhw_get_tid_type(int tid)
 			while(tidname2type[index].tidtype && strcmp(tidname2type[index].tidname, str1)) {
 /*
      f50:	8e020000 	lw	$v0,0($s0)
-     f54:	00401821 	move	$v1,$v0
+     f54:	00401821 	move	$v1,$v0 // pointer to 
      f58:	90820000 	lbu	$v0,0($a0)
      f5c:	90610000 	lbu	$at,0($v1)
      f60:	24840001 	addiu	$a0,$a0,1
@@ -2778,3 +2795,20 @@ void tiuhw_led(void) {
 
 module_init(tihw_hal_init_module);
 module_exit(tihw_hal_cleanup_module);
+
+
+MODULE_DESCRIPTION(DRV_DESC);
+MODULE_VERSION(DRV_VERSION);
+MODULE_AUTHOR("Wlodzimierz Kalawski <wlk at poczta.fm>");
+MODULE_LICENSE("GPL v2");
+
+EXPORT_SYMBOL_GPL(hwu_get_tiuhw_if);
+EXPORT_SYMBOL_GPL(tiuhw_get_dsp_mult);
+EXPORT_SYMBOL_GPL(hwu_settings_mod);
+EXPORT_SYMBOL_GPL(tiuhw_get_tid_type);
+EXPORT_SYMBOL_GPL(tiuhw_map_tcid_to_tid);
+EXPORT_SYMBOL_GPL(tiuhw_init_hal);
+EXPORT_SYMBOL_GPL(tiuhw_reset_tid);
+EXPORT_SYMBOL_GPL(tiuhw_led);
+EXPORT_SYMBOL_GPL(tiuhw_api);
+EXPORT_SYMBOL_GPL(hw_apis);
