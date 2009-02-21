@@ -2384,6 +2384,8 @@ static int __init mxpmod_init_module(void) {
     2620:	afb3002c 	sw	$s3,44($sp)
     2624:	afb20028 	sw	$s2,40($sp)
     2628:	afb10024 	sw	$s1,36($sp)
+*/
+/*
     262c:	3c020000 	lui	$v0,0x0
     2630:	8c420050 	lw	$v0,80($v0)
     2634:	afb00020 	sw	$s0,32($sp)
@@ -2397,6 +2399,8 @@ static int __init mxpmod_init_module(void) {
     2654:	24420000 	addiu	$v0,$v0,0
     2658:	0040f809 	jalr	$v0
     265c:	00000000 	nop
+*/
+/*
     2660:	00002021 	move	$a0,$zero
     2664:	3c120000 	lui	$s2,0x0
     2668:	26520350 	addiu	$s2,$s2,848
@@ -2432,20 +2436,28 @@ static int __init mxpmod_init_module(void) {
     26e0:	24420000 	addiu	$v0,$v0,0
     26e4:	0040f809 	jalr	$v0
     26e8:	afa0001c 	sw	$zero,28($sp)
+*/
+/*
     26ec:	3c010000 	lui	$at,0x0
     26f0:	ac2200bc 	sw	$v0,188($at)
     26f4:	3c020000 	lui	$v0,0x0
     26f8:	24422ff8 	addiu	$v0,$v0,12280
     26fc:	0040f809 	jalr	$v0
     2700:	00000000 	nop
+*/
+/*
     2704:	3c020000 	lui	$v0,0x0
     2708:	24421850 	addiu	$v0,$v0,6224
     270c:	0040f809 	jalr	$v0
     2710:	00000000 	nop
+*/
+/*
     2714:	3c020000 	lui	$v0,0x0
     2718:	24420be0 	addiu	$v0,$v0,3040
     271c:	0040f809 	jalr	$v0
     2720:	00000000 	nop
+*/
+/*
     2724:	afa00010 	sw	$zero,16($sp)
     2728:	2404000d 	li	$a0,13
     272c:	3c050000 	lui	$a1,0x0
@@ -2456,15 +2468,21 @@ static int __init mxpmod_init_module(void) {
     2740:	24420000 	addiu	$v0,$v0,0
     2744:	0040f809 	jalr	$v0          // requst_irq
     2748:	00003021 	move	$a2,$zero
+*/
+/*
     274c:	3c040000 	lui	$a0,0x0
     2750:	24840360 	addiu	$a0,$a0,864
     2754:	14400032 	bnez	$v0,2820 <init_module+0x208>
     2758:	240501f2 	li	$a1,498
+*/
+/*
     275c:	24041800 	li	$a0,6144
     2760:	3c020000 	lui	$v0,0x0
     2764:	24420000 	addiu	$v0,$v0,0
     2768:	0040f809 	jalr	$v0
     276c:	2406079f 	li	$a2,1951
+*/
+/*
     2770:	3c010000 	lui	$at,0x0
     2774:	ac2200c8 	sw	$v0,200($at)
     2778:	3c040000 	lui	$a0,0x0
@@ -2476,12 +2494,16 @@ static int __init mxpmod_init_module(void) {
     2790:	26100000 	addiu	$s0,$s0,0
     2794:	0200f809 	jalr	$s0
     2798:	24061800 	li	$a2,6144
+*/
+/*
     279c:	3c110000 	lui	$s1,0x0
     27a0:	263100cc 	addiu	$s1,$s1,204
     27a4:	02202021 	move	$a0,$s1
     27a8:	00002821 	move	$a1,$zero
     27ac:	0200f809 	jalr	$s0
     27b0:	24061000 	li	$a2,4096
+*/
+/*
     27b4:	24040001 	li	$a0,1
     27b8:	00041140 	sll	$v0,$a0,0x5
     27bc:	00511021 	addu	$v0,$v0,$s1
@@ -2499,6 +2521,8 @@ static int __init mxpmod_init_module(void) {
     27ec:	24420000 	addiu	$v0,$v0,0
     27f0:	0040f809 	jalr	$v0
     27f4:	02603021 	move	$a2,$s3
+*/
+/*
     27f8:	0441000f 	bgez	$v0,2838 <init_module+0x220>
     27fc:	02402021 	move	$a0,$s2
     2800:	3c040000 	lui	$a0,0x0
@@ -2507,18 +2531,24 @@ static int __init mxpmod_init_module(void) {
     280c:	24420000 	addiu	$v0,$v0,0
     2810:	0040f809 	jalr	$v0
     2814:	00000000 	nop
+*/
+/*
     2818:	3c040000 	lui	$a0,0x0
     281c:	248403b4 	addiu	$a0,$a0,948
     2820:	3c020000 	lui	$v0,0x0
     2824:	24420000 	addiu	$v0,$v0,0
     2828:	0040f809 	jalr	$v0
     282c:	00000000 	nop
+*/
+/*
     2830:	08000a3d 	j	28f4 <init_module+0x2dc>
     2834:	24020001 	li	$v0,1
     2838:	3c020000 	lui	$v0,0x0
     283c:	24420000 	addiu	$v0,$v0,0
     2840:	0040f809 	jalr	$v0
     2844:	00002821 	move	$a1,$zero
+*/
+/*
     2848:	3c010000 	lui	$at,0x0
     284c:	ac2200c0 	sw	$v0,192($at)
     2850:	3c030000 	lui	$v1,0x0
@@ -2544,6 +2574,8 @@ static int __init mxpmod_init_module(void) {
     28a0:	8cc600c0 	lw	$a2,192($a2)
     28a4:	0200f809 	jalr	$s0
     28a8:	00002821 	move	$a1,$zero
+*/
+/*
     28ac:	00401821 	move	$v1,$v0
     28b0:	10600005 	beqz	$v1,28c8 <init_module+0x2b0>
     28b4:	00000000 	nop
@@ -2561,6 +2593,8 @@ static int __init mxpmod_init_module(void) {
     28e4:	24420000 	addiu	$v0,$v0,0
     28e8:	0040f809 	jalr	$v0
     28ec:	00000000 	nop
+*/
+/*
     28f0:	00001021 	move	$v0,$zero
     28f4:	8fbf0030 	lw	$ra,48($sp)
     28f8:	8fb3002c 	lw	$s3,44($sp)
