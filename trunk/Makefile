@@ -21,7 +21,7 @@ define KernelPackage/ar7voip
   	$(PKG_BUILD_DIR)/ar7dsp.$(LINUX_KMOD_SUFFIX) \
   	$(PKG_BUILD_DIR)/ar7hal.$(LINUX_KMOD_SUFFIX) \
   	$(PKG_BUILD_DIR)/ar7mxpmod.$(LINUX_KMOD_SUFFIX)
-  AUTOLOAD:=$(call AutoLoad,55,ar7mxpmod ar7dsp ar7hal)
+  AUTOLOAD:=$(call AutoLoad,55,ar7mxpmod ar7hal ar7dsp)
 endef
 
 define KernelPackage/ar7voip/description
