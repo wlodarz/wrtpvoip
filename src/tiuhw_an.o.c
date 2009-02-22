@@ -1,4 +1,5 @@
 
+/*
 ../../../wrtp300-rootfs/lib/modules/2.4.17_mvl21-malta-mips_fp_le/kernel/drivers/tiuhw_an.o:     file format elf32-tradlittlemips
 
 Disassembly of section .text:
@@ -8212,7 +8213,11 @@ VpMpiCmd(
     7d9c:	8fbf0010 	lw	$ra,16($sp)
     7da0:	03e00008 	jr	$ra
     7da4:	27bd0018 	addiu	$sp,$sp,24
+*/
 
+int vp880_abs_api_init(void)
+{
+/*
 0000000000007da8 <vp880_abs_api_init>:
     7da8:	27bdffe8 	addiu	$sp,$sp,-24
     7dac:	afbf0010 	sw	$ra,16($sp)
@@ -8229,6 +8234,9 @@ VpMpiCmd(
     7dd8:	24420000 	addiu	$v0,$v0,0
     7ddc:	0040f809 	jalr	$v0
     7de0:	00000000 	nop
+*/
+	tiuo_fill_drv_api();
+/*
     7de4:	8fbf0010 	lw	$ra,16($sp)
     7de8:	03e00008 	jr	$ra
     7dec:	27bd0018 	addiu	$sp,$sp,24
@@ -8348,7 +8356,11 @@ VpMpiCmd(
     7fbc:	24020001 	li	$v0,1
     7fc0:	03e00008 	jr	$ra
     7fc4:	27bd0018 	addiu	$sp,$sp,24
+*/
+}
 
+
+/*
 0000000000007fc8 <tid_teardown>:
     7fc8:	03e00008 	jr	$ra
     7fcc:	aca00000 	sw	$zero,0($a1)
