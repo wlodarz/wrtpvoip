@@ -1,4 +1,17 @@
 
+#include <linux/module.h>
+#include <linux/kernel.h>
+#include <linux/init.h>
+#include <linux/interrupt.h>
+#include <asm/ar7/ar7.h>
+#include <asm/ar7/gpio.h>
+
+#include "legerity/sys_service.h"
+
+#define DRV_VERSION "0.0.1"
+#define DRV_DESC "TIUHw_An driver"
+
+
 /*
 ../../../wrtp300-rootfs/lib/modules/2.4.17_mvl21-malta-mips_fp_le/kernel/drivers/tiuhw_an.o:     file format elf32-tradlittlemips
 
@@ -7288,7 +7301,7 @@ VpMpiCmd(
 		uint8 *dataPtr)             /**< Pointer to the data location */
 {
 	uint8 byteCnt;
-	// uint8 isRead = (cmd & READ_COMMAND); 
+	uint8 isRead = (cmd & READ_COMMAND); 
 
 
 /*
@@ -7307,6 +7320,9 @@ VpMpiCmd(
     6ff0:	30d400ff 	andi	$s4,$a2,0xff
     6ff4:	32330001 	andi	$s3,$s1,0x1
 */
+	deviceId &= 0xff
+	ecVal &= 0xff;
+	cmd &= 0xff;
 
 /*
     6ff8:	24020001 	li	$v0,1
