@@ -20,8 +20,10 @@ define KernelPackage/ar7voip
   FILES:= \
   	$(PKG_BUILD_DIR)/ar7dsp.$(LINUX_KMOD_SUFFIX) \
   	$(PKG_BUILD_DIR)/ar7hal.$(LINUX_KMOD_SUFFIX) \
-  	$(PKG_BUILD_DIR)/ar7mxpmod.$(LINUX_KMOD_SUFFIX)
-  AUTOLOAD:=$(call AutoLoad,55,ar7mxpmod ar7hal ar7dsp)
+  	$(PKG_BUILD_DIR)/ar7mxpmod.$(LINUX_KMOD_SUFFIX) \
+  	$(PKG_BUILD_DIR)/ar7hwan.$(LINUX_KMOD_SUFFIX) \
+  	$(PKG_BUILD_DIR)/testapp.$(LINUX_KMOD_SUFFIX)
+  AUTOLOAD:=$(call AutoLoad,55,ar7mxpmod ar7hal ar7dsp ar7hwan le88x testapp)
 endef
 
 define KernelPackage/ar7voip/description

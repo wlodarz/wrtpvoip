@@ -2,10 +2,11 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
-// #include <linux/compiler.h>
 #include <linux/interrupt.h>
 #include <asm/ar7/ar7.h>
 #include <asm/ar7/gpio.h>
+
+#include "tiuhw.h"
 
 #define DRV_VERSION "0.0.1"
 #define DRV_DESC "TIUHal driver"
@@ -53,8 +54,6 @@ void tiuhw_deselect_tid(int tid);
 int tiuhw_get_tnetv1050_tid_type(void);
 int tiuhw_get_tid_type(int tid);
 
-#define TIHW_INTERNAL 1
-#define TIHW_EXTERNAL 2
 
 #define DSP_CORE_0 0
 #define DSP_RESET_ON 1
