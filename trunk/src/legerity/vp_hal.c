@@ -12,6 +12,10 @@
 #include "hbi_hal.h"
 #include "mpi_hal.h"
 
+
+
+void VpMpiCmd(VpDeviceIdType deviceId, uint8 ecVal, uint8 cmd, uint8 cmdLen, uint8 *dataPtr);
+
 /*****************************************************************************
  * HAL functions for VCP and VPP. Not necessary for CSLAC devices.
  ****************************************************************************/
@@ -319,6 +323,7 @@ bool VpHalHbiBootWr(
     return TRUE;
 #endif
 } /* VpHalHbiBootWr() */
+#if 0
 /*****************************************************************************
  * HAL functions for CSLAC devices. Not necessary for VCP and VPP
  ****************************************************************************/
@@ -399,3 +404,8 @@ VpMpiCmd(
 
     return;
 } /* End VpMpiCmd */
+#endif
+
+MODULE_AUTHOR("Wlodzimierz Kalawski <wlk at poczta.fm>");
+MODULE_LICENSE("GPL v2");
+

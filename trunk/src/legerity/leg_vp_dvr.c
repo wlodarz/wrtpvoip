@@ -16,6 +16,11 @@
 
 #include "leg_vp_dvr.h"
 
+#define DRV_VERSION "0.0.1"
+#define DRV_DESC "VE880 driver"
+
+
+
 /* ****************************************************************************
  * This is a union of all possible VP-API Device Object types.
  * The size of the union will only be as large as the largest
@@ -163,8 +168,7 @@ static int LegVpDvrIoctlCodeCkSum       (LegVpDvrInfoType *pDvrInfo, unsigned lo
 /* VP-API Line Tests */
 static int LegVpDvrIoctlTestLn          (LegVpDvrInfoType *pDvrInfo, unsigned long arg);
 
-// #ifdef LEG_VP_DVR_RUN_TIME_DEV_LOADING
-#if 0
+#ifdef LEG_VP_DVR_RUN_TIME_DEV_LOADING
 
     /* majornum, deviceType, linecount */
     static int dev0_info[3] = {-1, -1, -1};
@@ -188,7 +192,8 @@ static int LegVpDvrIoctlTestLn          (LegVpDvrInfoType *pDvrInfo, unsigned lo
     LegVpDvrInfoType gLegVpDvrInfo[LEG_VP_DVR_NUM_DEVS];
 #else
     /* User defined section of code */
-    static int dev0_info[3] = {-1, -1, -1};
+    // static int dev0_info[3] = {-1, -1, -1};
+    static int dev0_info[3] = {VP_DEV_880_SERIES, -1, 2};
 
     /* add all devX_info arrays to this pointer */
     int *pDev_Info[LEG_VP_DVR_NUM_DEVS] = {dev0_info};
@@ -2157,8 +2162,8 @@ static void __exit LegVpDvr_exit(void)
 
 module_init(LegVpDvr_init);
 module_exit(LegVpDvr_exit);
-MODULE_LICENSE("Proprietary");
-MODULE_DESCRIPTION("Zarlink Semiconductor VoicePath Module");
+// MODULE_LICENSE("Proprietary");
+// MODULE_DESCRIPTION("Zarlink Semiconductor VoicePath Module");
 
 /* ****************************************************************************
  * This function checks the validity of each of the elements in the command
@@ -2306,3 +2311,9 @@ static int LegVpDvrKmallocDevObjs(void)
     }
     return 0;
 }
+
+MODULE_DESCRIPTION(DRV_DESC);
+MODULE_VERSION(DRV_VERSION);
+MODULE_AUTHOR("Wlodzimierz Kalawski <wlk at poczta.fm>");
+MODULE_LICENSE("GPL v2");
+

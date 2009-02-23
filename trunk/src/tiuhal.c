@@ -7,22 +7,10 @@
 #include <asm/ar7/gpio.h>
 
 #include "tiuhw.h"
+#include "tiuhal.h"
 
 #define DRV_VERSION "0.0.1"
 #define DRV_DESC "TIUHal driver"
-
-typedef struct {
-	char field0;
-	char field1;
-	char notused0;
-	char notused1;
-	int  field2;
-	char  field3;
-	char notused2;
-	char notused3;
-	char notused4;
-	int  field4;
-} struct_s1;
 
 typedef struct {
 	int (*field0)(void);
@@ -31,7 +19,7 @@ typedef struct {
 	int (*field3)(void);
 } ptrs;
 
-int tnetv1050_tid_init(struct_s1 *a);
+int tnetv1050_tid_init(tiuhw_device *a);
 int tnetv1050_tid_read(int tid, int ecval_arg, int data, int len);
 int tnetv1050_tid_write(int tid_arg, int ecval_arg, char *data, int len);
 int func03(void);
@@ -127,7 +115,7 @@ Disassembly of section .text:
 
 /* FUNCTION: DONE, need review */
 /* probably init function */
-int tnetv1050_tid_init(struct_s1 *a)
+int tnetv1050_tid_init(tiuhw_device *a)
 {
 	int reg;
 	int tmp0, tmp1, tmp2, tmp5, tmp6;
@@ -1768,7 +1756,7 @@ int tiuhw_get_dsp_clk_values(void)
 
 /* ALMOST DONE, fix pointers, change 'magic number sections' to ar7_* functions */
 /* FUNCTION: DONE, need review */
-int tiuhw_init_hal(int a, int b)
+int tiuhw_init_hal(tiuhw_device *a, int b)
 {
 	int if_type = -1;
 	int reg;
@@ -1809,7 +1797,7 @@ int tiuhw_init_hal(int a, int b)
 	if(if_type == TIHW_INTERNAL) {
 
 
-/*   tiuhw_get_dsp_clk_values
+/* 
      bdc:	3c020000 	lui	$v0,0x0 
      be0:	244209f0 	addiu	$v0,$v0,2544
      be4:	0040f809 	jalr	$v0
