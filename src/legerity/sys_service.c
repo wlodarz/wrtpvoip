@@ -7,6 +7,9 @@
  *
  * Copyright (c) 2008, Zarlink Semiconductor, Inc.
  */
+#include <linux/kernel.h>
+#include <linux/module.h>
+
 #include "vp_api_types.h"
 #include "sys_service.h"
 /*
@@ -174,3 +177,8 @@ VpSysPcmCollectAndProcess(
 {
 } /* VpSysPcmCollectAndProcess() */
 
+EXPORT_SYMBOL_GPL(VpSysEnterCritical);
+EXPORT_SYMBOL_GPL(VpSysExitCritical);
+EXPORT_SYMBOL_GPL(VpSysWait);
+// EXPORT_SYMBOL_GPL();
+// EXPORT_SYMBOL_GPL();

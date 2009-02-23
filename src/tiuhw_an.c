@@ -35,6 +35,7 @@ char *somepointer = NULL;
 int tiuo_fill_drv_api(void *);
 void tiuhw_lin_pre_halt_hook(void);
 void tiuhw_lin_post_halt_hook(void);
+void tiuhw_powerup();
 
 static const struct file_operations tiuhw_fops = {
 	.owner		= THIS_MODULE
@@ -1556,7 +1557,7 @@ static int __init tiuhw_an_init_module(void)
     1664:	0040f809 	jalr	$v0
     1668:	02603021 	move	$a2,$s3
 */
-		ret = register_chrdev(major,"tiuhw", &tiuhw_fops);
+//		ret = register_chrdev(major,"tiuhw", &tiuhw_fops);
 /*
     166c:	04430008 	0x4430008
     1670:	92020009 	lbu	$v0,9($s0)
@@ -1672,6 +1673,8 @@ static int __init tiuhw_an_init_module(void)
     1788:	03e00008 	jr	$ra
     178c:	27bd0038 	addiu	$sp,$sp,56
 */
+// WK: test
+	tiuhw_powerup();
 	return ret;
 }
 
