@@ -6,11 +6,25 @@
 #include <asm/ar7/ar7.h>
 #include <asm/ar7/gpio.h>
 
+#include "legerity/vp_api_types.h"
 #include "legerity/sys_service.h"
+#include "legerity/hbi_hal.h"
+#include "legerity/mpi_hal.h"
+
+#include "tiuhw.h"
+#include "tiuhal.h"
+
 
 #define DRV_VERSION "0.0.1"
 #define DRV_DESC "TIUHw_An driver"
 
+#define WRITE_COMMAND 0
+#define READ_COMMAND 1
+static uint8 tempBuf[512]; /* All zero buffer */
+
+void *globalApiPointer = NULL;
+
+int tiuo_fill_drv_api(void *);
 
 /*
 ../../../wrtp300-rootfs/lib/modules/2.4.17_mvl21-malta-mips_fp_le/kernel/drivers/tiuhw_an.o:     file format elf32-tradlittlemips
@@ -616,6 +630,10 @@ Disassembly of section .text:
      93c:	8fb00018 	lw	$s0,24($sp)
      940:	03e00008 	jr	$ra
      944:	27bd0038 	addiu	$sp,$sp,56
+*/
+void somefunction()
+{
+/*
      948:	27bdffd0 	addiu	$sp,$sp,-48
      94c:	afbf002c 	sw	$ra,44($sp)
      950:	afb60028 	sw	$s6,40($sp)
@@ -1121,7 +1139,10 @@ Disassembly of section .text:
     1120:	8fb00010 	lw	$s0,16($sp)
     1124:	03e00008 	jr	$ra
     1128:	27bd0030 	addiu	$sp,$sp,48
+*/
+}
 
+/*
 000000000000112c <tiuhw_vma_open>:
     112c:	24020001 	li	$v0,1
     1130:	3c030000 	lui	$v1,0x0
@@ -1383,7 +1404,11 @@ Disassembly of section .text:
     1500:	8fb00010 	lw	$s0,16($sp)
     1504:	03e00008 	jr	$ra
     1508:	27bd0020 	addiu	$sp,$sp,32
+*/
 
+static void __exit tiuhw_an_cleanup_module(void)
+{
+/*
 000000000000150c <cleanup_module>:
     150c:	27bdffe0 	addiu	$sp,$sp,-32
     1510:	afbf0018 	sw	$ra,24($sp)
@@ -1436,36 +1461,60 @@ Disassembly of section .text:
     15cc:	8fb00010 	lw	$s0,16($sp)
     15d0:	03e00008 	jr	$ra
     15d4:	27bd0020 	addiu	$sp,$sp,32
+*/
+}
 
+static int __init tiuhw_an_init_module(void)
+{
+	int ret;
+/* prologue
 00000000000015d8 <init_module>:
     15d8:	27bdffc8 	addiu	$sp,$sp,-56
     15dc:	afbf0030 	sw	$ra,48($sp)
     15e0:	afb3002c 	sw	$s3,44($sp)
     15e4:	afb20028 	sw	$s2,40($sp)
     15e8:	afb10024 	sw	$s1,36($sp)
+*/
+
+/*
     15ec:	3c040000 	lui	$a0,0x0
     15f0:	248403dc 	addiu	$a0,$a0,988
     15f4:	3c120000 	lui	$s2,0x0
     15f8:	26520000 	addiu	$s2,$s2,0
     15fc:	0240f809 	jalr	$s2
     1600:	afb00020 	sw	$s0,32($sp)
+*/
+	printk(KERN_ERR "TIUHW module start loading\n");
+
+/*
     1604:	3c100000 	lui	$s0,0x0
     1608:	26100064 	addiu	$s0,$s0,100
     160c:	3c020000 	lui	$v0,0x0
     1610:	24420948 	addiu	$v0,$v0,2376
     1614:	0040f809 	jalr	$v0
     1618:	02002021 	move	$a0,$s0
+*/
+	// ret = somefunction();
+
+/*
     161c:	1440000a 	bnez	$v0,1648 <init_module+0x70>
     1620:	240400f0 	li	$a0,240
     1624:	3c020000 	lui	$v0,0x0
     1628:	244213fc 	addiu	$v0,$v0,5116
     162c:	0040f809 	jalr	$v0
     1630:	02002021 	move	$a0,$s0
+*/
+	if(ret == 0) {
+/*
     1634:	3c040000 	lui	$a0,0x0
     1638:	0240f809 	jalr	$s2
     163c:	248403fc 	addiu	$a0,$a0,1020
     1640:	080005dd 	j	1774 <init_module+0x19c>
     1644:	2402fff4 	li	$v0,-12
+*/
+	} else {
+
+/*
     1648:	3c110000 	lui	$s1,0x0
     164c:	263103b8 	addiu	$s1,$s1,952
     1650:	02202821 	move	$a1,$s1
@@ -1477,6 +1526,9 @@ Disassembly of section .text:
     1668:	02603021 	move	$a2,$s3
     166c:	04430008 	0x4430008
     1670:	92020009 	lbu	$v0,9($s0)
+*/
+	}
+/*
     1674:	3c020000 	lui	$v0,0x0
     1678:	244213fc 	addiu	$v0,$v0,5116
     167c:	0040f809 	jalr	$v0
@@ -1548,36 +1600,71 @@ Disassembly of section .text:
     1784:	8fb00020 	lw	$s0,32($sp)
     1788:	03e00008 	jr	$ra
     178c:	27bd0038 	addiu	$sp,$sp,56
+*/
+}
 
+void tiuhw_powerup(void)
+{
+	int if_type;
+	void *apitab[16];
+	int ret;
+
+/* prologue
 0000000000001790 <tiuhw_powerup>:
     1790:	27bdffd0 	addiu	$sp,$sp,-48
     1794:	afbf0028 	sw	$ra,40($sp)
     1798:	afb10024 	sw	$s1,36($sp)
+*/
+/*
     179c:	3c020000 	lui	$v0,0x0
     17a0:	24420000 	addiu	$v0,$v0,0
     17a4:	0040f809 	jalr	$v0
     17a8:	afb00020 	sw	$s0,32($sp)
+*/
+	if_type = hwu_get_tiuhw_if();
+
+/*
     17ac:	24030001 	li	$v1,1
     17b0:	1443002e 	bne	$v0,$v1,186c <tiuhw_powerup+0xdc>
     17b4:	8fbf0028 	lw	$ra,40($sp)
+*/
+
+	if(if_type == TIHW_INTERNAL) {
+/*
     17b8:	3c040000 	lui	$a0,0x0
     17bc:	2484049c 	addiu	$a0,$a0,1180
     17c0:	3c100000 	lui	$s0,0x0
     17c4:	26100000 	addiu	$s0,$s0,0
     17c8:	0200f809 	jalr	$s0
     17cc:	00000000 	nop
+*/
+		printk(KERN_ERR "Inside tiuhw_powerup()\n");
+
+/*
     17d0:	27a40010 	addiu	$a0,$sp,16
     17d4:	3c020000 	lui	$v0,0x0
     17d8:	24420000 	addiu	$v0,$v0,0
     17dc:	0040f809 	jalr	$v0
     17e0:	00002821 	move	$a1,$zero
+*/
+		ret = tiuhw_init_hal(apitab, 0);
+
+/*
     17e4:	14400006 	bnez	$v0,1800 <tiuhw_powerup+0x70>
     17e8:	00008821 	move	$s1,$zero
+*/
+		if(ret == 0) {
+
+/*
     17ec:	3c040000 	lui	$a0,0x0
     17f0:	0200f809 	jalr	$s0
     17f4:	248404b8 	addiu	$a0,$a0,1208
     17f8:	0800061b 	j	186c <tiuhw_powerup+0xdc>
     17fc:	8fbf0028 	lw	$ra,40($sp)
+*/
+			printk(KERN_ERR "TIUHW HAL Reset failed\n");
+		} else {
+/*
     1800:	3c100000 	lui	$s0,0x0
     1804:	8e100068 	lw	$s0,104($s0)
     1808:	8e030020 	lw	$v1,32($s0)
@@ -1605,11 +1692,21 @@ Disassembly of section .text:
     1860:	1440ffe9 	bnez	$v0,1808 <tiuhw_powerup+0x78>
     1864:	2610008c 	addiu	$s0,$s0,140
     1868:	8fbf0028 	lw	$ra,40($sp)
+*/
+		}
+	}
+/* epilogue
     186c:	8fb10024 	lw	$s1,36($sp)
     1870:	8fb00020 	lw	$s0,32($sp)
     1874:	03e00008 	jr	$ra
     1878:	27bd0030 	addiu	$sp,$sp,48
+*/
+	return;
+}
 
+void tiuhw_powerdown(void)
+{
+/* prologue
 000000000000187c <tiuhw_powerdown>:
     187c:	27bdffe0 	addiu	$sp,$sp,-32
     1880:	afbf001c 	sw	$ra,28($sp)
@@ -1659,7 +1756,12 @@ Disassembly of section .text:
     1930:	8fb00010 	lw	$s0,16($sp)
     1934:	03e00008 	jr	$ra
     1938:	27bd0020 	addiu	$sp,$sp,32
+*/
+}
 
+void tiuhw_lin_post_halt_hook(void)
+{
+/* prologue
 000000000000193c <tiuhw_lin_post_halt_hook>:
     193c:	27bdffe8 	addiu	$sp,$sp,-24
     1940:	afbf0010 	sw	$ra,16($sp)
@@ -1669,31 +1771,56 @@ Disassembly of section .text:
     1950:	24420000 	addiu	$v0,$v0,0
     1954:	0040f809 	jalr	$v0
     1958:	00000000 	nop
+*/
+	printk(KERN_ERR "Titan DSP halt done (TIU)\n");
+/*
     195c:	3c020000 	lui	$v0,0x0
     1960:	24421790 	addiu	$v0,$v0,6032
     1964:	0040f809 	jalr	$v0
     1968:	00000000 	nop
+*/
+	tiuhw_powerup();
+
+/* epilogue
     196c:	8fbf0010 	lw	$ra,16($sp)
     1970:	03e00008 	jr	$ra
     1974:	27bd0018 	addiu	$sp,$sp,24
+*/
+	return;
+}
 
+void tiuhw_lin_pre_halt_hook(void)
+{
+/* prologue
 0000000000001978 <tiuhw_lin_pre_halt_hook>:
     1978:	27bdffe8 	addiu	$sp,$sp,-24
     197c:	afbf0010 	sw	$ra,16($sp)
+*/
+/*
     1980:	3c040000 	lui	$a0,0x0
     1984:	248404f4 	addiu	$a0,$a0,1268
     1988:	3c020000 	lui	$v0,0x0
     198c:	24420000 	addiu	$v0,$v0,0
     1990:	0040f809 	jalr	$v0
     1994:	00000000 	nop
+*/
+	printk(KERN_ERR "Titan DSP halt initiated (TIU)\n");
+/*
     1998:	3c020000 	lui	$v0,0x0
     199c:	2442187c 	addiu	$v0,$v0,6268
     19a0:	0040f809 	jalr	$v0
     19a4:	00000000 	nop
+*/
+	tiuhw_powerdown();
+/*
     19a8:	8fbf0010 	lw	$ra,16($sp)
     19ac:	03e00008 	jr	$ra
     19b0:	27bd0018 	addiu	$sp,$sp,24
+*/
+	return;
+}
 
+/*
 00000000000019b4 <tuihw_read_reg>:
     19b4:	27bdffd8 	addiu	$sp,$sp,-40
     19b8:	afbf0020 	sw	$ra,32($sp)
@@ -7320,9 +7447,14 @@ VpMpiCmd(
     6ff0:	30d400ff 	andi	$s4,$a2,0xff
     6ff4:	32330001 	andi	$s3,$s1,0x1
 */
-	deviceId &= 0xff
+	deviceId &= 0xff;
 	ecVal &= 0xff;
 	cmd &= 0xff;
+
+#define CSLAC_EC_REG_RD    0x4B   /* Same for all CSLAC devices */
+#define CSLAC_EC_REG_WRT   0x4A   /* Same for all CSLAC devices */
+#define CSLAC_EC_REG_LEN   0x01   /* Same for all CSLAC devices */
+
 
 /*
     6ff8:	24020001 	li	$v0,1
@@ -7341,7 +7473,9 @@ VpMpiCmd(
     702c:	0040f809 	jalr	$v0
     7030:	2604fffc 	addiu	$a0,$s0,-4
 */
-		// mutex_lock
+/* Configure glue logic as necessary to talk to the device */
+/* Start critical section for MPI access */
+VpSysEnterCritical(deviceId, VP_MPI_CRITICAL_SEC);
 
 /*
     7034:	1260000a 	beqz	$s3,7060 <VpMpiCmd+0x9c>
@@ -7400,6 +7534,8 @@ VpMpiCmd(
     70cc:	03e00008 	jr	$ra
     70d0:	27bd0030 	addiu	$sp,$sp,48
 */
+	VpSysExitCritical(deviceId, VP_MPI_CRITICAL_SEC);
+}
 
 /*
 
@@ -8233,10 +8369,13 @@ VpMpiCmd(
 
 int vp880_abs_api_init(void)
 {
-/*
+	void *apipointer = NULL;
+/* prologue
 0000000000007da8 <vp880_abs_api_init>:
     7da8:	27bdffe8 	addiu	$sp,$sp,-24
     7dac:	afbf0010 	sw	$ra,16($sp)
+*/
+/*
     7db0:	3c030000 	lui	$v1,0x0
     7db4:	8c630538 	lw	$v1,1336($v1)
     7db8:	24020001 	li	$v0,1
@@ -8251,7 +8390,8 @@ int vp880_abs_api_init(void)
     7ddc:	0040f809 	jalr	$v0
     7de0:	00000000 	nop
 */
-	tiuo_fill_drv_api();
+	apipointer = globalApiPointer;
+	tiuo_fill_drv_api(apipointer);
 /*
     7de4:	8fbf0010 	lw	$ra,16($sp)
     7de8:	03e00008 	jr	$ra
@@ -8551,7 +8691,11 @@ int vp880_abs_api_init(void)
     8270:	a0c00000 	sb	$zero,0($a2)
     8274:	03e00008 	jr	$ra
     8278:	00000000 	nop
+*/
 
+int tiuo_fill_drv_api(void *apipointer)
+{
+/* prologue
 000000000000827c <tiuo_fill_drv_api>:
     827c:	8c820000 	lw	$v0,0($a0)
     8280:	54400005 	0x54400005
@@ -8717,3 +8861,16 @@ int vp880_abs_api_init(void)
     8500:	ac82006c 	sw	$v0,108($a0)
     8504:	03e00008 	jr	$ra
 	...
+*/
+
+}
+
+module_init(tiuhw_an_init_module);
+module_exit(tiuhw_an_cleanup_module);
+
+MODULE_DESCRIPTION(DRV_DESC);
+MODULE_VERSION(DRV_VERSION);
+MODULE_AUTHOR("Wlodzimierz Kalawski <wlk at poczta.fm>");
+MODULE_LICENSE("GPL v2");
+
+
