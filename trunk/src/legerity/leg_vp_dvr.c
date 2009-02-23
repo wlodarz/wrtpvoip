@@ -193,7 +193,7 @@ static int LegVpDvrIoctlTestLn          (LegVpDvrInfoType *pDvrInfo, unsigned lo
 #else
     /* User defined section of code */
     // static int dev0_info[3] = {-1, -1, -1};
-    static int dev0_info[3] = {VP_DEV_880_SERIES, -1, 2};
+    static int dev0_info[3] = {240, VP_DEV_880_SERIES, 2};
 
     /* add all devX_info arrays to this pointer */
     int *pDev_Info[LEG_VP_DVR_NUM_DEVS] = {dev0_info};
@@ -2113,23 +2113,29 @@ static int __init LegVpDvr_init(void)
     /* Initialize the drivers info structs */
     LegVpDvrInitDvrInfo();
 
+    printk(KERN_ERR "Checking...\n");
     /* Check the parameters for each of the chip selects */
     result = LegVpDvrParamCheck();
     if ( 0 >  result) goto fail_arg;
+    printk(KERN_ERR "Checked...\n");
 
     /*
      * Attempt to register the driver on the requested major number.
      * If anything goes wrong the we unregister all of the devices.
      */
+    printk(KERN_ERR "RegisteringMajor...\n");
     result = LegVpDvrRegMajorNums();
     if ( 0 >  result) goto fail_reg;
+    printk(KERN_ERR "RegisteredMajor...\n");
 
     /*
      * Allocate the memory for the specified device object and create it.
      * If anything goes wrong delete any device objects.
      */
+    printk(KERN_ERR "Allocating...\n");
     result = LegVpDvrKmallocDevObjs();
     if ( 0 >  result) goto fail_make;
+    printk(KERN_ERR "Allocated...\n");
 
     printk(KERN_ALERT "VoicePath module initialization successful!!!\n");
     return result; /* sucess */

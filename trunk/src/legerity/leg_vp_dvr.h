@@ -12,7 +12,7 @@
 /* VP-API headers */
 #include "vp_api.h"
 
-#define LEG_VP_DVR_NUM_DEVS             4
+#define LEG_VP_DVR_NUM_DEVS             1
 #define LEG_VP_DVR_NAME                 "leg_vp_dvr"
 
 #undef LEG_VP_DVR_RUN_TIME_DEV_LOADING
