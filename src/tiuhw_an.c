@@ -3,6 +3,12 @@
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/interrupt.h>
+#include <linux/fs.h>
+#include <linux/slab.h>
+#include <linux/types.h>
+#include <linux/errno.h>
+#include <linux/device.h>
+
 #include <asm/ar7/ar7.h>
 #include <asm/ar7/gpio.h>
 
@@ -14,6 +20,7 @@
 #include "tiuhw.h"
 #include "tiuhal.h"
 
+#define TIUHW_MAJOR 240
 
 #define DRV_VERSION "0.0.1"
 #define DRV_DESC "TIUHw_An driver"
@@ -23,8 +30,15 @@
 static uint8 tempBuf[512]; /* All zero buffer */
 
 void *globalApiPointer = NULL;
+char *somepointer = NULL;
 
 int tiuo_fill_drv_api(void *);
+void tiuhw_lin_pre_halt_hook(void);
+void tiuhw_lin_post_halt_hook(void);
+
+static const struct file_operations tiuhw_fops = {
+	.owner		= THIS_MODULE
+};
 
 /*
 ../../../wrtp300-rootfs/lib/modules/2.4.17_mvl21-malta-mips_fp_le/kernel/drivers/tiuhw_an.o:     file format elf32-tradlittlemips
@@ -631,7 +645,7 @@ Disassembly of section .text:
      940:	03e00008 	jr	$ra
      944:	27bd0038 	addiu	$sp,$sp,56
 */
-void somefunction()
+int tiumcb_init()
 {
 /*
      948:	27bdffd0 	addiu	$sp,$sp,-48
@@ -643,12 +657,17 @@ void somefunction()
      960:	afb20018 	sw	$s2,24($sp)
      964:	afb10014 	sw	$s1,20($sp)
      968:	afb00010 	sw	$s0,16($sp)
+*/
+/*
      96c:	00809821 	move	$s3,$a0
      970:	00002821 	move	$a1,$zero
      974:	3c150000 	lui	$s5,0x0
      978:	26b50000 	addiu	$s5,$s5,0
      97c:	02a0f809 	jalr	$s5
      980:	24060020 	li	$a2,32
+*/
+
+/*
      984:	24100002 	li	$s0,2
      988:	a6700010 	sh	$s0,16($s3)
      98c:	3c110000 	lui	$s1,0x0
@@ -1334,7 +1353,10 @@ void somefunction()
     13f0:	8fb00030 	lw	$s0,48($sp)
     13f4:	03e00008 	jr	$ra
     13f8:	27bd0050 	addiu	$sp,$sp,80
-
+*/
+int tiu_if_quit(char *pointer)
+{
+/*
 00000000000013fc <tiu_if_quit>:
     13fc:	27bdffe0 	addiu	$sp,$sp,-32
     1400:	afbf0018 	sw	$ra,24($sp)
@@ -1405,6 +1427,7 @@ void somefunction()
     1504:	03e00008 	jr	$ra
     1508:	27bd0020 	addiu	$sp,$sp,32
 */
+}
 
 static void __exit tiuhw_an_cleanup_module(void)
 {
@@ -1467,6 +1490,8 @@ static void __exit tiuhw_an_cleanup_module(void)
 static int __init tiuhw_an_init_module(void)
 {
 	int ret;
+	int major;
+	char *somepointer;
 /* prologue
 00000000000015d8 <init_module>:
     15d8:	27bdffc8 	addiu	$sp,$sp,-56
@@ -1494,17 +1519,21 @@ static int __init tiuhw_an_init_module(void)
     1614:	0040f809 	jalr	$v0
     1618:	02002021 	move	$a0,$s0
 */
-	// ret = somefunction();
+	ret = tiumcb_init(somepointer);
 
 /*
     161c:	1440000a 	bnez	$v0,1648 <init_module+0x70>
     1620:	240400f0 	li	$a0,240
+*/
+	major = TIUHW_MAJOR;
+	if(ret == 0) {
+/*
     1624:	3c020000 	lui	$v0,0x0
     1628:	244213fc 	addiu	$v0,$v0,5116
     162c:	0040f809 	jalr	$v0
     1630:	02002021 	move	$a0,$s0
 */
-	if(ret == 0) {
+		tiu_if_quit(somepointer);
 /*
     1634:	3c040000 	lui	$a0,0x0
     1638:	0240f809 	jalr	$s2
@@ -1512,6 +1541,8 @@ static int __init tiuhw_an_init_module(void)
     1640:	080005dd 	j	1774 <init_module+0x19c>
     1644:	2402fff4 	li	$v0,-12
 */
+		printk(KERN_ERR "Tiuhw_an failed to initialize TIUMCB\n");
+		ret = -12;
 	} else {
 
 /*
@@ -1524,18 +1555,29 @@ static int __init tiuhw_an_init_module(void)
     1660:	24420000 	addiu	$v0,$v0,0
     1664:	0040f809 	jalr	$v0
     1668:	02603021 	move	$a2,$s3
+*/
+		ret = register_chrdev(major,"tiuhw", &tiuhw_fops);
+/*
     166c:	04430008 	0x4430008
     1670:	92020009 	lbu	$v0,9($s0)
 */
 	}
+
+#warning START FROM HERE
 /*
     1674:	3c020000 	lui	$v0,0x0
     1678:	244213fc 	addiu	$v0,$v0,5116
     167c:	0040f809 	jalr	$v0
     1680:	02002021 	move	$a0,$s0
+*/
+	tiu_if_quit(somepointer);
+
+/*
     1684:	3c040000 	lui	$a0,0x0
     1688:	080005ac 	j	16b0 <init_module+0xd8>
     168c:	24840428 	addiu	$a0,$a0,1064
+*/
+/*
     1690:	1440000b 	bnez	$v0,16c0 <init_module+0xe8>
     1694:	02202021 	move	$a0,$s1
     1698:	3c020000 	lui	$v0,0x0
@@ -1544,15 +1586,26 @@ static int __init tiuhw_an_init_module(void)
     16a4:	02002021 	move	$a0,$s0
     16a8:	3c040000 	lui	$a0,0x0
     16ac:	24840448 	addiu	$a0,$a0,1096
+*/
+/*
     16b0:	0240f809 	jalr	$s2
     16b4:	00000000 	nop
+*/
+	printk(KERN_ERR "");
+/*
     16b8:	080005dd 	j	1774 <init_module+0x19c>
     16bc:	2402fffb 	li	$v0,-5
+*/
+			ret = -5;
+/*
     16c0:	00002821 	move	$a1,$zero
     16c4:	3c020000 	lui	$v0,0x0
     16c8:	24420000 	addiu	$v0,$v0,0
     16cc:	0040f809 	jalr	$v0
     16d0:	00003021 	move	$a2,$zero
+*/
+
+/*
     16d4:	00401821 	move	$v1,$v0
     16d8:	50600006 	0x50600006
     16dc:	afa00010 	sw	$zero,16($sp)
@@ -1572,6 +1625,9 @@ static int __init tiuhw_an_init_module(void)
     1714:	24420000 	addiu	$v0,$v0,0
     1718:	0040f809 	jalr	$v0
     171c:	240700f0 	li	$a3,240
+*/
+	// devfs_register();
+/*
     1720:	3c010000 	lui	$at,0x0
     1724:	ac220000 	sw	$v0,0($at)
     1728:	3c040000 	lui	$a0,0x0
@@ -1582,17 +1638,32 @@ static int __init tiuhw_an_init_module(void)
     173c:	24420000 	addiu	$v0,$v0,0
     1740:	0040f809 	jalr	$v0
     1744:	00000000 	nop
+*/
+	hwu_lin_register_halt_hooks(tiuhw_lin_pre_halt_hook, tiuhw_lin_post_halt_hook);
+/*
     1748:	3c040000 	lui	$a0,0x0
     174c:	0240f809 	jalr	$s2
     1750:	2484045c 	addiu	$a0,$a0,1116
+*/
+	printk(KERN_ERR "TIUHW: DIMHW hooks registered\n");
+
+/*
     1754:	3c020000 	lui	$v0,0x0
     1758:	244200bc 	addiu	$v0,$v0,188
     175c:	3c010000 	lui	$at,0x0
     1760:	ac220004 	sw	$v0,4($at)
+
     1764:	3c040000 	lui	$a0,0x0
     1768:	0240f809 	jalr	$s2
     176c:	24840480 	addiu	$a0,$a0,1152
+*/
+	printk(KERN_ERR "TIUHW: module loaded\n");
+
+/*
     1770:	00001021 	move	$v0,$zero
+*/
+	ret = 0;
+/*
     1774:	8fbf0030 	lw	$ra,48($sp)
     1778:	8fb3002c 	lw	$s3,44($sp)
     177c:	8fb20028 	lw	$s2,40($sp)
@@ -1601,6 +1672,7 @@ static int __init tiuhw_an_init_module(void)
     1788:	03e00008 	jr	$ra
     178c:	27bd0038 	addiu	$sp,$sp,56
 */
+	return ret;
 }
 
 void tiuhw_powerup(void)
@@ -7475,7 +7547,7 @@ VpMpiCmd(
 */
 /* Configure glue logic as necessary to talk to the device */
 /* Start critical section for MPI access */
-VpSysEnterCritical(deviceId, VP_MPI_CRITICAL_SEC);
+        VpSysEnterCritical(deviceId, VP_MPI_CRITICAL_SEC);
 
 /*
     7034:	1260000a 	beqz	$s3,7060 <VpMpiCmd+0x9c>
@@ -7534,7 +7606,7 @@ VpSysEnterCritical(deviceId, VP_MPI_CRITICAL_SEC);
     70cc:	03e00008 	jr	$ra
     70d0:	27bd0030 	addiu	$sp,$sp,48
 */
-	VpSysExitCritical(deviceId, VP_MPI_CRITICAL_SEC);
+  	VpSysExitCritical(deviceId, VP_MPI_CRITICAL_SEC);
 }
 
 /*
@@ -8396,6 +8468,12 @@ int vp880_abs_api_init(void)
     7de4:	8fbf0010 	lw	$ra,16($sp)
     7de8:	03e00008 	jr	$ra
     7dec:	27bd0018 	addiu	$sp,$sp,24
+*/
+}
+
+void strange_function1(void) 
+{
+/*
     7df0:	27bdffd8 	addiu	$sp,$sp,-40
     7df4:	afbf0024 	sw	$ra,36($sp)
     7df8:	afb20020 	sw	$s2,32($sp)
@@ -8520,8 +8598,12 @@ int vp880_abs_api_init(void)
 0000000000007fc8 <tid_teardown>:
     7fc8:	03e00008 	jr	$ra
     7fcc:	aca00000 	sw	$zero,0($a1)
+*/
+/*
     7fd0:	03e00008 	jr	$ra
     7fd4:	24020002 	li	$v0,2
+*/
+/*
     7fd8:	27bdffe8 	addiu	$sp,$sp,-24
     7fdc:	afbf0010 	sw	$ra,16($sp)
     7fe0:	24021001 	li	$v0,4097
@@ -8536,6 +8618,8 @@ int vp880_abs_api_init(void)
     8004:	8fbf0010 	lw	$ra,16($sp)
     8008:	03e00008 	jr	$ra
     800c:	27bd0018 	addiu	$sp,$sp,24
+*/
+/*
     8010:	27bdffe8 	addiu	$sp,$sp,-24
     8014:	afbf0010 	sw	$ra,16($sp)
     8018:	3c020000 	lui	$v0,0x0
@@ -8873,4 +8957,4 @@ MODULE_VERSION(DRV_VERSION);
 MODULE_AUTHOR("Wlodzimierz Kalawski <wlk at poczta.fm>");
 MODULE_LICENSE("GPL v2");
 
-
+EXPORT_SYMBOL_GPL(VpMpiCmd);

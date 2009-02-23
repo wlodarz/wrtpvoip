@@ -15,7 +15,7 @@
 #define LEG_VP_DVR_NUM_DEVS             4
 #define LEG_VP_DVR_NAME                 "leg_vp_dvr"
 
-#define LEG_VP_DVR_RUN_TIME_DEV_LOADING
+#undef LEG_VP_DVR_RUN_TIME_DEV_LOADING
 
 #define LEG_VP_DVR_IOCTL_MAGIC          'v'
 
