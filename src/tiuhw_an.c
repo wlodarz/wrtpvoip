@@ -29,8 +29,9 @@
 #define READ_COMMAND 1
 static uint8 tempBuf[512]; /* All zero buffer */
 
-void *globalApiPointer = NULL;
 char *somepointer = NULL;
+int apiNotInitialized = 1; //  0x538
+void *globalApiPointer = NULL; // 0x53c
 
 int tiuo_fill_drv_api(void *);
 void tiuhw_lin_pre_halt_hook(void);
@@ -40,6 +41,8 @@ void tiuhw_powerup();
 static const struct file_operations tiuhw_fops = {
 	.owner		= THIS_MODULE
 };
+
+extern api_type *tiuhw_api;
 
 /*
 ../../../wrtp300-rootfs/lib/modules/2.4.17_mvl21-malta-mips_fp_le/kernel/drivers/tiuhw_an.o:     file format elf32-tradlittlemips
@@ -1746,11 +1749,16 @@ void tiuhw_powerup(void)
     180c:	24020001 	li	$v0,1
     1810:	14620011 	bne	$v1,$v0,1858 <tiuhw_powerup+0xc8>
     1814:	26220001 	addiu	$v0,$s1,1
+*/
+/*
     1818:	8e02003c 	lw	$v0,60($s0)
     181c:	02002021 	move	$a0,$s0
     1820:	8c420018 	lw	$v0,24($v0)
     1824:	0040f809 	jalr	$v0
     1828:	24050001 	li	$a1,1
+*/
+
+/*
     182c:	8e02001c 	lw	$v0,28($s0)
     1830:	54400008 	0x54400008
     1834:	a600002c 	sh	$zero,44($s0)
@@ -1760,6 +1768,8 @@ void tiuhw_powerup(void)
     1844:	8c42003c 	lw	$v0,60($v0)
     1848:	0040f809 	jalr	$v0
     184c:	00002821 	move	$a1,$zero
+*/
+/*
     1850:	a600002c 	sh	$zero,44($s0)
     1854:	26220001 	addiu	$v0,$s1,1
     1858:	305100ff 	andi	$s1,$v0,0xff
@@ -7504,6 +7514,7 @@ VpMpiCmd(
 {
 	uint8 byteCnt;
 	uint8 isRead = (cmd & READ_COMMAND); 
+	void (*function)(int8, int8, int8, int8, int8);
 
 
 /*
@@ -7568,7 +7579,9 @@ VpMpiCmd(
     7058:	08001c20 	j	7080 <VpMpiCmd+0xbc>
     705c:	24020001 	li	$v0,1
 */
-		// api->read(deviceId, ecVal, cmdLen, cmd, dataPtr);
+
+		function = tiuhw_api->read;
+		function(deviceId, ecVal, cmdLen, cmd, dataPtr);
 		
 	} else {
 /* write command
@@ -7580,7 +7593,9 @@ VpMpiCmd(
     7074:	0040f809 	jalr	$v0
     7078:	02803821 	move	$a3,$s4
 */
-		// api->read(deviceId, ecVal, 
+		// convert it to something better (init/read/write fields)
+		function = tiuhw_api->write;
+		function(deviceId, ecVal, cmdLen, cmd, dataPtr);
 	}
 /*
     707c:	24020001 	li	$v0,1
@@ -7643,6 +7658,8 @@ VpMpiCmd(
     7130:	8fbf0010 	lw	$ra,16($sp)
     7134:	03e00008 	jr	$ra
     7138:	27bd0018 	addiu	$sp,$sp,24
+*/
+/*
     713c:	27bdffe0 	addiu	$sp,$sp,-32
     7140:	afbf001c 	sw	$ra,28($sp)
     7144:	afb00018 	sw	$s0,24($sp)
@@ -8456,6 +8473,9 @@ int vp880_abs_api_init(void)
     7db8:	24020001 	li	$v0,1
     7dbc:	1462000a 	bne	$v1,$v0,7de8 <vp880_abs_api_init+0x40>
     7dc0:	8fbf0010 	lw	$ra,16($sp)
+*/
+	if(apiNotInitialized == 1) {
+/*
     7dc4:	3c010000 	lui	$at,0x0
     7dc8:	ac200538 	sw	$zero,1336($at)
     7dcc:	3c040000 	lui	$a0,0x0
@@ -8465,8 +8485,10 @@ int vp880_abs_api_init(void)
     7ddc:	0040f809 	jalr	$v0
     7de0:	00000000 	nop
 */
-	apipointer = globalApiPointer;
-	tiuo_fill_drv_api(apipointer);
+		apiNotInitialized = 0;
+		apipointer = globalApiPointer;
+		tiuo_fill_drv_api(apipointer);
+	}
 /*
     7de4:	8fbf0010 	lw	$ra,16($sp)
     7de8:	03e00008 	jr	$ra
