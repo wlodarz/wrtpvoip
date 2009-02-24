@@ -154,6 +154,7 @@ int tnetv1050_tid_init(tiuhw_device *a)
 	a->field4 = 0;
 	if(unknown_global1 != 0) unknown_global1 = 0;
 
+		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 /*
       4c:	3c06a861 	lui	$a2,0xa861
       50:	34c61a00 	ori	$a2,$a2,0x1a00
@@ -178,6 +179,7 @@ int tnetv1050_tid_init(tiuhw_device *a)
 */
 	ar7_device_enable(AR7_RESET_BIT_DSP);
 
+		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 /*
       9c:	3c08a508 	lui	$t0,0xa508
       a0:	8d020000 	lw	$v0,0($t0)
@@ -186,7 +188,7 @@ int tnetv1050_tid_init(tiuhw_device *a)
       ac:	ad020000 	sw	$v0,0($t0)
 */
 	reg = *(volatile int *)0xa5080000;
-	reg &= 0xfffffffa;
+	reg &= 0xfffffffb;
 	*(volatile int *)0xa5080000 = reg;
 
 /*
@@ -195,8 +197,10 @@ int tnetv1050_tid_init(tiuhw_device *a)
       b0:	24020004 	li	$v0,4
       b4:	ad220000 	sw	$v0,0($t1)
 */
+		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 	*(volatile int *)0xa5080104 = 4;
 
+		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 /*
 
       88:	3c04a861 	lui	$a0,0xa861
@@ -212,6 +216,7 @@ int tnetv1050_tid_init(tiuhw_device *a)
 	reg &= 0x00f00fff;
 	*(volatile int *)0xa861163c = reg;
 
+		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 /*
 
 
@@ -227,6 +232,7 @@ int tnetv1050_tid_init(tiuhw_device *a)
 	reg |= 0x55055000;
 	*(volatile int *)0xa861163c = reg;
 
+		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 /*
 
       d8:	3c06a861 	lui	$a2,0xa861
@@ -240,6 +246,7 @@ int tnetv1050_tid_init(tiuhw_device *a)
 	reg &= 0x00003000;
 	*(volatile int *)0xa8611640 = reg;
 
+		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 /*
 
 
@@ -253,6 +260,7 @@ int tnetv1050_tid_init(tiuhw_device *a)
 	*(volatile int *)0xa8611640 = reg;
 
 
+		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 
 /*
       e8:	3c03431b 	lui	$v1,0x431b
@@ -308,6 +316,7 @@ int tnetv1050_tid_init(tiuhw_device *a)
      14c:	1060000f 	beqz	$v1,18c <init_module-0x7b0>
      150:	01402821 	move	$a1,$t2
 */
+		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 	tmp3 = tmp1;	
 	if (tmp5 != 0) {
 /*
@@ -355,6 +364,7 @@ int tnetv1050_tid_init(tiuhw_device *a)
      18c:	3c020000 	lui	$v0,0x0
      190:	8c420000 	lw	$v0,0($v0)
 */
+		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 	tmp_v0 = tiuhw_dsp_clock_mult;
 
 /*
@@ -391,8 +401,10 @@ int tnetv1050_tid_init(tiuhw_device *a)
      1d4:	00431025 	or	$v0,$v0,$v1
      1d8:	aca20000 	sw	$v0,0($a1)
 */
+		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 	tmp_v0 = ((((ltmp1 >> 32) & 0xffffffff) << 0x14) - 1) | 0x81080000;
 	*(volatile int *)0xa5081010 = tmp_v0;
+		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 /*
      1dc:	8ca50000 	lw	$a1,0($a1)
 */
@@ -1927,6 +1939,8 @@ int tiuhw_init_hal(tiuhw_device *a, int b)
 */
 		tiuhw_api = &hw_apis;
 
+		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
+
 /*
      cb8:	02602021 	move	$a0,$s3
      cbc:	8c420000 	lw	$v0,0($v0)
@@ -1937,6 +1951,7 @@ int tiuhw_init_hal(tiuhw_device *a, int b)
 		init_function = hw_apis.init;
 		ret = init_function(a,b);
 
+		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 /*
      cc8:	3c021fff 	lui	$v0,0x1fff
      ccc:	3442fc70 	ori	$v0,$v0,0xfc70
@@ -1960,6 +1975,7 @@ int tiuhw_init_hal(tiuhw_device *a, int b)
 		tmp2 = (ltmp1 >> 23) & 0xffffffff;
 		while(tmp2--);
 
+		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 /*
      ce8:	3c020000 	lui	$v0,0x0
      cec:	8c420070 	lw	$v0,112($v0)
@@ -1987,6 +2003,7 @@ int tiuhw_init_hal(tiuhw_device *a, int b)
      d20:	00000000 	nop
 */
 
+		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 
 		}
 	} else if(if_type == TIHW_EXTERNAL) {
