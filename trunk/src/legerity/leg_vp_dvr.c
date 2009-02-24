@@ -14,10 +14,15 @@
 #include <asm/uaccess.h>        /* loacation copy_xyz_user*/
 #include <linux/slab.h>         /* kmalloc and kfree */
 
+#include <linux/timer.h>
+
 #include "leg_vp_dvr.h"
 
 #define DRV_VERSION "0.0.1"
 #define DRV_DESC "VE880 driver"
+
+void vptimer_function(unsigned long);
+DEFINE_TIMER(vptimer, vptimer_function, 0, (unsigned long)NULL);
 
 
 
@@ -167,6 +172,14 @@ static int LegVpDvrIoctlDtmfDetect      (LegVpDvrInfoType *pDvrInfo, unsigned lo
 static int LegVpDvrIoctlCodeCkSum       (LegVpDvrInfoType *pDvrInfo, unsigned long arg);
 /* VP-API Line Tests */
 static int LegVpDvrIoctlTestLn          (LegVpDvrInfoType *pDvrInfo, unsigned long arg);
+
+void timer_function(unsigned long data)
+{
+	printk(KERN_ERR "TICK\n");
+	// schedule next
+	mod_timer(&vptimer, jiffies + (HZ));
+}
+
 
 #ifdef LEG_VP_DVR_RUN_TIME_DEV_LOADING
 
