@@ -173,12 +173,6 @@ static int LegVpDvrIoctlCodeCkSum       (LegVpDvrInfoType *pDvrInfo, unsigned lo
 /* VP-API Line Tests */
 static int LegVpDvrIoctlTestLn          (LegVpDvrInfoType *pDvrInfo, unsigned long arg);
 
-void timer_function(unsigned long data)
-{
-	printk(KERN_ERR "TICK\n");
-	// schedule next
-	mod_timer(&vptimer, jiffies + (HZ));
-}
 
 
 #ifdef LEG_VP_DVR_RUN_TIME_DEV_LOADING
@@ -214,6 +208,22 @@ void timer_function(unsigned long data)
     LegVpDvrInfoType gLegVpDvrInfo[LEG_VP_DVR_NUM_DEVS];
 #endif
 
+void vptimer_function(unsigned long data)
+{
+	int dev;
+	bool status;
+	VpDevCtxType *context;
+
+	printk(KERN_ERR "TICK\n");
+	// let's call VpApiTick
+	for (dev = 0; dev < LEG_VP_DVR_NUM_DEVS; dev++) {
+		context = gLegVpDvrInfo[dev].pDevCtx;
+		if(context) VpApiTick(context, &status);
+	}
+
+	// schedule next
+	mod_timer(&vptimer, jiffies + (HZ));
+}
 
 /* ****************************************************************************
  * This function initializes each of the gLegVpDvrInfo structs to know values
