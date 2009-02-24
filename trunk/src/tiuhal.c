@@ -12,13 +12,6 @@
 #define DRV_VERSION "0.0.1"
 #define DRV_DESC "TIUHal driver"
 
-typedef struct {
-	int (*field0)(void);
-	int (*field1)(void);
-	int (*field2)(void);
-	int (*field3)(void);
-} ptrs;
-
 int tnetv1050_tid_init(tiuhw_device *a);
 int tnetv1050_tid_read(int tid, int ecval_arg, int data, int len);
 int tnetv1050_tid_write(int tid_arg, int ecval_arg, char *data, int len);
@@ -48,25 +41,19 @@ int tiuhw_get_tid_type(int tid);
 #define DSP_RESET_OFF 0
 
 /* pointers from data + 0x0000 */
-ptrs tnetv1050_api[3] = {
-	{
+api_type tnetv1050_api = {
 		tnetv1050_tid_init, // 0x000
 		tnetv1050_tid_read, // 0x714
 		tnetv1050_tid_write, // 0x7c8
-		func03  // 0x878
-	},
-	{
+		func03, // 0x878
 		func10, // 0x888
 		func11, // 0x880
 		func12, // 0x890
-		func13  // 0x898
-	},
-	{
+		func13, // 0x898
 		func20, // 0x8a0
 		func21, // 0x8a8
 		func22, // 0x8b0
 		func23  // 0x904
-	}
 };
 
 typedef struct {
@@ -75,7 +62,7 @@ typedef struct {
 } s_tidname2type;
 
 int unknown_global1 = 1; // data + 0x0034
-ptrs hw_apis[3];	// data + 0x0038 - (+0x0034)
+api_type hw_apis;	// data + 0x0038 - (+0x0034)
 int should_reset_tid = 1; // data + 0x0070
 s_tidname2type tidname2type[8] = {
 	{"SI3210_SI3050", 1},
@@ -89,13 +76,13 @@ s_tidname2type tidname2type[8] = {
 int tmp_variable0 = 0; // data + 0x00ac
 int not_initialized = 1; // data + 0x00b0
 int interface_type = TIHW_EXTERNAL; // data + 0x00b4
-void *tiuhw_api = NULL;		    // data + 0x00b8
+api_type *tiuhw_api = NULL;		    // data + 0x00b8
 int tiuhw_dsp_clock_mult = 0; // data + 0x00bc
 int tiuhw_dsp_input_clock_speed = 0; // data + 0x00c0
 int hwu_settings_mod[4]; // data + 0x00c4
 char *stub_text = "tele_if_stub";
-int tiuhw_dsp_clock_mult;
-int tiuhw_dsp_input_clock_speed;
+// int tiuhw_dsp_clock_mult;
+// int tiuhw_dsp_input_clock_speed;
 
 
 
@@ -103,8 +90,8 @@ int tiuhw_dsp_input_clock_speed;
 void *other_pointer_src = 0;
 void *other_pointer_dst = 0;
 
-ptrs dst[3];
-ptrs some_table_of_structures[3];
+// ptrs dst[3];
+// ptrs some_table_of_structures[3];
 
 
 /*
@@ -1485,12 +1472,14 @@ static int __init tihw_hal_init_module(void) {
      940:	afbf0018 	sw	$ra,24($sp)
 */
 
+	printk(KERN_ERR "HAL initializing\n");
 /*
      944:	3c030000 	lui	$v1,0x0
      948:	24630038 	addiu	$v1,$v1,56
      94c:	3c020000 	lui	$v0,0x0
      950:	24420000 	addiu	$v0,$v0,0
      954:	24440030 	addiu	$a0,$v0,48
+
      958:	8c450000 	lw	$a1,0($v0)
      95c:	8c460004 	lw	$a2,4($v0)
      960:	8c470008 	lw	$a3,8($v0)
@@ -1503,19 +1492,18 @@ static int __init tihw_hal_init_module(void) {
      97c:	1444fff6 	bne	$v0,$a0,958 <init_module+0x1c>
      980:	24630010 	addiu	$v1,$v1,16
 */
-	printk(KERN_ERR "ala\n");
-	for(i=0; i<3; i++) {
-	// 	v0 = pointer_with_defaults[i];
-	// 	v1 = some_table_of_structures[i];
-	// 	v0 = pointer_with_defaults[i];
-		some_table_of_structures[i].field0 = tnetv1050_api[i].field0;
-
-		// v1->field0 = v0->field0;
-		// v1->field1 = v0->field1;
-	// 	v1->field2 = v0->field2;
-	// 	v1->field3 = v0->field3;
-
-	}
+	hw_apis.init = tnetv1050_api.init;
+	hw_apis.read = tnetv1050_api.read;
+	hw_apis.write = tnetv1050_api.write;
+	hw_apis.field3 = tnetv1050_api.field3;
+	hw_apis.field4 = tnetv1050_api.field4;
+	hw_apis.field5 = tnetv1050_api.field5;
+	hw_apis.field6 = tnetv1050_api.field6;
+	hw_apis.field7 = tnetv1050_api.field7;
+	hw_apis.field8 = tnetv1050_api.field8;
+	hw_apis.field9 = tnetv1050_api.field9;
+	hw_apis.field10 = tnetv1050_api.field10;
+	hw_apis.field11 = tnetv1050_api.field11;
 
 #warning WHAT IT MEANS: saving on stack?
 /*
@@ -1548,6 +1536,8 @@ static int __init tihw_hal_init_module(void) {
      9bc:	03e00008 	jr	$ra
      9c0:	27bd0020 	addiu	$sp,$sp,32
 */
+	printk(KERN_ERR "HAL initializing DONE\n");
+
 	return 0;
 }
 
@@ -1582,7 +1572,7 @@ int tiuhw_get_dsp_clk_values(void)
 {
 	int ret = -1;
 	char *dsp_clk_str;
-	unsigned long int a1, a2, a3;
+	unsigned long int a1, a2, a3, dsp_clk_input_speed_val=0, dsp_clk_mult_val=0, dsp_clock = 0, clock_div = 0;
 
 /* prologue
 00000000000009f0 <tiuhw_get_dsp_clk_values>:
@@ -1607,7 +1597,8 @@ int tiuhw_get_dsp_clk_values(void)
      a20:	10600042 	beqz	$v1,b2c <tiuhw_get_dsp_clk_values+0x13c>
 */
 	if(dsp_clk_str) {
-
+		char tmp_dsp_clk_str[128], *tmp_dsp_clk_str_ptr = tmp_dsp_clk_str;;
+		char *dsp_clk_ptr = NULL;
 /*
      a24:	27a40010 	addiu	$a0,$sp,16
      a28:	24020080 	li	$v0,128
@@ -1620,8 +1611,9 @@ int tiuhw_get_dsp_clk_values(void)
      a44:	1440fffa 	bnez	$v0,a30 <tiuhw_get_dsp_clk_values+0x40>
      a48:	24630001 	addiu	$v1,$v1,1
      a4c:	3c100000 	lui	$s0,0x0
-     a50:	26100210 	addiu	$s0,$s0,528
+     a50:	26100210 	addiu	$s0,$s0,528 // ":"
 */
+		strncpy(tmp_dsp_clk_str, dsp_clk_str, sizeof(tmp_dsp_clk_str));
 
 /*
      a54:	3c110000 	lui	$s1,0x0
@@ -1630,46 +1622,59 @@ int tiuhw_get_dsp_clk_values(void)
      a60:	02002821 	move	$a1,$s0
      a64:	00002021 	move	$a0,$zero
 */
-		// dsp_clk = strtok(dsp_clk_str);
+		dsp_clk_ptr = strsep(&tmp_dsp_clk_str_ptr, ":");
 
 /*
      a68:	02002821 	move	$a1,$s0
      a6c:	0220f809 	jalr	$s1
-     a70:	00408021 	move	$s0,$v0
+     a70:	00408021 	move	$s0,$v0 // dsp_clk
      a74:	02002021 	move	$a0,$s0
      a78:	00002821 	move	$a1,$zero
 */
 /*
      a7c:	2406000a 	li	$a2,10
-     a80:	3c110000 	lui	$s1,0x0
+     a80:	3c110000 	lui	$s1,0x0 // strtol
      a84:	26310000 	addiu	$s1,$s1,0
      a88:	0220f809 	jalr	$s1
-     a8c:	00408021 	move	$s0,$v0
+     a8c:	00408021 	move	$s0,$v0 // dsp_clk_input_speed_value
 */
+		dsp_clk_input_speed_val = simple_strtol(dsp_clk_ptr, NULL, 10);
 
 /*
      a90:	3c010000 	lui	$at,0x0
      a94:	ac2200c0 	sw	$v0,192($at)
-*/
-
-/*
      a98:	02002021 	move	$a0,$s0
      a9c:	00002821 	move	$a1,$zero
      aa0:	0220f809 	jalr	$s1
      aa4:	2406000a 	li	$a2,10
 */
+		tiuhw_dsp_input_clock_speed = dsp_clk_input_speed_val;
+
+		// mult
+		dsp_clk_ptr = strsep(&tmp_dsp_clk_str_ptr, ":");
+		dsp_clk_mult_val = simple_strtol(dsp_clk_ptr, NULL, 10);
+		tiuhw_dsp_clock_mult = dsp_clk_mult_val;
+
+
 /*
      aa8:	3c040000 	lui	$a0,0x0
      aac:	8c8400c0 	lw	$a0,192($a0)
      ab0:	00820018 	mult	$a0,$v0
      ab4:	3c010000 	lui	$at,0x0
      ab8:	ac2200bc 	sw	$v0,188($at)
+*/
+		dsp_clock = tiuhw_dsp_clock_mult * tiuhw_dsp_input_clock_speed;
+
+/*
      abc:	3c070773 	lui	$a3,0x773
      ac0:	00001812 	mflo	$v1
      ac4:	34e75940 	ori	$a3,$a3,0x5940
      ac8:	00e3182b 	sltu	$v1,$a3,$v1
      acc:	1060001d 	beqz	$v1,b44 <tiuhw_get_dsp_clk_values+0x154>
      ad0:	00000000 	nop
+*/
+		if(dsp_clock <= 0x7735940) { // 125MHz
+/*
      ad4:	00e4001b 	divu	$zero,$a3,$a0
      ad8:	00001812 	mflo	$v1
      adc:	50800001 	0x50800001
@@ -1683,6 +1688,15 @@ int tiuhw_get_dsp_clk_values(void)
      afc:	3c010000 	lui	$at,0x0
      b00:	ac2700bc 	sw	$a3,188($at)
 */
+			clock_div = dsp_clock / tiuhw_dsp_input_clock_speed;
+			tiuhw_dsp_clock_mult = clock_div;
+
+			if(clock_div == 0) {
+				ret = 0;
+				goto out;
+			}
+			clock_div -= 1;
+			tiuhw_dsp_clock_mult = clock_div;
 /*
      b04:	3c040000 	lui	$a0,0x0
      b08:	24840214 	addiu	$a0,$a0,532
@@ -1693,13 +1707,15 @@ int tiuhw_get_dsp_clk_values(void)
      b1c:	0040f809 	jalr	$v0
      b20:	34c65940 	ori	$a2,$a2,0x5940
 */
-		a1 = 0x7735940; // 120MHz
-		printk(KERN_ERR "%s exceeds %lu, dropping multiplier to %lu\n", "DSP_CLK", a1, a2);
+			a3 = tiuhw_dsp_clock_mult;
+			a2 = 0x7735940; // 125MHz
+			printk(KERN_ERR "%s exceeds %lu, dropping multiplier to %lu\n", "DSP_CLK", a2, a3);
 
 /*
      b24:	080002d1 	j	b44 <tiuhw_get_dsp_clk_values+0x154>
      b28:	00000000 	nop
 */
+		}
 	} else {
 
 /*
@@ -1707,7 +1723,7 @@ int tiuhw_get_dsp_clk_values(void)
      b30:	3c010000 	lui	$at,0x0
      b34:	ac2200bc 	sw	$v0,188($at)
 */
-		tiuhw_dsp_clock_mult = 0x1f;
+		tiuhw_dsp_clock_mult = 0x0f;
 
 /*
      b38:	3c02007d 	lui	$v0,0x7d
@@ -1728,7 +1744,6 @@ int tiuhw_get_dsp_clk_values(void)
      b50:	8cc600c0 	lw	$a2,192($a2)
 */
 	a2 = tiuhw_dsp_input_clock_speed;
-	a3 = a1 * a2;
 
 /*
      b54:	00a60018 	mult	$a1,$a2
@@ -1741,8 +1756,11 @@ int tiuhw_get_dsp_clk_values(void)
      b70:	00000000 	nop
      b74:	24020001 	li	$v0,1
 */
+	a3 = a1 * a2;
 	printk(KERN_ERR "Internal TNETV1060 DSP settings:\n DSP mult: %lu Input clock: %lu, final DSP speed: %lu\n", a1, a2, a3);
 	ret = 1;
+
+out:
 /*
      b78:	8fbf009c 	lw	$ra,156($sp)
      b7c:	8fb20098 	lw	$s2,152($sp)
@@ -1907,7 +1925,7 @@ int tiuhw_init_hal(tiuhw_device *a, int b)
      cb0:	3c010000 	lui	$at,0x0
      cb4:	ac2200b8 	sw	$v0,184($at)
 */
-		tiuhw_api = hw_apis;
+		tiuhw_api = &hw_apis;
 
 /*
      cb8:	02602021 	move	$a0,$s3
@@ -1916,7 +1934,7 @@ int tiuhw_init_hal(tiuhw_device *a, int b)
      cc4:	02202821 	move	$a1,$s1
 */
      		// call hw_apis + 0(a,b);
-		init_function = hw_apis[0].field0;
+		init_function = hw_apis.init;
 		ret = init_function(a,b);
 
 /*
@@ -2243,13 +2261,8 @@ int tiuhw_get_tid_type(int tid)
      f34:	001110c0 	sll	$v0,$s1,0x3
      f38:	3c100000 	lui	$s0,0x0
      f3c:	26100074 	addiu	$s0,$s0,116
-<<<<<<< .mine
      f40:	02028021 	addu	$s0,$s0,$v0 // first entry in tid2name table
      f44:	92060004 	lbu	$a2,4($s0) /// get pointer to tidname
-=======
-     f40:	02028021 	addu	$s0,$s0,$v0
-     f44:	92060004 	lbu	$a2,4($s0) // tidtype
->>>>>>> .r19
      f48:	10c0000e 	beqz	$a2,f84 <tiuhw_get_tid_type+0x170>
      f4c:	00a02021 	move	$a0,$a1
 */
@@ -2798,4 +2811,3 @@ EXPORT_SYMBOL_GPL(tiuhw_init_hal);
 EXPORT_SYMBOL_GPL(tiuhw_reset_tid);
 EXPORT_SYMBOL_GPL(tiuhw_led);
 EXPORT_SYMBOL_GPL(tiuhw_api);
-EXPORT_SYMBOL_GPL(hw_apis);
