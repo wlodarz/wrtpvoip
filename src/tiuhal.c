@@ -179,7 +179,7 @@ int tnetv1050_tid_init(tiuhw_device *a)
 */
 	ar7_device_enable(AR7_RESET_BIT_DSP);
 
-		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
+	printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 /*
       9c:	3c08a508 	lui	$t0,0xa508
       a0:	8d020000 	lw	$v0,0($t0)
@@ -1685,7 +1685,7 @@ int tiuhw_get_dsp_clk_values(void)
      acc:	1060001d 	beqz	$v1,b44 <tiuhw_get_dsp_clk_values+0x154>
      ad0:	00000000 	nop
 */
-		if(dsp_clock <= 0x7735940) { // 125MHz
+		if(dsp_clock > 0x7735940) { // 125MHz
 /*
      ad4:	00e4001b 	divu	$zero,$a3,$a0
      ad8:	00001812 	mflo	$v1
@@ -1891,7 +1891,7 @@ int tiuhw_init_hal(tiuhw_device *a, int b)
      c7c:	34423000 	ori	$v0,$v0,0x3000
      c80:	acc20000 	sw	$v0,0($a2)
 */
-			// reset
+			// reset - ok
 			reg = *(volatile int *)0xa8611660; // v1
 			reg |= 0x01;
 			*(volatile int *)0xa8611660 = reg;
@@ -2635,12 +2635,13 @@ int tiuhw_reset_tid(int tid, int cmd)
     1244:	00832024 	and	$a0,$a0,$v1
     1248:	ac440000 	sw	$a0,0($v0)
 */
-/*
+#if 1 // let's try this
 		reg = *(volatile int *)0xa861090c;
 		reg = (reg & 0xfff7ffff);
 		*(volatile int *)0xa861090c = reg;
-*/
+#else
 		ar7_gpio_disable(AR7_RESET_BIT_TID);
+#endif
 
 /*
     124c:	0800049b 	j	126c <tiuhw_reset_tid+0x6c>
@@ -2656,12 +2657,13 @@ int tiuhw_reset_tid(int tid, int cmd)
     1264:	ac430000 	sw	$v1,0($v0)
     1268:	8fbf0014 	lw	$ra,20($sp)
 */
-/*
+#if 1
 		reg = *(volatile int *)0xa861090c;
 		reg |= 0x00080000;
 		*(volatile int *)0xa861090c = reg;
-*/
+#else
 		ar7_gpio_enable(AR7_RESET_BIT_TID);
+#endif
 	}
 
 /*
