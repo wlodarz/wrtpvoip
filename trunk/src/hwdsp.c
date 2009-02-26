@@ -52,8 +52,7 @@ void hwu_lin_titan_dsp_reset(int core, int cmd) {
         int status = *(volatile int *) (DSP_REG1);
         status &= (0x000000fb);
 
-    }
-    else {
+    } else {
 	/* release DSP from reset */
 #warning MAGIC NUMBERS
         int status = *(volatile int *) (DSP_REG1);
@@ -110,19 +109,16 @@ void hwu_lin_titan_dsp_halt(int core) {
 
         while (tmp--) ;
 
-    }
-    while ((cnt1--) >= 0);
+    } while ((cnt1--) >= 0);
 
     ar7_device_enable(AR7_RESET_BIT_DSP);
 
 #warning LEARN : addesses & constants meaning
 
-    *(volatile int *) (DSP_RST_REG) = 0x80;
+    *(volatile int *) (DSP_RST_REG) = 80;
     tmp = *(volatile int *) (DSP_REG1);
-    printk(KERN_ERR "hwu_lin_titan_dsp_halt() Before: DSP_RST_REG=0x%08x\n",
-           tmp);
+    printk(KERN_ERR "hwu_lin_titan_dsp_halt() Before: DSP_RST_REG=0x%08x\n", tmp);
 
-#warning WHAT ABOUT THAT?!?!?!?!?!?!?!
     ret = hwu_get_tiuhw_if(0);
 
 #warning TO LEARN : what those constants mean
