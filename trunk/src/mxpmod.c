@@ -922,6 +922,8 @@ Disassembly of section .text:
      ee0:	8fb00010 	lw	$s0,16($sp)
      ee4:	03e00008 	jr	$ra
      ee8:	27bd0030 	addiu	$sp,$sp,48
+*/
+/*
      eec:	27bdffd0 	addiu	$sp,$sp,-48
      ef0:	afbf0028 	sw	$ra,40($sp)
      ef4:	afb50024 	sw	$s5,36($sp)
@@ -1010,6 +1012,8 @@ Disassembly of section .text:
     1050:	8fb00010 	lw	$s0,16($sp)
     1054:	03e00008 	jr	$ra
     1058:	27bd0030 	addiu	$sp,$sp,48
+*/
+/*
     105c:	27bdffb0 	addiu	$sp,$sp,-80
     1060:	afbf0048 	sw	$ra,72($sp)
     1064:	afb10044 	sw	$s1,68($sp)

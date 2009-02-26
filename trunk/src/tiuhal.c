@@ -81,17 +81,10 @@ int tiuhw_dsp_clock_mult = 0; // data + 0x00bc
 int tiuhw_dsp_input_clock_speed = 0; // data + 0x00c0
 int hwu_settings_mod[4]; // data + 0x00c4
 char *stub_text = "tele_if_stub";
-// int tiuhw_dsp_clock_mult;
-// int tiuhw_dsp_input_clock_speed;
-
-
 
 
 void *other_pointer_src = 0;
 void *other_pointer_dst = 0;
-
-// ptrs dst[3];
-// ptrs some_table_of_structures[3];
 
 
 /*
