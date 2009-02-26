@@ -1382,24 +1382,24 @@ int func21(void)
 	return 0;
 }
 
-/* TODO: NOR, 'magic number sections' -> ar7_* functions */
+/* TODO: 'magic number sections' -> ar7_* functions */
 /* FUNCTION: TODO, need review */
-int func22(int a, int b)
+int func22(int tid, int if_type)
 {
-	int c=a&0xffff;
 	int reg;
 /*
      8b0:	3084ffff 	andi	$a0,$a0,0xffff
      8b4:	2c820004 	sltiu	$v0,$a0,4
      8b8:	10400010 	beqz	$v0,8fc <init_module-0x40>
 */
-	if(c < 4) {
+	tid &= 0xffff;
+	if(tid < 4) {
 
 /*
      8bc:	24060001 	li	$a2,1
      8c0:	14a60008 	bne	$a1,$a2,8e4 <init_module-0x58>
 */
-		if(b == TIHW_INTERNAL) {
+		if(if_type == TIHW_INTERNAL) {
 
 /*
      8c4:	3c02a508 	lui	$v0,0xa508
@@ -1412,7 +1412,7 @@ int func22(int a, int b)
      8e0:	24020001 	li	$v0,1
 */
 			reg = *(volatile int *)0xa5081020;
-			reg |= (1 << c);
+			reg |= (1 << if_type);
 			*(volatile int *)0xa5081020 = reg;
 		} else {
 /*
@@ -1424,6 +1424,7 @@ int func22(int a, int b)
      8f8:	ac440000 	sw	$a0,0($v0)
 */
 			reg = *(volatile int *)0xa5081020;
+			reg &= (~(1 << if_type));
 			// TODO : NOR
 			*(volatile int *)0xa5081020 = reg;
 		}
@@ -1436,9 +1437,8 @@ int func22(int a, int b)
 }
 
 /* FUNCTION: DONE, need review */
-int func23(int a, int b)
+int func23(int tid, int if_type)
 {
-	int a1;
 	int ret;
 /*
      904:	27bdffe8 	addiu	$sp,$sp,-24
@@ -1449,8 +1449,8 @@ int func23(int a, int b)
      910:	10a20003 	beq	$a1,$v0,920 <init_module-0x1c>
      914:	3084ffff 	andi	$a0,$a0,0xffff
 */
-	a1 = a&0xffff;
-	if(b != 1) {
+	tid = tid&0xffff;
+	if(if_type != 1) {
 /*
      918:	0800024c 	j	930 <init_module-0xc>
      91c:	00001021 	move	$v0,$zero
