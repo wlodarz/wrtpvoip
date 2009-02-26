@@ -49,17 +49,17 @@ void hwu_lin_titan_dsp_reset(int core, int cmd) {
 	/* put DSP into reset */
 
 #warning MAGIC NUMBERS
-        int status = *(int *) (DSP_REG1);
+        int status = *(volatile int *) (DSP_REG1);
         status &= (0x000000fb);
 
     }
     else {
 	/* release DSP from reset */
 #warning MAGIC NUMBERS
-        int status = *(int *) (DSP_REG1);
+        int status = *(volatile int *) (DSP_REG1);
         status |= 0x000000fb;
     }
-    *(int *) (DSP_REG1) = status;
+    *(volatile int *) (DSP_REG1) = status;
 
     return;
 }
@@ -135,7 +135,7 @@ void hwu_lin_titan_dsp_halt(int core) {
     *(volatile int *) (DSP_REG1) = status;
 
     status = *(volatile int *) (DSP_REG1);
-    printk(KERN_ERR "hwu_lin_titan_dsp_halt() After: DSP_RST_REG=0x%08x\n", 1);
+    printk(KERN_ERR "hwu_lin_titan_dsp_halt() After: DSP_RST_REG=0x%08x\n", status);
 
     hwu_lin_titan_post_halt_hook(core);
 
@@ -161,8 +161,8 @@ void hwu_lin_dsp_loop(int core, int flag) {
     {
 
 	// just small loop, (NOP? , JUMP to 0x100
-        *(int *) (DSP_ADDR100) = 0x20202020; 0x100;
-        *(int *) (DSP_ADDR104) = 0x6a000100; 0x104;
+        *(volatile int *) (DSP_ADDR100) = 0x20202020; 0x100;
+        *(volatile int *) (DSP_ADDR104) = 0x6a000100; 0x104;
 
         printk(KERN_ERR "putting dsp in tight loop status=%d\n", flag);
 
@@ -171,7 +171,7 @@ void hwu_lin_dsp_loop(int core, int flag) {
     {
 
 	// this causes DSP to jump to 0x4000 (start of the program?)
-        *(int *) DSP_ADDR104 = 0x6a004000;
+        *(volatile int *) DSP_ADDR104 = 0x6a004000;
 
         printk(KERN_ERR "jumping to 0x4000 status=%d\n", 0);
     }
@@ -193,34 +193,58 @@ void hwu_dsp_init(void) {
 /* the syscall is used to take DSP from reset */
 int dsp_syscall(void *a) {
     int ret = 0;
-    int reg = 0;
+    int op = 0, core = 0, cmd = 0;
+    int *msg = (int *)a;
 
-    reg = *(int *) a;
-    if (reg >= 10) {
-
-        reg = (reg << 2);
-
-#warning TODO: where goto
-        //              goto out;
-
-        ret = 0x0f;
-        goto out;
-
-        ret = 1;
-
-
-        hwu_lin_titan_dsp_reset(DSP_CORE_0, DSP_RESET_OFF);
-
-#warning TODO : should be finished and checked
-        // ret = ..
+    op = msg[0];
+    if (op < 10) {
+        switch(op) {
+		case 0: // 3ec
+		case 5:
+		case 7:
+			ret = 0;
+			break;
+		case 1: // 368
+#warning TODO: what we return
+			ret = 0;
+			// save on 12(a) = 0xf;
+			break;
+		case 2: // 3e8
+			ret = 1;
+			break;
+		case 3: // 380
+			// adr = 4(a);
+			// call some function at 384
+			core = msg[1];
+			cmd = msg[2];
+			hwu_lin_titan_dsp_reset(core, cmd);
+			break;
+		case 4: // 374
+#warning TODO: what we return
+			ret = 0;
+			// save on 12(a) = 1;
+			break;
+		case 6: // 3b4
+			core = msg[1];
+			cmd = msg[2];
+			hwu_lin_dsp_loop(core, cmd);
+			break;
+		case 8: // 39c
+			core = msg[1];
+			hwu_lin_titan_dsp_halt(core);
+			break;
+		case 9: // 3d0
+#warning IMPLEMENT ME!!
+			// avalanche_get_chip_version_info
+			break;
+		default:
+			printk(KERN_ERR "ERROR at %s:%d\n", __FUNCTION__, __LINE__);
+	}
     }
-    else {
-
+    else 
         ret = 1;
-    }
 
 out:
-
     return ret;
 }
 
