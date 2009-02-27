@@ -58,16 +58,12 @@ void hwu_lin_titan_dsp_reset(int core, int cmd) {
         status &= 0xff04; // or 0xff04;
 
     } else {
-    printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 	/* release DSP from reset */
 #warning MAGIC NUMBERS
         status = *(volatile int *) (DSP_REG1);
-    printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
         status |= 0x000000fb;
     }
-    printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
     *(volatile int *) (DSP_REG1) = status;
-    printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 
     return;
 }
