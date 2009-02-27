@@ -1405,7 +1405,7 @@ int func22(int tid, int if_type)
      8e0:	24020001 	li	$v0,1
 */
 			reg = *(volatile int *)0xa5081020;
-			reg |= (1 << if_type);
+			reg |= (1 << tid);
 			*(volatile int *)0xa5081020 = reg;
 		} else {
 /*
@@ -1418,7 +1418,6 @@ int func22(int tid, int if_type)
 */
 			reg = *(volatile int *)0xa5081020;
 			reg &= (~(1 << if_type));
-			// TODO : NOR
 			*(volatile int *)0xa5081020 = reg;
 		}
 	}
