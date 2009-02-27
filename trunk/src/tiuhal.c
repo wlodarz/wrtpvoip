@@ -180,9 +180,11 @@ int tnetv1050_tid_init(tiuhw_device *a)
       a8:	00431024 	and	$v0,$v0,$v1
       ac:	ad020000 	sw	$v0,0($t0)
 */
+#if 1
 	reg = *(volatile int *)0xa5080000;
 	reg &= 0xfffffffb;
 	*(volatile int *)0xa5080000 = reg;
+#endif
 
 /*
       80:	3c09a508 	lui	$t1,0xa508
@@ -285,8 +287,10 @@ int tnetv1050_tid_init(tiuhw_device *a)
      124:	3442027e 	ori	$v0,$v0,0x27e
      128:	ad220000 	sw	$v0,0($t1)
 */
+		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 	*(volatile int *)0xa5080104 = (((tmp1-1) << 12)|0x0000027e);
 
+		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 /*
      12c:	8d020000 	lw	$v0,0($t0)
      130:	00002021 	move	$a0,$zero
@@ -294,9 +298,12 @@ int tnetv1050_tid_init(tiuhw_device *a)
      13c:	ad020000 	sw	$v0,0($t0)
 */
 
+#if 1
 	reg = *(volatile int *)0xa5080000;
 	reg |= 0x00000004;
 	*(volatile int *)0xa5080000 = reg;
+#endif
+		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 /*
      138:	00001810 	mfhi	$v1
      140:	00031d02 	srl	$v1,$v1,0x14
@@ -1477,6 +1484,7 @@ static int __init tihw_hal_init_module(void) {
 */
 
 	printk(KERN_ERR "HAL initializing\n");
+ 	printk(KERN_ERR "Version: %s\n", SOURCE_DATE);
 /*
      944:	3c030000 	lui	$v1,0x0
      948:	24630038 	addiu	$v1,$v1,56

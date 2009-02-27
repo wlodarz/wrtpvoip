@@ -24,6 +24,8 @@
 #include <linux/compiler.h>
 #include <asm/ar7/ar7.h>
 
+#include "tiuhw.h"
+
 #define DSP_SYSCALL_NR 0x08
 
 void *hwdsp_pre_hook = NULL;
@@ -53,15 +55,19 @@ void hwu_lin_titan_dsp_reset(int core, int cmd) {
 
 #warning MAGIC NUMBERS
         status = *(volatile int *) (DSP_REG1);
-        status &= (0x000000fb);
+        status &= 0xff04; // or 0xff04;
 
     } else {
+    printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 	/* release DSP from reset */
 #warning MAGIC NUMBERS
         status = *(volatile int *) (DSP_REG1);
+    printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
         status |= 0x000000fb;
     }
+    printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
     *(volatile int *) (DSP_REG1) = status;
+    printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 
     return;
 }
@@ -123,10 +129,11 @@ void hwu_lin_titan_dsp_halt(int core) {
     printk(KERN_ERR "hwu_lin_titan_dsp_halt() Before: DSP_RST_REG=0x%08x\n", tmp);
 
     ret = hwu_get_tiuhw_if(0);
+    printk(KERN_ERR "hwu_get_tiuhw_if = %d\n", ret);
 
 #warning TO LEARN : what those constants mean
 
-    if (ret == 1)
+    if (ret != 1)
         status = 0x300;
     else
         status = 0x304;
@@ -185,6 +192,7 @@ void hwu_dsp_init(void) {
     printk(KERN_ERR "Taking DSP out of reset\n");
 
     hwu_lin_titan_dsp_reset(DSP_CORE_0, DSP_RESET_OFF);
+    printk(KERN_ERR "Took DSP out of reset\n");
 
     return;
 }
@@ -250,8 +258,10 @@ out:
 static int __init tidsp_init_module(void) {
     int chipid = 0;
 
-    hwu_dsp_init();
+    printk(KERN_ERR "HW_DSP module loading\n");
+    printk(KERN_ERR "Version: %s\n", SOURCE_DATE);
 
+    hwu_dsp_init();
 #warning TODO: syscalls
     // ti_syscalls[DSP_SYSCALL_NR] = dsp_syscall;
 

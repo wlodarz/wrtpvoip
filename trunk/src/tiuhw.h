@@ -2,6 +2,8 @@
 #ifndef __TIUHW_H
 #define __TIUHW_H
 
+#define SOURCE_DATE "$Date$"
+
 #include "legerity/vp_api_types.h"
 
 #define TIHW_INTERNAL 1
