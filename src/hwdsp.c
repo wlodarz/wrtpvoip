@@ -5,8 +5,11 @@
 // mailbox base?
 #define TNETV1050_DSP_BASE 0xa5080000
 
+// some control area?
 #define DSP_REG1 (TNETV1050_DSP_BASE + 0x000000)
 #define DSP_RST_REG (TNETV1050_DSP_BASE + 0x000014)
+
+// program area?!?
 #define DSP_ADDR100 (TNETV1050_DSP_BASE + 0x000100)
 #define DSP_ADDR104 (TNETV1050_DSP_BASE + 0x000104)
 
