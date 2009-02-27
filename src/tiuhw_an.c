@@ -1752,6 +1752,7 @@ void tiuhw_powerup(void)
     1800:	3c100000 	lui	$s0,0x0
     1804:	8e100068 	lw	$s0,104($s0)
 */
+#if 0 // incomplete
     			index = 0;
     			{
 
@@ -1810,6 +1811,7 @@ void tiuhw_powerup(void)
     1868:	8fbf0028 	lw	$ra,40($sp)
 */
     			} while(index < 4);
+#endif
 		}
 	}
 /* epilogue
