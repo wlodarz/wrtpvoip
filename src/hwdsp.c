@@ -49,13 +49,13 @@ void hwu_lin_titan_dsp_reset(int core, int cmd) {
 	/* put DSP into reset */
 
 #warning MAGIC NUMBERS
-        int status = *(volatile int *) (DSP_REG1);
+        status = *(volatile int *) (DSP_REG1);
         status &= (0x000000fb);
 
     } else {
 	/* release DSP from reset */
 #warning MAGIC NUMBERS
-        int status = *(volatile int *) (DSP_REG1);
+        status = *(volatile int *) (DSP_REG1);
         status |= 0x000000fb;
     }
     *(volatile int *) (DSP_REG1) = status;
