@@ -29,6 +29,7 @@
 #define READ_COMMAND 1
 static uint8 tempBuf[512]; /* All zero buffer */
 
+int unknown_pointer1 = 0; // 0x68 // to the structure
 char *somepointer = NULL;
 int apiNotInitialized = 1; //  0x538
 void *globalApiPointer = NULL; // 0x53c
@@ -1686,6 +1687,11 @@ void tiuhw_powerup(void)
 	int if_type;
 	void *apitab[16];
 	int ret;
+	int *pointer1, *pointer2, *pointer3;
+	void *function1, *function2;
+	void (*func1)(int, int),(*func2)(int, int, int);
+	int index = 0;
+	int tmp_v1;
 
 /* prologue
 0000000000001790 <tiuhw_powerup>:
@@ -1745,11 +1751,21 @@ void tiuhw_powerup(void)
 /*
     1800:	3c100000 	lui	$s0,0x0
     1804:	8e100068 	lw	$s0,104($s0)
+*/
+    			index = 0;
+    			{
+
+/*
     1808:	8e030020 	lw	$v1,32($s0)
     180c:	24020001 	li	$v0,1
     1810:	14620011 	bne	$v1,$v0,1858 <tiuhw_powerup+0xc8>
     1814:	26220001 	addiu	$v0,$s1,1
 */
+				pointer1 = unknown_pointer1; // 0x68(data)
+				tmp_v1 = pointer1[8]; // some structure?!?
+
+				if(tmp_v1 == 1) {
+
 /*
     1818:	8e02003c 	lw	$v0,60($s0)
     181c:	02002021 	move	$a0,$s0
@@ -1757,6 +1773,10 @@ void tiuhw_powerup(void)
     1824:	0040f809 	jalr	$v0
     1828:	24050001 	li	$a1,1
 */
+					pointer2 = pointer1[15]; // some strucutre?!?
+					function1 = (void *)(pointer2[6]); // some structure?!? .. API/functions
+					func1 = function1;
+					func1(pointer1, 1);
 
 /*
     182c:	8e02001c 	lw	$v0,28($s0)
@@ -1769,15 +1789,27 @@ void tiuhw_powerup(void)
     1848:	0040f809 	jalr	$v0
     184c:	00002821 	move	$a1,$zero
 */
+					if(pointer1[7]) {
+						pointer2 = pointer1[15];
+						function2 = (void *)pointer2[15];
+						func2 = function2;
+						func2(pointer1, 0, pointer1[1]);
+					}
+
 /*
     1850:	a600002c 	sh	$zero,44($s0)
     1854:	26220001 	addiu	$v0,$s1,1
+*/
+					pointer1[11] = 0; // halfword
+				}
+/*
     1858:	305100ff 	andi	$s1,$v0,0xff
     185c:	2e220004 	sltiu	$v0,$s1,4
     1860:	1440ffe9 	bnez	$v0,1808 <tiuhw_powerup+0x78>
     1864:	2610008c 	addiu	$s0,$s0,140
     1868:	8fbf0028 	lw	$ra,40($sp)
 */
+    			} while(index < 4);
 		}
 	}
 /* epilogue
@@ -1791,19 +1823,29 @@ void tiuhw_powerup(void)
 
 void tiuhw_powerdown(void)
 {
+	int if_type;
 /* prologue
 000000000000187c <tiuhw_powerdown>:
     187c:	27bdffe0 	addiu	$sp,$sp,-32
     1880:	afbf001c 	sw	$ra,28($sp)
     1884:	afb20018 	sw	$s2,24($sp)
     1888:	afb10014 	sw	$s1,20($sp)
+*/
+
+/*
     188c:	3c020000 	lui	$v0,0x0
     1890:	24420000 	addiu	$v0,$v0,0
     1894:	0040f809 	jalr	$v0
     1898:	afb00010 	sw	$s0,16($sp)
+*/
+	if_type = hwu_get_tiuhw_if();
+/*
     189c:	24030001 	li	$v1,1
     18a0:	14430021 	bne	$v0,$v1,1928 <tiuhw_powerdown+0xac>
     18a4:	8fbf001c 	lw	$ra,28($sp)
+*/
+	if(if_type == TIHW_INTERNAL) {
+/*
     18a8:	00009021 	move	$s2,$zero
     18ac:	3c100000 	lui	$s0,0x0
     18b0:	8e100068 	lw	$s0,104($s0)
@@ -1836,12 +1878,16 @@ void tiuhw_powerdown(void)
     191c:	1440ffe5 	bnez	$v0,18b4 <tiuhw_powerdown+0x38>
     1920:	2610008c 	addiu	$s0,$s0,140
     1924:	8fbf001c 	lw	$ra,28($sp)
+*/
+	}
+/*
     1928:	8fb20018 	lw	$s2,24($sp)
     192c:	8fb10014 	lw	$s1,20($sp)
     1930:	8fb00010 	lw	$s0,16($sp)
     1934:	03e00008 	jr	$ra
     1938:	27bd0020 	addiu	$sp,$sp,32
 */
+	return;
 }
 
 void tiuhw_lin_post_halt_hook(void)
@@ -8496,7 +8542,7 @@ int vp880_abs_api_init(void)
 */
 }
 
-void strange_function1(void) 
+void unknown_function1(void) 
 {
 /*
     7df0:	27bdffd8 	addiu	$sp,$sp,-40
