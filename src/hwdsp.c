@@ -46,7 +46,7 @@ int ar7_get_chip_version_info(void) {
 }
 
 void hwu_lin_titan_dsp_reset(int core, int cmd) {
-    int status;
+    unsigned int status;
 
     printk(KERN_ERR "hwu_lin_titan_dsp_reset(%d,%d)\n", core, cmd);
 
@@ -54,16 +54,16 @@ void hwu_lin_titan_dsp_reset(int core, int cmd) {
 	/* put DSP into reset */
 
 #warning MAGIC NUMBERS
-        status = *(volatile int *) (DSP_REG1);
+        status = *(volatile unsigned int *) (DSP_REG1);
         status &= 0xff04; // or 0xff04;
 
     } else {
 	/* release DSP from reset */
 #warning MAGIC NUMBERS
-        status = *(volatile int *) (DSP_REG1);
+        status = *(volatile unsigned int *) (DSP_REG1);
         status |= 0x000000fb;
     }
-    *(volatile int *) (DSP_REG1) = status;
+    *(volatile unsigned int *) (DSP_REG1) = status;
 
     return;
 }
@@ -103,6 +103,7 @@ void hwu_lin_titan_dsp_halt(int core) {
 #warning LEARN : delay, let's find out how long & replace it with some defines
 
     cnt1 = 99;
+    cnt1 = 299;
     do {
 
         cnt2 = 0x199996c0;
@@ -120,8 +121,8 @@ void hwu_lin_titan_dsp_halt(int core) {
 
 #warning LEARN : addesses & constants meaning
 
-    *(volatile int *) (DSP_RST_REG) = 80;
-    tmp = *(volatile int *) (DSP_REG1);
+    *(volatile unsigned int *) (DSP_RST_REG) = 80;
+    tmp = *(volatile unsigned int *) (DSP_REG1);
     printk(KERN_ERR "hwu_lin_titan_dsp_halt() Before: DSP_RST_REG=0x%08x\n", tmp);
 
     ret = hwu_get_tiuhw_if(0);
@@ -134,9 +135,9 @@ void hwu_lin_titan_dsp_halt(int core) {
     else
         status = 0x304;
 
-    *(volatile int *) (DSP_REG1) = status;
+    *(volatile unsigned int *) (DSP_REG1) = status;
 
-    status = *(volatile int *) (DSP_REG1);
+    status = *(volatile unsigned int *) (DSP_REG1);
     printk(KERN_ERR "hwu_lin_titan_dsp_halt() After: DSP_RST_REG=0x%08x\n", status);
 
     hwu_lin_titan_post_halt_hook(core);
@@ -163,8 +164,8 @@ void hwu_lin_dsp_loop(int core, int flag) {
     {
 
 	// just small loop, (NOP? , JUMP to 0x100
-        *(volatile int *) (DSP_ADDR100) = 0x20202020; 0x100;
-        *(volatile int *) (DSP_ADDR104) = 0x6a000100; 0x104;
+        *(volatile unsigned int *) (DSP_ADDR100) = 0x20202020; 0x100;
+        *(volatile unsigned int *) (DSP_ADDR104) = 0x6a000100; 0x104;
 
         printk(KERN_ERR "putting dsp in tight loop status=%d\n", flag);
 
@@ -173,7 +174,7 @@ void hwu_lin_dsp_loop(int core, int flag) {
     {
 
 	// this causes DSP to jump to 0x4000 (start of the program?)
-        *(volatile int *) DSP_ADDR104 = 0x6a004000;
+        *(volatile unsigned int *) DSP_ADDR104 = 0x6a004000;
 
         printk(KERN_ERR "jumping to 0x4000 status=%d\n", 0);
     }
