@@ -98,7 +98,7 @@ void hwu_lin_titan_dsp_halt(int core) {
 
     hwu_lin_titan_pre_halt_hook(core);
 
-    ar7_device_disable(AR7_RESET_BIT_DSP);
+    ar7_device_disable(AR7_RESET_BIT_DSP_SUBSYSTEM);
 
 #warning LEARN : delay, let's find out how long & replace it with some defines
 
@@ -117,7 +117,7 @@ void hwu_lin_titan_dsp_halt(int core) {
 
     } while ((cnt1--) >= 0);
 
-    ar7_device_enable(AR7_RESET_BIT_DSP);
+    ar7_device_enable(AR7_RESET_BIT_DSP_SUBSYSTEM);
 
 #warning LEARN : addesses & constants meaning
 
@@ -276,7 +276,7 @@ static void __exit tidsp_cleanup_module(void) {
 #warning TODO: syscall
     // ti_syscalls[DSP_SYSCALL_NR] = NULL;
 
-    ar7_device_disable(AR7_RESET_BIT_DSP);
+    ar7_device_disable(AR7_RESET_BIT_DSP_SUBSYSTEM);
 
     printk(KERN_ERR "HW_DSP module unloaded\n");
 

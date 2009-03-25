@@ -87,6 +87,16 @@ void *other_pointer_src = 0;
 void *other_pointer_dst = 0;
 
 
+#define WAIT_LOOP \
+	index = 0; \
+        do { \
+		ltmp1 = dsp_clock_mult * dsp_input_clock_speed; \
+		tmp_v1 = ltmp1 & 0xffffffff; \
+		ltmp1 = (unsigned long long)(tmp_v1) * (unsigned long long)0x431bde83; \
+		tmp_v0 = ((((ltmp1 >> 0x20) >> 0x14) - 1) << 0x02); \
+	} while(++index < tmp_v0); 
+
+
 /*
 tiuhal.o:     file format elf32-tradlittlemips
 
@@ -98,8 +108,7 @@ Disassembly of section .text:
 int tnetv1050_tid_init(tiuhw_device *a)
 {
 	int reg;
-	int tmp0, tmp1, tmp2, tmp5, tmp6;
-	unsigned long long tmp3, tmp4;
+	int tmp0, tmp1, tmp2, tmp3, tmp5, tmp6;
 	int tmp;
 	int tmp_v0, tmp_v1;
 	int tmp_a1;
@@ -108,7 +117,7 @@ int tnetv1050_tid_init(tiuhw_device *a)
 	int index = 0;
 	int dsp_clock_mult;
 	int dsp_input_clock_speed;
-	long long ltmp1;
+	long long ltmp1, ltmp2;
 	int tmp_s0, tmp_s3;
 	int cond;
 	int ret;
@@ -170,7 +179,7 @@ int tnetv1050_tid_init(tiuhw_device *a)
       78:	0040f809 	jalr	$v0
       7c:	00000000 	nop
 */
-	ar7_device_enable(AR7_RESET_BIT_DSP);
+	ar7_device_enable(AR7_RESET_BIT_DSP_SUBSYSTEM);
 
 	printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 /*
@@ -267,7 +276,7 @@ int tnetv1050_tid_init(tiuhw_device *a)
       c8:	3c0a0000 	lui	$t2,0x0
       cc:	8d4a0000 	lw	$t2,0($t2)
 */
-	tmp1 = tiuhw_dsp_clock_mult; // t2
+	dsp_clock_mult = tiuhw_dsp_clock_mult; // t2
 /*
       d0:	3c0b0000 	lui	$t3,0x0
       d4:	8d6b0000 	lw	$t3,0($t3)
@@ -278,8 +287,8 @@ int tnetv1050_tid_init(tiuhw_device *a)
      104:	00002812 	mflo	$a1
      110:	00a30019 	multu	$a1,$v1
 */
-	tmp3 = tmp1 * tmp2; // a1
-	tmp4 = (tmp3 & 0xffffffff) * tmp0; // a1 * v1
+	ltmp1 = dsp_clock_mult * tmp2; // a1
+	ltmp1 = (ltmp1 & 0xffffffff) * tmp0; // a1 * v1
 
 /*
      11c:	2542ffff 	addiu	$v0,$t2,-1
@@ -287,8 +296,7 @@ int tnetv1050_tid_init(tiuhw_device *a)
      124:	3442027e 	ori	$v0,$v0,0x27e
      128:	ad220000 	sw	$v0,0($t1)
 */
-		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
-	*(volatile int *)0xa5080104 = (((tmp1-1) << 12)|0x0000027e);
+	*(volatile int *)0xa5080104 = (((dsp_clock_mult-1) << 12)|0x0000027e);
 
 		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 /*
@@ -310,14 +318,14 @@ int tnetv1050_tid_init(tiuhw_device *a)
      144:	2463ffff 	addiu	$v1,$v1,-1
      148:	00031880 	sll	$v1,$v1,0x2
 */
-	tmp5 = ((((tmp4 >> 32) & 0xffffffff) << 0x14) - 1) >> 0x02;
+	tmp5 = ((((ltmp1 >> 32) & 0xffffffff) << 0x14) - 1) >> 0x02;
 
 /*
      14c:	1060000f 	beqz	$v1,18c <init_module-0x7b0>
      150:	01402821 	move	$a1,$t2
 */
 		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
-	tmp3 = tmp1;	
+	tmp3 = dsp_clock_mult;	
 	if (tmp5 != 0) {
 /*
      154:	00ab0018 	mult	$a1,$t3
@@ -438,6 +446,7 @@ int tnetv1050_tid_init(tiuhw_device *a)
      224:	12000013 	beqz	$s0,274 <init_module-0x6c8>
      228:	00002021 	move	$a0,$zero
 */
+#if 0
 	ltmp1 = dsp_clock_mult * dsp_input_clock_speed;	
 	tmp_v0 = ltmp1 & 0xffffffff;
 	ltmp1 = tmp_v0 * 0x431bde83;
@@ -483,6 +492,9 @@ int tnetv1050_tid_init(tiuhw_device *a)
 */
 		dsp_input_clock_speed = tiuhw_dsp_input_clock_speed;
 	}
+#endif
+	WAIT_LOOP
+
 /*
      274:	00c50018 	mult	$a2,$a1
      278:	3c02431b 	lui	$v0,0x431b
@@ -1911,7 +1923,7 @@ int tiuhw_init_hal(tiuhw_device *a, int b)
 			reg |= 0x00080000;
 			*(volatile int *)0xa861091c = reg; // t0
 
-			// reset
+			// reset TELE_RESET (telephony interface)
 			reg = *(volatile int *)0xa8611640; // a2
 			reg |= 0x00003000;
 			*(volatile int *)0xa8611640 = reg; // a2
@@ -1956,8 +1968,7 @@ int tiuhw_init_hal(tiuhw_device *a, int b)
      cc8:	3c021fff 	lui	$v0,0x1fff
      ccc:	3442fc70 	ori	$v0,$v0,0xfc70
 */
-		ret &= 0x1fff;
-		ret |= 0xfc70;
+		ret = 0x1ffffc70;
 
 /*
      cd0:	3c030000 	lui	$v1,0x0
