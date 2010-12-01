@@ -2,6 +2,8 @@
 #define DRV_DESC "HWDSP driver"
 
 
+#define TITAN_DSP_SUBSYSTEM_MEM_BASE (0xa4000000)
+
 // mailbox base?
 #define TNETV1050_DSP_BASE 0xa5080000
 
@@ -22,7 +24,7 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/compiler.h>
-#include <asm/ar7/ar7.h>
+#include <asm/mach-ar7/ar7.h>
 
 #include "tiuhw.h"
 
@@ -98,7 +100,7 @@ void hwu_lin_titan_dsp_halt(int core) {
 
     hwu_lin_titan_pre_halt_hook(core);
 
-    ar7_device_disable(AR7_RESET_BIT_DSP_SUBSYSTEM);
+    ar7_device_disable(TITAN_RESET_BIT_DSP);
 
 #warning LEARN : delay, let's find out how long & replace it with some defines
 
@@ -117,7 +119,7 @@ void hwu_lin_titan_dsp_halt(int core) {
 
     } while ((cnt1--) >= 0);
 
-    ar7_device_enable(AR7_RESET_BIT_DSP_SUBSYSTEM);
+    ar7_device_enable(TITAN_RESET_BIT_DSP);
 
 #warning LEARN : addesses & constants meaning
 
@@ -164,8 +166,10 @@ void hwu_lin_dsp_loop(int core, int flag) {
     {
 
 	// just small loop, (NOP? , JUMP to 0x100
-        *(volatile unsigned int *) (DSP_ADDR100) = 0x20202020; 0x100;
-        *(volatile unsigned int *) (DSP_ADDR104) = 0x6a000100; 0x104;
+        *(volatile unsigned int *) (DSP_ADDR100) = 0x20202020; // 0x001000:
+							       //   NOP; NOP; NOP; NOP;
+        *(volatile unsigned int *) (DSP_ADDR104) = 0x6a000100; // 0x001040:
+							       //   B 0x000100;
 
         printk(KERN_ERR "putting dsp in tight loop status=%d\n", flag);
 
@@ -174,7 +178,8 @@ void hwu_lin_dsp_loop(int core, int flag) {
     {
 
 	// this causes DSP to jump to 0x4000 (start of the program?)
-        *(volatile unsigned int *) DSP_ADDR104 = 0x6a004000;
+        *(volatile unsigned int *) DSP_ADDR104 = 0x6a004000; // 0x001040:
+							     //   B 0x004000
 
         printk(KERN_ERR "jumping to 0x4000 status=%d\n", 0);
     }
@@ -276,7 +281,7 @@ static void __exit tidsp_cleanup_module(void) {
 #warning TODO: syscall
     // ti_syscalls[DSP_SYSCALL_NR] = NULL;
 
-    ar7_device_disable(AR7_RESET_BIT_DSP_SUBSYSTEM);
+    ar7_device_disable(TITAN_RESET_BIT_DSP);
 
     printk(KERN_ERR "HW_DSP module unloaded\n");
 
