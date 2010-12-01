@@ -3,14 +3,15 @@
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/interrupt.h>
-#include <asm/ar7/ar7.h>
-#include <asm/ar7/gpio.h>
+#include <asm/mach-ar7/ar7.h>
+#include <asm/mach-ar7/gpio.h>
 
 #include "tiuhw.h"
 #include "tiuhal.h"
 
 #define DRV_VERSION "0.0.1"
 #define DRV_DESC "TIUHal driver"
+
 
 int tnetv1050_tid_init(tiuhw_device *a);
 int tnetv1050_tid_read(int tid, int ecval_arg, int data, int len);
@@ -179,7 +180,7 @@ int tnetv1050_tid_init(tiuhw_device *a)
       78:	0040f809 	jalr	$v0
       7c:	00000000 	nop
 */
-	ar7_device_enable(AR7_RESET_BIT_DSP_SUBSYSTEM);
+	ar7_device_enable(TITAN_RESET_BIT_DSP);
 
 	printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 /*
@@ -1551,7 +1552,7 @@ static int __init tihw_hal_init_module(void) {
      9ac:	0040f809 	jalr	$v0
      9b0:	00003021 	move	$a2,$zero
 */
-	ret = request_irq(AR7_IRQ_DSP, tnetv1050_tid_interrupt_handler, IRQF_SHARED, stub_text, 0);
+	ret = request_irq(TITAN_IRQ_TELEIF, tnetv1050_tid_interrupt_handler, IRQF_SHARED, stub_text, 0);
 	ret = request_irq(13, test_irq_handler, IRQF_SHARED, "test", 0);
 
 /*
@@ -1580,7 +1581,7 @@ static void __exit tihw_hal_cleanup_module(void)
      9d8:	0040f809 	jalr	$v0
      9dc:	00002821 	move	$a1,$zero
 */
-	free_irq(AR7_IRQ_DSP, NULL);
+	free_irq(TITAN_IRQ_TELEIF, NULL);
 /*
      9e0:	8fbf0010 	lw	$ra,16($sp)
      9e4:	03e00008 	jr	$ra
