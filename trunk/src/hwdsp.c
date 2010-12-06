@@ -49,7 +49,7 @@ int ar7_get_chip_version_info(void) {
 
 // checked, shoule be OK
 void hwu_lin_titan_dsp_reset(int core, int cmd) {
-    unsigned int status;
+    unsigned short status;
 
     printk(KERN_ERR "hwu_lin_titan_dsp_reset(%d,%d)\n", core, cmd);
 
@@ -57,16 +57,16 @@ void hwu_lin_titan_dsp_reset(int core, int cmd) {
 	/* put DSP into reset */
 
 #warning MAGIC NUMBERS
-        status = *(volatile unsigned int *) (DSP_REG1);
-        status &= 0xffffff04; // or 0xff04;
+        status = *(volatile unsigned short *) (DSP_REG1);
+        status &= 0xff04;
 
     } else {
 	/* release DSP from reset */
 #warning MAGIC NUMBERS
-        status = *(volatile unsigned int *) (DSP_REG1);
-        status |= 0x000000fb;
+        status = *(volatile unsigned short *) (DSP_REG1);
+        status |= 0x00fb;
     }
-    *(volatile unsigned int *) (DSP_REG1) = status;
+    *(volatile unsigned short *) (DSP_REG1) = status;
 
     return;
 }
