@@ -9,8 +9,8 @@
 #include <linux/errno.h>
 #include <linux/device.h>
 
-#include <asm/ar7/ar7.h>
-#include <asm/ar7/gpio.h>
+#include <asm/mach-ar7/ar7.h>
+#include <asm/mach-ar7/gpio.h>
 
 #include "legerity/vp_api_types.h"
 #include "legerity/sys_service.h"
