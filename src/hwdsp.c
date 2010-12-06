@@ -12,8 +12,8 @@
 #define DSP_RST_REG (TNETV1050_DSP_BASE + 0x000014)
 
 // program area?!?
-#define DSP_ADDR100 (TNETV1050_DSP_BASE + 0x000100)
-#define DSP_ADDR104 (TNETV1050_DSP_BASE + 0x000104)
+#define DSP_ADDR100 (TITAN_DSP_SUBSYSTEM_MEM_BASE + 0x000100)
+#define DSP_ADDR104 (TITAN_DSP_SUBSYSTEM_MEM_BASE + 0x000104)
 
 #define DSP_RESET_ON 1
 #define DSP_RESET_OFF 0
@@ -47,6 +47,7 @@ int ar7_get_chip_version_info(void) {
     return (rev << 16) | id;
 }
 
+// checked, shoule be OK
 void hwu_lin_titan_dsp_reset(int core, int cmd) {
     unsigned int status;
 
@@ -57,7 +58,7 @@ void hwu_lin_titan_dsp_reset(int core, int cmd) {
 
 #warning MAGIC NUMBERS
         status = *(volatile unsigned int *) (DSP_REG1);
-        status &= 0xff04; // or 0xff04;
+        status &= 0xffffff04; // or 0xff04;
 
     } else {
 	/* release DSP from reset */
@@ -105,7 +106,6 @@ void hwu_lin_titan_dsp_halt(int core) {
 #warning LEARN : delay, let's find out how long & replace it with some defines
 
     cnt1 = 99;
-    cnt1 = 299;
     do {
 
         cnt2 = 0x199996c0;

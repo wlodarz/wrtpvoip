@@ -1909,22 +1909,22 @@ int tiuhw_init_hal(tiuhw_device *a, int b)
 			reg |= 0x01;
 			*(volatile int *)0xa8611660 = reg;
 
-			// gpio
+			// gpio - set direction 1
 			reg = *(volatile int *)0xa8610914; // a0
 			reg &= 0xfff7ffff; // 0xfff7ffff is in a3
 			*(volatile int *)0xa8610914 = reg;
 
-			// gpio
+			// gpio - data out 1
 			reg = *(volatile int *)0xa861090c; // a1
 			reg &= 0xfff7ffff;
 			*(volatile int *)0xa861090c = reg;
 
-			// gpio
+			// gpio - enable 1
 			reg = *(volatile int *)0xa861091c; // t0
 			reg |= 0x00080000;
 			*(volatile int *)0xa861091c = reg; // t0
 
-			// reset TELE_RESET (telephony interface)
+			// reset TELE_RESET (telephony interface) - PIN_SEL_14
 			reg = *(volatile int *)0xa8611640; // a2
 			reg |= 0x00003000;
 			*(volatile int *)0xa8611640 = reg; // a2
@@ -2652,7 +2652,9 @@ int tiuhw_reset_tid(int tid, int cmd)
 		reg = (reg & 0xfff7ffff);
 		*(volatile int *)0xa861090c = reg;
 #else
-		ar7_gpio_disable(AR7_RESET_BIT_TID);
+		// gpio data out 1
+		//ar7_gpio_disable(AR7_RESET_BIT_TID);
+		gpio_set_value(19, 0);
 #endif
 
 /*
@@ -2674,7 +2676,9 @@ int tiuhw_reset_tid(int tid, int cmd)
 		reg |= 0x00080000;
 		*(volatile int *)0xa861090c = reg;
 #else
-		ar7_gpio_enable(AR7_RESET_BIT_TID);
+		// gpio data out 1
+		//ar7_gpio_enable(AR7_RESET_BIT_TID);
+		gpio_set_value(19, 1);
 #endif
 	}
 
