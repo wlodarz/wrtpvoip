@@ -1,3 +1,4 @@
+// loops_per_jiffy = 429496
 
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -41,6 +42,8 @@ int tiuhw_get_tid_type(int tid);
 #define DSP_RESET_ON 1
 #define DSP_RESET_OFF 0
 
+#define DSP_REG_SPCR1 0xa5081010
+
 /* pointers from data + 0x0000 */
 api_type tnetv1050_api = {
 		tnetv1050_tid_init, // 0x000
@@ -74,19 +77,18 @@ s_tidname2type tidname2type[8] = {
 	{"AUTO", 255},
 	{NULL, 0},
 };
-int tmp_variable0 = 0; // data + 0x00ac
-int not_initialized = 1; // data + 0x00b0
-int interface_type = TIHW_EXTERNAL; // data + 0x00b4
-api_type *tiuhw_api = NULL;		    // data + 0x00b8
-int tiuhw_dsp_clock_mult = 0; // data + 0x00bc
-int tiuhw_dsp_input_clock_speed = 0; // data + 0x00c0
-int hwu_settings_mod[4]; // data + 0x00c4
+int tmp_variable0 = 0; 			// data + 0x00ac
+int not_initialized = 1; 		// data + 0x00b0
+int interface_type = TIHW_EXTERNAL; 	// data + 0x00b4
+api_type *tiuhw_api = NULL;		// data + 0x00b8
+int tiuhw_dsp_clock_mult = 0; 		// data + 0x00bc
+int tiuhw_dsp_input_clock_speed = 0; 	// data + 0x00c0
+int hwu_settings_mod[4]; 		// data + 0x00c4
 char *stub_text = "tele_if_stub";
 
 
 void *other_pointer_src = 0;
 void *other_pointer_dst = 0;
-
 
 #define WAIT_LOOP \
 	index = 0; \
@@ -109,7 +111,7 @@ Disassembly of section .text:
 int tnetv1050_tid_init(tiuhw_device *a)
 {
 	int reg;
-	int tmp0, tmp1, tmp2, tmp3, tmp5, tmp6;
+	int tmp0, tmp1, tmp3, tmp5, tmp6;
 	int tmp;
 	int tmp_v0, tmp_v1;
 	int tmp_a1;
@@ -118,605 +120,134 @@ int tnetv1050_tid_init(tiuhw_device *a)
 	int index = 0;
 	int dsp_clock_mult;
 	int dsp_input_clock_speed;
+	long long dsp_freq;
 	long long ltmp1, ltmp2;
 	int tmp_s0, tmp_s3;
-	int cond;
-	int ret;
+	int ret = 1;
+	int const_0x4;
 
-/* prologue
-0000000000000000 <init_module-0x93c>:
-       0:	27bdffd8 	addiu	$sp,$sp,-40
-       4:	afbf0020 	sw	$ra,32($sp)
-       8:	afb3001c 	sw	$s3,28($sp)
-       c:	afb20018 	sw	$s2,24($sp)
-      10:	afb10014 	sw	$s1,20($sp)
-      14:	afb00010 	sw	$s0,16($sp)
-*/
-/*
-      18:	24130001 	li	$s3,1
-      1c:	2402000b 	li	$v0,11
-      20:	ac820004 	sw	$v0,4($a0)
-      24:	a0930000 	sb	$s3,0($a0)
-      28:	a0800001 	sb	$zero,1($a0)
-      2c:	24020002 	li	$v0,2
-      30:	a0820008 	sb	$v0,8($a0)
-*/
 	a->field2 = 11;
 	a->field0 = 1;
 	a->field1 = 0;
 	a->field3 = 2;
 
-/*
-      34:	3c020000 	lui	$v0,0x0
-      38:	8c420034 	lw	$v0,52($v0)
-      3c:	10400003 	beqz	$v0,4c <init_module-0x8f0>
-      40:	ac80000c 	sw	$zero,12($a0)
-      44:	3c010000 	lui	$at,0x0
-      48:	ac200034 	sw	$zero,52($at)
-*/
 	a->field4 = 0;
 	if(unknown_global1 != 0) unknown_global1 = 0;
 
-		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
-/*
-      4c:	3c06a861 	lui	$a2,0xa861
-      50:	34c61a00 	ori	$a2,$a2,0x1a00
-      54:	3c03ffcf 	lui	$v1,0xffcf
-      58:	3463ffff 	ori	$v1,$v1,0xffff
-      60:	8cc20000 	lw	$v0,0($a2)
-      68:	00431024 	and	$v0,$v0,$v1
-      6c:	acc20000 	sw	$v0,0($a2)
-*/
 	/* DSP clock set to telephony clock I/O */
 	reg = *(volatile int *)0xa8611a00;
 	reg &= 0xffcfffff;
 	*(volatile int *)0xa8611a00;
 
-/*
-      5c:	24040014 	li	$a0,20
-      64:	24050001 	li	$a1,1
-      70:	3c020000 	lui	$v0,0x0
-      74:	24420000 	addiu	$v0,$v0,0
-      78:	0040f809 	jalr	$v0
-      7c:	00000000 	nop
-*/
 	ar7_device_enable(TITAN_RESET_BIT_DSP);
 
-	printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
-/*
-      9c:	3c08a508 	lui	$t0,0xa508
-      a0:	8d020000 	lw	$v0,0($t0)
-      a4:	2403fffb 	li	$v1,-5
-      a8:	00431024 	and	$v0,$v0,$v1
-      ac:	ad020000 	sw	$v0,0($t0)
-*/
-#if 1
 	reg = *(volatile int *)0xa5080000;
-	reg &= 0xfffffffb;
+	reg &= 0xfffb;
 	*(volatile int *)0xa5080000 = reg;
-#endif
 
-/*
-      80:	3c09a508 	lui	$t1,0xa508
-      84:	35290104 	ori	$t1,$t1,0x104
-      b0:	24020004 	li	$v0,4
-      b4:	ad220000 	sw	$v0,0($t1)
-*/
-		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
 	*(volatile int *)0xa5080104 = 4;
 
-		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
-/*
-
-      88:	3c04a861 	lui	$a0,0xa861
-      8c:	3484163c 	ori	$a0,$a0,0x163c
-      b8:	8c820000 	lw	$v0,0($a0)
-      90:	3c0500f0 	lui	$a1,0xf0
-      94:	34a50fff 	ori	$a1,$a1,0xfff
-      c0:	00451024 	and	$v0,$v0,$a1
-      c4:	ac820000 	sw	$v0,0($a0)
-*/
-	/* PIN_SEL_13 */
+	/* PIN_SEL_13 functions - telephony interface */
 	reg = *(volatile int *)0xa861163c;
 	reg &= 0x00f00fff;
 	*(volatile int *)0xa861163c = reg;
 
-		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
-/*
-
-
-
-      98:	3c075505 	lui	$a3,0x5505
-      bc:	34e75000 	ori	$a3,$a3,0x5000
-      e4:	8c820000 	lw	$v0,0($a0)
-      ec:	00471025 	or	$v0,$v0,$a3
-      f0:	ac820000 	sw	$v0,0($a0)
-*/
-	/* set primary PIN_SEL_13 functions - telephony interface */
 	reg = *(volatile int *)0xa861163c;
 	reg |= 0x55055000;
 	*(volatile int *)0xa861163c = reg;
 
-		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
-/*
-
-      d8:	3c06a861 	lui	$a2,0xa861
-      e0:	34c61640 	ori	$a2,$a2,0x1640
-      f4:	8cc20000 	lw	$v0,0($a2)
-      fc:	30423000 	andi	$v0,$v0,0x3000
-     100:	acc20000 	sw	$v0,0($a2)
-*/
         /* PIN_SEL_14 functions - telephony interface */
 	reg = *(volatile int *)0xa8611640;
 	reg &= 0x00003000;
 	*(volatile int *)0xa8611640 = reg;
 
-		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
-/*
-
-
-     108:	8cc20000 	lw	$v0,0($a2)
-     10c:	00000000 	nop
-     114:	34424144 	ori	$v0,$v0,0x4144
-     118:	acc20000 	sw	$v0,0($a2)
-*/
 	reg = *(volatile int *)0xa8611640;
 	reg |= 0x00004144;
 	*(volatile int *)0xa8611640 = reg;
 
+	index = 0;
+	{
+		const_0x4 = 0x431bde83;
+		dsp_clock_mult = tiuhw_dsp_clock_mult; // t2
+		dsp_input_clock_speed = tiuhw_dsp_input_clock_speed; // t3
 
-		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
+		dsp_freq = dsp_clock_mult * dsp_input_clock_speed; // a1
+		dsp_freq = (dsp_freq & 0xffffffff) * const_0x4; // a1 * v1
 
-/*
-      e8:	3c03431b 	lui	$v1,0x431b
-      f8:	3463de83 	ori	$v1,$v1,0xde83
-*/
-	tmp0 = 0x431bde83;
+		if (index == 0) {
+			*(volatile int *)0xa5080104 = (((dsp_clock_mult-1) << 12)|0x0000027e);
+			reg = *(volatile int *)0xa5080000;
+			reg |= 0x00000004;
+			*(volatile int *)0xa5080000 = reg;
+		}
+		tmp5 = ((((dsp_freq >> 32) & 0xffffffff) >> 0x14) - 1) << 0x02;
 
-/*
-      c8:	3c0a0000 	lui	$t2,0x0
-      cc:	8d4a0000 	lw	$t2,0($t2)
-*/
-	dsp_clock_mult = tiuhw_dsp_clock_mult; // t2
-/*
-      d0:	3c0b0000 	lui	$t3,0x0
-      d4:	8d6b0000 	lw	$t3,0($t3)
-*/
-	tmp2 = tiuhw_dsp_input_clock_speed; // t3
-/*
-      dc:	014b0018 	mult	$t2,$t3
-     104:	00002812 	mflo	$a1
-     110:	00a30019 	multu	$a1,$v1
-*/
-	ltmp1 = dsp_clock_mult * tmp2; // a1
-	ltmp1 = (ltmp1 & 0xffffffff) * tmp0; // a1 * v1
+	} while(tmp5>index++);
 
-/*
-     11c:	2542ffff 	addiu	$v0,$t2,-1
-     120:	00021300 	sll	$v0,$v0,0xc
-     124:	3442027e 	ori	$v0,$v0,0x27e
-     128:	ad220000 	sw	$v0,0($t1)
-*/
-	*(volatile int *)0xa5080104 = (((dsp_clock_mult-1) << 12)|0x0000027e);
-
-		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
-/*
-     12c:	8d020000 	lw	$v0,0($t0)
-     130:	00002021 	move	$a0,$zero
-     134:	34420004 	ori	$v0,$v0,0x4
-     13c:	ad020000 	sw	$v0,0($t0)
-*/
-
-#if 1
-	reg = *(volatile int *)0xa5080000;
-	reg |= 0x00000004;
-	*(volatile int *)0xa5080000 = reg;
-#endif
-		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
-/*
-     138:	00001810 	mfhi	$v1
-     140:	00031d02 	srl	$v1,$v1,0x14
-     144:	2463ffff 	addiu	$v1,$v1,-1
-     148:	00031880 	sll	$v1,$v1,0x2
-*/
-	tmp5 = ((((ltmp1 >> 32) & 0xffffffff) << 0x14) - 1) >> 0x02;
-
-/*
-     14c:	1060000f 	beqz	$v1,18c <init_module-0x7b0>
-     150:	01402821 	move	$a1,$t2
-*/
-		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
-	tmp3 = dsp_clock_mult;	
-	if (tmp5 != 0) {
-/*
-     154:	00ab0018 	mult	$a1,$t3
-*/
-		index = 0;
-		{
-/*
-     158:	3c02431b 	lui	$v0,0x431b
-     15c:	00001812 	mflo	$v1
-     160:	3442de83 	ori	$v0,$v0,0xde83
-     164:	00000000 	nop
-*/
-			tmp5 = (tmp3 * 	tmp2) & 0xffffffff;
-
-/*
-     168:	00620019 	multu	$v1,$v0
-     16c:	00001010 	mfhi	$v0
-*/
-			ltmp1 = tmp5 * 0x431bde83;
-			tmp6 = (ltmp1 >> 32) & 0xffffffff;
-
-/*
-     170:	24840001 	addiu	$a0,$a0,1
-*/
-			index++;
-
-/*
-     174:	00021502 	srl	$v0,$v0,0x14
-     178:	2442ffff 	addiu	$v0,$v0,-1
-     17c:	00021080 	sll	$v0,$v0,0x2
-     180:	0082102b 	sltu	$v0,$a0,$v0
-*/
-			tmp6 >>= 0x14;
-			tmp6 -= 1;
-			tmp6 <<= 0x02;
-		
-/*
-     184:	1440fff4 	bnez	$v0,158 <init_module-0x7e4>
-     188:	00ab0018 	mult	$a1,$t3
-*/
-		} while(tmp6>index);
-	}
-/*
-     18c:	3c020000 	lui	$v0,0x0
-     190:	8c420000 	lw	$v0,0($v0)
-*/
-		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
-	tmp_v0 = tiuhw_dsp_clock_mult;
-
-/*
-     194:	3c030000 	lui	$v1,0x0
-     198:	8c630000 	lw	$v1,0($v1)
-*/
-	tmp_v1 = tiuhw_dsp_input_clock_speed;
-
-/*
-     19c:	00430018 	mult	$v0,$v1
-     1a0:	3c10431b 	lui	$s0,0x431b
-     1a4:	00001012 	mflo	$v0
-     1a8:	3610de83 	ori	$s0,$s0,0xde83
-     1ac:	00000000 	nop
-*/
-	ltmp1 = tmp_v0 * tmp_v1;
-/*
-     1b0:	00500019 	multu	$v0,$s0
-     1b4:	3c05a508 	lui	$a1,0xa508
-     1b8:	34a51010 	ori	$a1,$a1,0x1010
-*/
-	ltmp1 = (ltmp1 & 0xffffffff) * 0x431bde83;
-
-/* arg for printk
-     1bc:	3c040000 	lui	$a0,0x0
-     1c0:	248400c8 	addiu	$a0,$a0,200
-*/
-	
-/*
-     1c4:	00001010 	mfhi	$v0
-     1c8:	3c038108 	lui	$v1,0x8108
-     1cc:	00021502 	srl	$v0,$v0,0x14
-     1d0:	2442ffff 	addiu	$v0,$v0,-1
-     1d4:	00431025 	or	$v0,$v0,$v1
-     1d8:	aca20000 	sw	$v0,0($a1)
-*/
-		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
-	tmp_v0 = ((((ltmp1 >> 32) & 0xffffffff) << 0x14) - 1) | 0x81080000;
-	*(volatile int *)0xa5081010 = tmp_v0;
-		printk(KERN_ERR "%s:%d\n", __FUNCTION__, __LINE__);
-/*
-     1dc:	8ca50000 	lw	$a1,0($a1)
-*/
-/*
-     1e0:	3c120000 	lui	$s2,0x0
-     1e4:	26520000 	addiu	$s2,$s2,0
-     1e8:	0240f809 	jalr	$s2
-     1ec:	00000000 	nop
-*/
-	reg = *(volatile int *)0xa5081010; // SPCR1
-	printk(KERN_ERR "SPCR1 = %08lx\n", reg);
-/*
-     1f0:	3c060000 	lui	$a2,0x0
-     1f4:	8cc60000 	lw	$a2,0($a2)
-*/
 	dsp_clock_mult = tiuhw_dsp_clock_mult;
-/*
-     1f8:	3c050000 	lui	$a1,0x0
-     1fc:	8ca50000 	lw	$a1,0($a1)
-*/
 	dsp_input_clock_speed = tiuhw_dsp_input_clock_speed;
-/*
-     200:	00c50018 	mult	$a2,$a1
-     204:	00001012 	mflo	$v0
-	...
-     210:	00500019 	multu	$v0,$s0
-     214:	00008010 	mfhi	$s0
-     218:	00108502 	srl	$s0,$s0,0x14
-     21c:	2610ffff 	addiu	$s0,$s0,-1
-     220:	00108080 	sll	$s0,$s0,0x2
-     224:	12000013 	beqz	$s0,274 <init_module-0x6c8>
-     228:	00002021 	move	$a0,$zero
-*/
-#if 0
-	ltmp1 = dsp_clock_mult * dsp_input_clock_speed;	
-	tmp_v0 = ltmp1 & 0xffffffff;
-	ltmp1 = tmp_v0 * 0x431bde83;
+	dsp_freq = dsp_clock_mult * dsp_input_clock_speed;
 
-	tmp_s0 = (((((ltmp1 >> 32) & 0xffffffff) << 0x14) - 1) >> 0x02);
-	if(tmp_s0 != 0) {
+	dsp_freq = (dsp_freq & 0xffffffff) * 0x431bde83;
 
-/*
-     22c:	00c50018 	mult	$a2,$a1
-*/
-		index = 0;
-		{
-/*
-     230:	3c02431b 	lui	$v0,0x431b
-     234:	00001812 	mflo	$v1
-     238:	3442de83 	ori	$v0,$v0,0xde83
-     23c:	00000000 	nop
-     240:	00620019 	multu	$v1,$v0
-     244:	00001010 	mfhi	$v0
-     248:	24840001 	addiu	$a0,$a0,1
-     24c:	00021502 	srl	$v0,$v0,0x14
-     250:	2442ffff 	addiu	$v0,$v0,-1
-     254:	00021080 	sll	$v0,$v0,0x2
-     258:	0082102b 	sltu	$v0,$a0,$v0
-     25c:	1440fff4 	bnez	$v0,230 <init_module-0x70c>
-     260:	00c50018 	mult	$a2,$a1
-*/
-			ltmp1 = dsp_clock_mult * dsp_input_clock_speed;
-			tmp_v1 = ltmp1 & 0xffffffff;
-			ltmp1 = tmp_v1 * 0x431bde83;
-			tmp_v0 = (ltmp1 >> 32) & 0xffffffff;
-			index++;
-			tmp_v0 = (((tmp_v0 >> 0x14) - 1) << 0x02);
-		} while(index<tmp_v0);
-/*
-     264:	3c060000 	lui	$a2,0x0
-     268:	8cc60000 	lw	$a2,0($a2)
-*/
-		dsp_clock_mult = tiuhw_dsp_clock_mult;
-/*
-     26c:	3c050000 	lui	$a1,0x0
-     270:	8ca50000 	lw	$a1,0($a1)
-*/
-		dsp_input_clock_speed = tiuhw_dsp_input_clock_speed;
-	}
-#endif
+	tmp_v0 = ((((dsp_freq >> 32) & 0xffffffff) >> 0x14) - 1) | 0x81080000;
+	*(volatile int *)DSP_REG_SPCR1 = tmp_v0;
+
+	reg = *(volatile int *)DSP_REG_SPCR1; // SPCR1
+	printk(KERN_ERR "SPCR1 = %08lx\n", reg);
+
+	dsp_clock_mult = tiuhw_dsp_clock_mult;
+	dsp_input_clock_speed = tiuhw_dsp_input_clock_speed;
 	WAIT_LOOP
 
-/*
-     274:	00c50018 	mult	$a2,$a1
-     278:	3c02431b 	lui	$v0,0x431b
-     27c:	00001812 	mflo	$v1
-     280:	3442de83 	ori	$v0,$v0,0xde83
-     284:	00000000 	nop
-     288:	00620019 	multu	$v1,$v0
-     28c:	24040001 	li	$a0,1
-     290:	3c03a508 	lui	$v1,0xa508
-     294:	34631004 	ori	$v1,$v1,0x1004
-     298:	ac640000 	sw	$a0,0($v1)
-     29c:	00001010 	mfhi	$v0
-     2a0:	00021502 	srl	$v0,$v0,0x14
-     2a4:	2442ffff 	addiu	$v0,$v0,-1
-     2a8:	00021080 	sll	$v0,$v0,0x2
-     2ac:	1040000f 	beqz	$v0,2ec <init_module-0x650>
-     2b0:	00002021 	move	$a0,$zero
-*/
-	ltmp1 = dsp_clock_mult * dsp_input_clock_speed;
-	tmp_v1 = ltmp1 & 0xffffffff;
-	ltmp1 = tmp_v1 * 0x431bde83;
-	*(volatile int *)0xa5081004 = 0x1;
-	tmp_v0 = ((((ltmp1 >> 32) & 0xffffffff) >> 0x14) - 1) >> 0x02;
-	if(tmp_v0 != 0) {
+	index = 0;
+	{
+		dsp_freq = dsp_clock_mult * dsp_input_clock_speed;
+		ltmp1 = dsp_freq * 0x431bde83;
 
-/*
-     2b4:	00c50018 	mult	$a2,$a1
-     2b8:	3c02431b 	lui	$v0,0x431b
-     2bc:	00001812 	mflo	$v1
-     2c0:	3442de83 	ori	$v0,$v0,0xde83
-     2c4:	00000000 	nop
-     2c8:	00620019 	multu	$v1,$v0
-     2cc:	00001010 	mfhi	$v0
-     2d0:	24840001 	addiu	$a0,$a0,1
-     2d4:	00021502 	srl	$v0,$v0,0x14
-     2d8:	2442ffff 	addiu	$v0,$v0,-1
-     2dc:	00021080 	sll	$v0,$v0,0x2
-     2e0:	0082102b 	sltu	$v0,$a0,$v0
-     2e4:	1440fff4 	bnez	$v0,2b8 <init_module-0x684>
-     2e8:	00c50018 	mult	$a2,$a1
-*/
-		index = 0;
-		{
-			ltmp1 = dsp_clock_mult * dsp_input_clock_speed;
-			tmp_v1 = ltmp1 & 0xffffffff;
-			ltmp1 = tmp_v1 * 0x431bde83;	
-			tmp_v0 = (((((ltmp1 >> 32) & 0xffffffff) >> 0x14) - 1) << 0x02);
-			index++;
-		} while(index < tmp_v0);
-		
-	}
-/*
-     2ec:	3c030000 	lui	$v1,0x0
-     2f0:	8c630000 	lw	$v1,0($v1)
-*/
+		if (index == 0) *(volatile int *)0xa5081004 = 0x1;
+
+		tmp_v0 = ((((ltmp1 >> 32) & 0xffffffff) >> 0x14) - 1) >> 0x02;
+	} while (tmp_v0 > index);
+
 	dsp_clock_mult = tiuhw_dsp_clock_mult;
-/*
-     2f4:	3c020000 	lui	$v0,0x0
-     2f8:	8c420000 	lw	$v0,0($v0)
-*/
 	dsp_input_clock_speed = tiuhw_dsp_input_clock_speed;
-/*
-     2fc:	00620018 	mult	$v1,$v0
-     300:	3c021062 	lui	$v0,0x1062
-     304:	00001812 	mflo	$v1
-     308:	34424dd3 	ori	$v0,$v0,0x4dd3
-     30c:	00000000 	nop
-     310:	00620019 	multu	$v1,$v0
-     314:	3c04a508 	lui	$a0,0xa508
-     318:	34841000 	ori	$a0,$a0,0x1000
-     31c:	3c0200ff 	lui	$v0,0xff
-     320:	00001810 	mfhi	$v1
-     324:	34428000 	ori	$v0,$v0,0x8000
-     328:	00031c82 	srl	$v1,$v1,0x12
-     32c:	2463ffff 	addiu	$v1,$v1,-1
-     330:	00621825 	or	$v1,$v1,$v0
-     334:	ac830000 	sw	$v1,0($a0)
-*/
-	ltmp1 = dsp_clock_mult * dsp_input_clock_speed;	
-	tmp_v1 = ltmp1 & 0xffffffff;
-	ltmp1 = tmp_v1 * 0x10624dd3;
+	dsp_freq = dsp_clock_mult * dsp_input_clock_speed;	
+	ltmp1 = dsp_freq * 0x10624dd3;
 	tmp_v1 = (ltmp1 >> 32) & 0xffffffff;
 	tmp_v1 >>= 0x12;
 	tmp_v1 -= 1;
 	tmp_v1 = tmp_v1 | 0x00ff8000;
-
 	*(volatile int *)0xa5081000 = tmp_v1;
-/*
-     338:	8c850000 	lw	$a1,0($a0)
-     33c:	3c040000 	lui	$a0,0x0
-     340:	0240f809 	jalr	$s2
-     344:	248400dc 	addiu	$a0,$a0,220
-*/
+
 	reg = *(volatile int *)0xa5081000;
 	printk(KERN_ERR "PCMCR1 = %08lx\n", reg);
-/*
-     348:	3c060000 	lui	$a2,0x0
-     34c:	8cc60000 	lw	$a2,0($a2)
-*/
-	tmp = tiuhw_dsp_clock_mult;
-/*
-     350:	3c050000 	lui	$a1,0x0
-     354:	8ca50000 	lw	$a1,0($a1)
-*/
-	tmp_a1 = tiuhw_dsp_input_clock_speed;
-/*
-     358:	00c50018 	mult	$a2,$a1
-     35c:	3c02431b 	lui	$v0,0x431b
-     360:	00001812 	mflo	$v1
-     364:	3442de83 	ori	$v0,$v0,0xde83
-     368:	00000000 	nop
-     36c:	00620019 	multu	$v1,$v0
-     370:	00001010 	mfhi	$v0
-     374:	00021502 	srl	$v0,$v0,0x14
-     378:	2442ffff 	addiu	$v0,$v0,-1
-     37c:	00021080 	sll	$v0,$v0,0x2
-     380:	1040000f 	beqz	$v0,3c0 <init_module-0x57c>
-     384:	00002021 	move	$a0,$zero
-*/
-	ltmp1 = dsp_clock_mult * dsp_input_clock_speed;
-	tmp_v1 = ltmp1 & 0xffffffff;
-	ltmp1 = tmp_v1 * 0x431bde83;
-	tmp_v0 = (ltmp1 >> 32) & 0xffffffff;
-	tmp_v0 >>= 0x14;
-	tmp_v0 -= 1;
-	tmp_v0 <<= 0x02;
-	index = 0;
-	if(tmp_v0 != 0) {
-		{
-/*
-     388:	00c50018 	mult	$a2,$a1
-     38c:	3c02431b 	lui	$v0,0x431b
-     390:	00001812 	mflo	$v1
-     394:	3442de83 	ori	$v0,$v0,0xde83
-     398:	00000000 	nop
-     39c:	00620019 	multu	$v1,$v0
-     3a0:	00001010 	mfhi	$v0
-     3a4:	24840001 	addiu	$a0,$a0,1
-     3a8:	00021502 	srl	$v0,$v0,0x14
-     3ac:	2442ffff 	addiu	$v0,$v0,-1
-     3b0:	00021080 	sll	$v0,$v0,0x2
-     3b4:	0082102b 	sltu	$v0,$a0,$v0
-     3b8:	1440fff4 	bnez	$v0,38c <init_module-0x5b0>
-     3bc:	00c50018 	mult	$a2,$a1
-*/
-			ltmp1 = dsp_clock_mult * dsp_input_clock_speed;
-			tmp_v1 = ltmp1 & 0xffffffff;
-			ltmp1 = tmp_v1 * 0x431bde83;
-			tmp_v0 = (ltmp1 >> 32) & 0xffffffff;
-			tmp_v0 >>= 0x14;
-			tmp_v0 -= 1;
-			tmp_v0 <<= 0x02;
-			index++;
-		} while(index < tmp_v0);
-	}
-/*
-     3c0:	3c02a508 	lui	$v0,0xa508
-     3c4:	34421020 	ori	$v0,$v0,0x1020
-     3c8:	ac400000 	sw	$zero,0($v0)
-     3cc:	00008021 	move	$s0,$zero
-*/
-	*(volatile int *)0xa5081020 = 0;
 
+	index = 0;
 	{
-/*
-     3d0:	3c110000 	lui	$s1,0x0
-     3d4:	26310000 	addiu	$s1,$s1,0
-     3d8:	0220f809 	jalr	$s1
-     3dc:	02002021 	move	$a0,$s0
-*/
+		dsp_clock_mult = tiuhw_dsp_clock_mult;
+		dsp_input_clock_speed = tiuhw_dsp_input_clock_speed;
+		dsp_freq = dsp_clock_mult * dsp_input_clock_speed;
+		ltmp1 = dsp_freq * 0x431bde83;
+		tmp_v0 = (ltmp1 >> 32) & 0xffffffff;
+		tmp_v0 >>= 0x14;
+		tmp_v0 -= 1;
+		tmp_v0 <<= 0x02;
+		index = 0;
+	} while (tmp_v0 > index);
+
+	*(volatile int *)0xa5081020 = 0;
+	{
 		tid_type = tiuhw_get_tid_type(tid);
 
-/*
-     3e0:	00401821 	move	$v1,$v0
-     3e4:	18600006 	blez	$v1,400 <init_module-0x53c>
-     3e8:	28620004 	slti	$v0,$v1,4
-     3ec:	1440000c 	bnez	$v0,420 <init_module-0x51c>
-     3f0:	26020001 	addiu	$v0,$s0,1
-     3f4:	2402000c 	li	$v0,12
-     3f8:	10620009 	beq	$v1,$v0,420 <init_module-0x51c>
-     3fc:	26020001 	addiu	$v0,$s0,1
-*/
 		if((tid_type < 0) || (tid_type >= 4 && tid_type != 12)) {
-/*
-     400:	0220f809 	jalr	$s1
-     404:	02002021 	move	$a0,$s0
-*/
 			tid_type = tiuhw_get_tid_type(tid);
-/*
-     408:	3c040000 	lui	$a0,0x0
-     40c:	248400f0 	addiu	$a0,$a0,240
-     410:	0240f809 	jalr	$s2
-     414:	00402821 	move	$a1,$v0
-*/
 			printk(KERN_ERR "TNETV1050_HAL : unsupported TID type detected %u\n", tid_type);
-
-/*
-     418:	00009821 	move	$s3,$zero
-     41c:	26020001 	addiu	$v0,$s0,1
-*/
-			cond = 0;
+			ret = 0;
 		}
-/*
-     420:	305000ff 	andi	$s0,$v0,0xff
-     424:	1200ffea 	beqz	$s0,3d0 <init_module-0x56c>
-     428:	02601021 	move	$v0,$s3
-*/
-		tmp_v0 = tid + 1;
-		tid = tmp_v0 & 0xff;
-		ret = cond;
+		tid = (tid + 1) & 0xff;
 	} while(tid == 0);
 
-/*
-     42c:	8fbf0020 	lw	$ra,32($sp)
-     430:	8fb3001c 	lw	$s3,28($sp)
-     434:	8fb20018 	lw	$s2,24($sp)
-     438:	8fb10014 	lw	$s1,20($sp)
-     43c:	8fb00010 	lw	$s0,16($sp)
-     440:	03e00008 	jr	$ra
-     444:	27bd0028 	addiu	$sp,$sp,40
-*/
 	return ret;
 }
 
@@ -776,14 +307,14 @@ int tnetv1050_tid_writebyte(int a) {
      47c:	3c07a508 	lui	$a3,0xa508
      480:	34e71018 	ori	$a3,$a3,0x1018  // a3 = 0xa5081018
      484:	3c06a508 	lui	$a2,0xa508
-     488:	34c61010 	ori	$a2,$a2,0x1010  // a2 = 0xa5081010
+     488:	34c61010 	ori	$a2,$a2,0x1010  // a2 = DSP_REG_SPCR1
      48c:	3c038148 	lui	$v1,0x8148	// v1 = 0x8148
      490:	00002810 	mfhi	$a1 		// a1 - tmp2
      494:	ace40000 	sw	$a0,0($a3)
 */
 	tmp2 = (tmp1 >> 32) & 0xffffffff;
 	*(volatile int *)0xa5081018 = a1;
-//	0xa5081010;					// a2
+//	DSP_REG_SPCR1;					// a2
 /*
      498:	00051502 	srl	$v0,$a1,0x14
      49c:	2442ffff 	addiu	$v0,$v0,-1
@@ -793,7 +324,7 @@ int tnetv1050_tid_writebyte(int a) {
 	tmp3 = (tmp2 >> 0x14);
 	tmp3 -= 1;
 	tmp3 |= 0x8148;
-	*(volatile int *)0xa5081010 = tmp3;
+	*(volatile int *)DSP_REG_SPCR1 = tmp3;
 
 /*
      4a8:	00052cc2 	srl	$a1,$a1,0x13
@@ -1003,7 +534,7 @@ int tnetv1050_tid_readbyte(char *ptr)
 	tmp_a0 -= 1;
 	tmp_v0 = tmp_a0 | 0x81280000;
 	reg = tmp_v0;
-	*(volatile int *)0xa5081010 = reg;
+	*(volatile int *)DSP_REG_SPCR1 = reg;
 	tmp_a3 = 0;
 /*
      5f4:	10800012 	beqz	$a0,640 <init_module-0x2fc>
@@ -1448,6 +979,7 @@ int func22(int tid, int if_type)
 	return 1;
 }
 
+// something like get_type
 /* FUNCTION: DONE, need review */
 int func23(int tid, int if_type)
 {
@@ -1673,12 +1205,12 @@ int tiuhw_get_dsp_clk_values(void)
      aa0:	0220f809 	jalr	$s1
      aa4:	2406000a 	li	$a2,10
 */
-		tiuhw_dsp_input_clock_speed = dsp_clk_input_speed_val;
+		tiuhw_dsp_input_clock_speed = dsp_clk_input_speed_val; // 12288000
 
 		// mult
 		dsp_clk_ptr = strsep(&tmp_dsp_clk_str_ptr, ":");
 		dsp_clk_mult_val = simple_strtol(dsp_clk_ptr, NULL, 10);
-		tiuhw_dsp_clock_mult = dsp_clk_mult_val;
+		tiuhw_dsp_clock_mult = dsp_clk_mult_val; // 10
 
 
 /*
