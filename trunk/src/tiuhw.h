@@ -9,6 +9,11 @@
 #define TIHW_INTERNAL 1
 #define TIHW_EXTERNAL 2
 
+#define DSP_CORE_0 0
+#define DSP_RESET_ON 1
+#define DSP_RESET_OFF 0
+
+
 void hwu_lin_register_halt_hooks(void *, void *);
 void VpMpiCmd(VpDeviceIdType deviceId,    /**< Chip select, connector and 3 or 4 wire interface for command */
 	      uint8 ecVal,                /**< Value to write to the EC register */

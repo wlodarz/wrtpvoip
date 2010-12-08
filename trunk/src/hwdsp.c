@@ -1,25 +1,3 @@
-#define DRV_VERSION "0.0.1"
-#define DRV_DESC "HWDSP driver"
-
-
-#define TITAN_DSP_SUBSYSTEM_MEM_BASE (0xa4000000)
-
-// mailbox base?
-#define TNETV1050_DSP_BASE 0xa5080000
-
-// some control area?
-#define DSP_REG1 (TNETV1050_DSP_BASE + 0x000000)
-#define DSP_RST_REG (TNETV1050_DSP_BASE + 0x000014)
-
-// program area?!?
-#define DSP_ADDR100 (TITAN_DSP_SUBSYSTEM_MEM_BASE + 0x000100)
-#define DSP_ADDR104 (TITAN_DSP_SUBSYSTEM_MEM_BASE + 0x000104)
-
-#define DSP_RESET_ON 1
-#define DSP_RESET_OFF 0
-
-/* I hope I understand it correctly. */
-#define DSP_CORE_0 0
 
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -28,13 +6,42 @@
 
 #include "tiuhw.h"
 
+#define DRV_VERSION "0.0.1"
+#define DRV_DESC "HWDSP driver"
+
+
+#define TITAN_DSP_SUBSYSTEM_MEM_BASE (0xa4000000)
+#define TNETV1050_DSP_CONTROL 	(TITAN_DSP_SUBSYSTEM_MEM_BASE + 0x01080000)
+
+// some control area?
+#define DSP_RST_REG 		(TNETV1050_DSP_CONTROL + 0x00000000)
+#define DSP_REG_UNKNOWN_0 	(TNETV1050_DSP_CONTROL + 0x00000014)
+
+// program area?
+#define DSP_PROGRAM_AREA	(TITAN_DSP_SUBSYSTEM_MEM_BASE + 0x00000000)
+#define DSP_ADDR100 		(DSP_PROGRAM_AREA + 0x00000100)
+#define DSP_ADDR104 		(DSP_PROGRAM_AREA + 0x00000104)
+
+
+// some opcodes
+#define OPC_NOP 0x20
+#define OPC_B   0x6a
+
+// more complex opcode sequences
+#define NOP_NOP_NOP_NOP ((OPC_NOP << 24) | (OPC_NOP << 16) | (OPC_NOP << 8) | (OPC_NOP))
+#define BRANCH_0x100    ((OPC_B   << 24) | (0x100))
+#define BRANCH_0x4000    ((OPC_B   << 24) | (0x4000))
+
+/* I hope I understand it correctly. */
+#define DSP_GO_INTO_TIGHT_LOOP 1
+
 #define DSP_SYSCALL_NR 0x08
 
 void *hwdsp_pre_hook = NULL;
 void *hwdsp_post_hook = NULL;
 
 void hwu_lin_dsp_loop(int, int);
-int hwu_get_tiuhw_if();
+extern int hwu_get_tiuhw_if(void);
 
 // supporting functions:
 int ar7_get_chip_version_info(void) {
@@ -49,7 +56,7 @@ int ar7_get_chip_version_info(void) {
 
 // checked, shoule be OK
 void hwu_lin_titan_dsp_reset(int core, int cmd) {
-    unsigned short status;
+    unsigned int status;
 
     printk(KERN_ERR "hwu_lin_titan_dsp_reset(%d,%d)\n", core, cmd);
 
@@ -57,16 +64,16 @@ void hwu_lin_titan_dsp_reset(int core, int cmd) {
 	/* put DSP into reset */
 
 #warning MAGIC NUMBERS
-        status = *(volatile unsigned short *) (DSP_REG1);
+        status = *(volatile unsigned int *) (DSP_RST_REG);
         status &= 0xff04;
 
     } else {
 	/* release DSP from reset */
 #warning MAGIC NUMBERS
-        status = *(volatile unsigned short *) (DSP_REG1);
+        status = *(volatile unsigned int *) (DSP_RST_REG);
         status |= 0x00fb;
     }
-    *(volatile unsigned short *) (DSP_REG1) = status;
+    *(volatile unsigned int *) (DSP_RST_REG) = status;
 
     return;
 }
@@ -87,59 +94,45 @@ void hwu_lin_register_halt_hooks(void *prehook, void *posthook) {
 
     hwdsp_pre_hook = prehook;
     hwdsp_post_hook = posthook;
+
     return;
 }
 
 void hwu_lin_titan_dsp_halt(int core) {
-    int cnt1, cnt2;
+//    volatile int cnt1, cnt2;
     int tmp;
-    long long test;
     int ret;
     int status;
+    int i;
 
     printk(KERN_ERR "hwu_lin_titan_dsp_halt(%d)\n", core);
 
     hwu_lin_titan_pre_halt_hook(core);
 
+    // this is device reset
     ar7_device_disable(TITAN_RESET_BIT_DSP);
-
-#warning LEARN : delay, let's find out how long & replace it with some defines
-
-    cnt1 = 99;
-    do {
-
-        cnt2 = 0x199996c0;
-
-        tmp = loops_per_jiffy;
-
-        test = tmp * cnt2;
-        tmp = (test >> 16) & 0xffffffff;
-
-        while (tmp--) ;
-
-    } while ((cnt1--) >= 0);
-
+    for(i=0; i<100; i++) udelay(1000);
     ar7_device_enable(TITAN_RESET_BIT_DSP);
 
 #warning LEARN : addesses & constants meaning
 
-    *(volatile unsigned int *) (DSP_RST_REG) = 80;
-    tmp = *(volatile unsigned int *) (DSP_REG1);
+    *(volatile unsigned int *) (DSP_REG_UNKNOWN_0) = 80;
+    tmp = *(volatile unsigned int *) (DSP_RST_REG);
     printk(KERN_ERR "hwu_lin_titan_dsp_halt() Before: DSP_RST_REG=0x%08x\n", tmp);
 
-    ret = hwu_get_tiuhw_if(0);
+    ret = hwu_get_tiuhw_if();
     printk(KERN_ERR "hwu_get_tiuhw_if = %d\n", ret);
 
 #warning TO LEARN : what those constants mean
 
-    if (ret != 1)
-        status = 0x300;
+    if (ret != TIHW_INTERNAL)
+        status = 0x300; // with FPGA - only software reset?
     else
-        status = 0x304;
+        status = 0x304; // internal - so software reset with peripherals?
 
-    *(volatile unsigned int *) (DSP_REG1) = status;
+    *(volatile unsigned int *) (DSP_RST_REG) = status;
 
-    status = *(volatile unsigned int *) (DSP_REG1);
+    status = *(volatile unsigned int *) (DSP_RST_REG);
     printk(KERN_ERR "hwu_lin_titan_dsp_halt() After: DSP_RST_REG=0x%08x\n", status);
 
     hwu_lin_titan_post_halt_hook(core);
@@ -150,7 +143,7 @@ void hwu_lin_titan_dsp_halt(int core) {
 
     printk(KERN_ERR "Installing tight loop\n");
 
-    hwu_lin_dsp_loop(core, 1);
+    hwu_lin_dsp_loop(core, DSP_GO_INTO_TIGHT_LOOP);
 
 }
 
@@ -160,15 +153,15 @@ void hwu_lin_dsp_loop(int core, int flag) {
 
     printk(KERN_ERR "hwu_lin_dsp_loop(%d,%d)\n", core, flag);
 
-#warning TO LEARN : what this code means
-
-    if (flag != 0)
+    if (flag == DSP_GO_INTO_TIGHT_LOOP)
     {
 
 	// just small loop, (NOP? , JUMP to 0x100
-        *(volatile unsigned int *) (DSP_ADDR100) = 0x20202020; // 0x001000:
+        //*(volatile unsigned int *) (DSP_ADDR100) = 0x20202020; // 0x00100:
+        *(volatile unsigned int *) (DSP_ADDR100) = NOP_NOP_NOP_NOP; // 0x001000:
 							       //   NOP; NOP; NOP; NOP;
-        *(volatile unsigned int *) (DSP_ADDR104) = 0x6a000100; // 0x001040:
+        //*(volatile unsigned int *) (DSP_ADDR104) = 0x6a000100; // 0x00104:
+        *(volatile unsigned int *) (DSP_ADDR104) = BRANCH_0x100; // 0x00104:
 							       //   B 0x000100;
 
         printk(KERN_ERR "putting dsp in tight loop status=%d\n", flag);
@@ -178,7 +171,8 @@ void hwu_lin_dsp_loop(int core, int flag) {
     {
 
 	// this causes DSP to jump to 0x4000 (start of the program?)
-        *(volatile unsigned int *) DSP_ADDR104 = 0x6a004000; // 0x001040:
+        //*(volatile unsigned int *) (DSP_ADDR104) = 0x6a004000; // 0x00104:
+        *(volatile unsigned int *) DSP_ADDR104 = BRANCH_0x4000; // 0x001040:
 							     //   B 0x004000
 
         printk(KERN_ERR "jumping to 0x4000 status=%d\n", 0);
@@ -234,6 +228,7 @@ int dsp_syscall(void *a) {
 			// save on 12(a) = 1;
 			break;
 		case 6: // 3b4
+			// tight loop, or jump to 0x4000
 			core = msg[1];
 			cmd = msg[2];
 			hwu_lin_dsp_loop(core, cmd);
