@@ -26,6 +26,7 @@ int func20(void);
 int func21(void);
 int func22(int a, int b);
 int func23(int a, int b);
+int tnetv1050_get_tid_type(int a, int b);
 
 char *prom_getenv(char *);
 static irqreturn_t tnetv1050_tid_interrupt_handler(int i, void *data);
@@ -35,6 +36,7 @@ int tiuhw_reset_tid(int a, int cmd);
 void tiuhw_select_tid(int tid);
 void tiuhw_deselect_tid(int tid);
 int tiuhw_get_tnetv1050_tid_type(void);
+int tnetv1050_get_tid_type(int tid, int tid_type);
 int tiuhw_get_tid_type(int tid);
 
 
@@ -59,7 +61,7 @@ api_type tnetv1050_api = {
 		func20, // 0x8a0
 		func21, // 0x8a8
 		func22, // 0x8b0
-		func23  // 0x904
+		tnetv1050_get_tid_type  // 0x904
 };
 
 typedef struct {
@@ -110,7 +112,7 @@ Disassembly of section .text:
 
 /* FUNCTION: DONE, need review */
 /* probably init function */
-int tnetv1050_tid_init(tiuhw_device *a)
+int tnetv1050_tid_init(tiuhw_device *tiddev)
 {
 	int reg;
 	int tmp0, tmp1, tmp3, tmp5, tmp6;
@@ -128,12 +130,12 @@ int tnetv1050_tid_init(tiuhw_device *a)
 	int ret = 1;
 	int const_0x4;
 
-	a->field2 = 11;
-	a->field0 = 1;
-	a->field1 = 0;
-	a->field3 = 2;
+	tiddev->field2 = 11;
+	tiddev->field0 = 1;
+	tiddev->field1 = 0;
+	tiddev->field3 = 2;
 
-	a->field4 = 0;
+	tiddev->field4 = 0;
 	if(unknown_global1 != 0) unknown_global1 = 0;
 
 	/* DSP clock set to telephony clock I/O */
@@ -167,6 +169,17 @@ int tnetv1050_tid_init(tiuhw_device *a)
 	reg |= 0x00004144;
 	*(volatile int *)0xa8611640 = reg;
 
+	// ----
+	const_0x4 = 0x431bde83;
+	dsp_clock_mult = tiuhw_dsp_clock_mult; // t2
+	dsp_input_clock_speed = tiuhw_dsp_input_clock_speed; // t3
+
+	dsp_freq = dsp_clock_mult * dsp_input_clock_speed; // a1
+	dsp_freq = (dsp_freq & 0xffffffff) * const_0x4; // a1 * v1
+	*(volatile int *)0xa5080104 = (((dsp_clock_mult-1) << 12)|0x0000027e);
+	reg = *(volatile int *)0xa5080000;
+	reg |= 0x00000004;
+	*(volatile int *)0xa5080000 = reg;
 	index = 0;
 	{
 		const_0x4 = 0x431bde83;
@@ -176,44 +189,42 @@ int tnetv1050_tid_init(tiuhw_device *a)
 		dsp_freq = dsp_clock_mult * dsp_input_clock_speed; // a1
 		dsp_freq = (dsp_freq & 0xffffffff) * const_0x4; // a1 * v1
 
-		if (index == 0) {
-			*(volatile int *)0xa5080104 = (((dsp_clock_mult-1) << 12)|0x0000027e);
-			reg = *(volatile int *)0xa5080000;
-			reg |= 0x00000004;
-			*(volatile int *)0xa5080000 = reg;
-		}
 		tmp5 = ((((dsp_freq >> 32) & 0xffffffff) >> 0x14) - 1) << 0x02;
-
 	} while(tmp5>index++);
+	// ----
 
+
+	// ----
 	dsp_clock_mult = tiuhw_dsp_clock_mult;
 	dsp_input_clock_speed = tiuhw_dsp_input_clock_speed;
 	dsp_freq = dsp_clock_mult * dsp_input_clock_speed;
-
 	dsp_freq = (dsp_freq & 0xffffffff) * 0x431bde83;
-
 	tmp_v0 = ((((dsp_freq >> 32) & 0xffffffff) >> 0x14) - 1) | 0x81080000;
 	*(volatile int *)DSP_REG_SPCR1 = tmp_v0;
-
 	reg = *(volatile int *)DSP_REG_SPCR1; // SPCR1
 	printk(KERN_ERR "SPCR1 = %08lx\n", reg);
+	// ----
 
+	// ----
 	dsp_clock_mult = tiuhw_dsp_clock_mult;
 	dsp_input_clock_speed = tiuhw_dsp_input_clock_speed;
 	WAIT_LOOP
+	// ----
 
+	// ----
+	dsp_freq = dsp_clock_mult * dsp_input_clock_speed;
+	ltmp1 = dsp_freq * 0x431bde83;
+	*(volatile int *)0xa5081004 = 0x1;
+	tmp_v0 = ((((ltmp1 >> 32) & 0xffffffff) >> 0x14) - 1) >> 0x02;
 	index = 0;
 	{
 		dsp_freq = dsp_clock_mult * dsp_input_clock_speed;
 		ltmp1 = dsp_freq * 0x431bde83;
-
-		if (index == 0) *(volatile int *)0xa5081004 = 0x1;
-
 		tmp_v0 = ((((ltmp1 >> 32) & 0xffffffff) >> 0x14) - 1) >> 0x02;
-	} while (tmp_v0 > index);
+	} while (tmp_v0 > ++index);
+	// ----
 
-	dsp_clock_mult = tiuhw_dsp_clock_mult;
-	dsp_input_clock_speed = tiuhw_dsp_input_clock_speed;
+	// ----
 	dsp_freq = dsp_clock_mult * dsp_input_clock_speed;	
 	ltmp1 = dsp_freq * 0x10624dd3;
 	tmp_v1 = (ltmp1 >> 32) & 0xffffffff;
@@ -231,14 +242,11 @@ int tnetv1050_tid_init(tiuhw_device *a)
 		dsp_input_clock_speed = tiuhw_dsp_input_clock_speed;
 		dsp_freq = dsp_clock_mult * dsp_input_clock_speed;
 		ltmp1 = dsp_freq * 0x431bde83;
-		tmp_v0 = (ltmp1 >> 32) & 0xffffffff;
-		tmp_v0 >>= 0x14;
-		tmp_v0 -= 1;
-		tmp_v0 <<= 0x02;
-		index = 0;
-	} while (tmp_v0 > index);
-
+		tmp_v0 = (((((ltmp1 >> 32) & 0xffffffff) >> 0x14) - 1) >> 0x02);
+	} while (tmp_v0 > ++index);
 	*(volatile int *)0xa5081020 = 0;
+	// ----
+
 	{
 		tid_type = tiuhw_get_tid_type(tid);
 
@@ -264,7 +272,7 @@ static irqreturn_t test_irq_handler(int i, void *data)
 	return IRQ_HANDLED;
 }
 
-/* FUNCTION: TODO, need review */
+/* FUNCTION: TODO, NEED CAREFULL REVIEW */
 int tnetv1050_tid_writebyte(int a) {
 	int a0, a1;
 	long long tmp1, ltmp2;
@@ -458,7 +466,7 @@ int tnetv1050_tid_writebyte(int a) {
 	return (0 < a0);
 }
 
-/* FUNCTION: TODO, need review */
+/* FUNCTION: TODO, NEED CAREFULL REVIEW */
 int tnetv1050_tid_readbyte(char *ptr)
 {
 	int tmp;
@@ -681,6 +689,7 @@ int tnetv1050_tid_readbyte(char *ptr)
 /* probably read function */
 /* DONE, TODO: magic numbers, magic functions */
 /* FUNCTION: DONE, need review */
+// 0x714
 int tnetv1050_tid_read(int tid, int ecval, int ptr, int count)
 {
 	int ret = 1;
@@ -695,6 +704,7 @@ int tnetv1050_tid_read(int tid, int ecval, int ptr, int count)
 	return ret;
 }
 
+// 0x7c8
 /* FUNCTION: DONE, need review */
 int tnetv1050_tid_write(int tid, int ecval, char *data, int len)
 {
@@ -720,6 +730,7 @@ int tnetv1050_tid_write(int tid, int ecval, char *data, int len)
 	return ret;
 }
 
+// 0x778
 /* FUNCTION: DONE, need review */
 int func03(void)
 {
@@ -727,43 +738,50 @@ int func03(void)
 }
 
 
+// 0x888
 /* FUNCTION: DONE, need review */
 int func11(void)
 {
 	return 0;
 }
 
+// 0x888
 /* FUNCTION: DONE, need review */
 int func10(void)
 {
 	return 0;
 }
 
+// 0x890
 /* FUNCTION: DONE, need review */
 int func12(void)
 {
 	return 0;
 }
 
+// 0x898
 /* FUNCTION: DONE, need review */
 int func13(void)
 {
 	return 0;
 }
 
+// 0x8a0
 /* FUNCTION: DONE, need review */
 int func20(void)
 {
 	return 0;
 }
 
+// 0x8a8
 /* FUNCTION: DONE, need review */
 int func21(void)
 {
 	return 0;
 }
 
-/* TODO: 'magic number sections' -> ar7_* functions */
+// 0x8b0
+/* TODO: 'magic number sections' -some DSP settings? */
 /* FUNCTION: TODO, need review */
 int func22(int tid, int if_type)
 {
@@ -785,14 +803,15 @@ int func22(int tid, int if_type)
 	return 1;
 }
 
+// 0x904
 // something like get_type
 /* FUNCTION: DONE, need review */
-int func23(int tid, int if_type)
+int tnetv1050_get_tid_type(int tid, int if_type)
 {
 	int ret;
 
 	tid = tid&0xffff;
-	if(if_type != 1) {
+	if(if_type != TIHW_INTERNAL) {
 		ret = 0;
 	} else {
 		ret = tiuhw_get_tnetv1050_tid_type();
@@ -806,33 +825,10 @@ int func23(int tid, int if_type)
 static int __init tihw_hal_init_module(void) {
 	int i;
 	int ret;
-/*
-000000000000093c <init_module>:
-     93c:	27bdffe0 	addiu	$sp,$sp,-32
-     940:	afbf0018 	sw	$ra,24($sp)
-*/
 
 	printk(KERN_ERR "HAL initializing\n");
  	printk(KERN_ERR "Version: %s\n", SOURCE_DATE);
-/*
-     944:	3c030000 	lui	$v1,0x0
-     948:	24630038 	addiu	$v1,$v1,56
-     94c:	3c020000 	lui	$v0,0x0
-     950:	24420000 	addiu	$v0,$v0,0
-     954:	24440030 	addiu	$a0,$v0,48
 
-     958:	8c450000 	lw	$a1,0($v0)
-     95c:	8c460004 	lw	$a2,4($v0)
-     960:	8c470008 	lw	$a3,8($v0)
-     964:	8c48000c 	lw	$t0,12($v0)
-     968:	ac650000 	sw	$a1,0($v1)
-     96c:	ac660004 	sw	$a2,4($v1)
-     970:	ac670008 	sw	$a3,8($v1)
-     974:	ac68000c 	sw	$t0,12($v1)
-     978:	24420010 	addiu	$v0,$v0,16
-     97c:	1444fff6 	bne	$v0,$a0,958 <init_module+0x1c>
-     980:	24630010 	addiu	$v1,$v1,16
-*/
 	hw_apis.init = tnetv1050_api.init;
 	hw_apis.read = tnetv1050_api.read;
 	hw_apis.write = tnetv1050_api.write;
@@ -846,37 +842,11 @@ static int __init tihw_hal_init_module(void) {
 	hw_apis.field10 = tnetv1050_api.field10;
 	hw_apis.field11 = tnetv1050_api.field11;
 
-#warning WHAT IT MEANS: saving on stack?
-/*
-     984:	8c440000 	lw	$a0,0($v0)
-     988:	ac640000 	sw	$a0,0($v1)
-*/
-	
 	other_pointer_dst = other_pointer_src;
-/*
-     98c:	afa00010 	sw	$zero,16($sp)
-*/
 
-/*
-     990:	24040028 	li	$a0,40
-     994:	3c050000 	lui	$a1,0x0
-     998:	24a50448 	addiu	$a1,$a1,1096
-     99c:	3c070000 	lui	$a3,0x0
-     9a0:	24e70124 	addiu	$a3,$a3,292
-     9a4:	3c020000 	lui	$v0,0x0
-     9a8:	24420000 	addiu	$v0,$v0,0
-     9ac:	0040f809 	jalr	$v0
-     9b0:	00003021 	move	$a2,$zero
-*/
 	ret = request_irq(TITAN_IRQ_TELEIF, tnetv1050_tid_interrupt_handler, IRQF_SHARED, stub_text, 0);
 	ret = request_irq(13, test_irq_handler, IRQF_SHARED, "test", 0);
 
-/*
-     9b4:	8fbf0018 	lw	$ra,24($sp)
-     9b8:	00001021 	move	$v0,$zero
-     9bc:	03e00008 	jr	$ra
-     9c0:	27bd0020 	addiu	$sp,$sp,32
-*/
 	printk(KERN_ERR "HAL initializing DONE\n");
 
 	return 0;
@@ -1031,6 +1001,7 @@ void tiuhw_deselect_tid(int tid)
 
 /* TODO: implement */
 /* FUNCTION: TODO, need review */
+/* This functions should be checked. It checks undefined variable. tmp_variable0 */
 int tiuhw_get_tid_type(int tid)
 {
 	int ret = -1;
