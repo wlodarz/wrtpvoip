@@ -650,7 +650,7 @@ Disassembly of section .text:
      940:	03e00008 	jr	$ra
      944:	27bd0038 	addiu	$sp,$sp,56
 */
-int tiumcb_init()
+int tiumcb_init(char *ptr)
 {
 /*
      948:	27bdffd0 	addiu	$sp,$sp,-48
@@ -671,16 +671,22 @@ int tiumcb_init()
      97c:	02a0f809 	jalr	$s5
      980:	24060020 	li	$a2,32
 */
+	memset(ptr, 0, 32);
 
 /*
      984:	24100002 	li	$s0,2
      988:	a6700010 	sh	$s0,16($s3)
+*/
+/*
      98c:	3c110000 	lui	$s1,0x0
      990:	263102fc 	addiu	$s1,$s1,764
      994:	3c120000 	lui	$s2,0x0
      998:	26520000 	addiu	$s2,$s2,0
      99c:	0240f809 	jalr	$s2
      9a0:	02202021 	move	$a0,$s1
+*/
+	//prom_getenv;
+/*
      9a4:	00402821 	move	$a1,$v0
      9a8:	10a0003b 	beqz	$a1,a98 <tiuhw_sys_call+0x9dc>
      9ac:	00a02021 	move	$a0,$a1

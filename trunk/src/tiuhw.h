@@ -13,6 +13,8 @@
 #define DSP_RESET_ON 1
 #define DSP_RESET_OFF 0
 
+#define DSP_MAX_CLOCK_SPEED 125000000
+
 
 void hwu_lin_register_halt_hooks(void *, void *);
 void VpMpiCmd(VpDeviceIdType deviceId,    /**< Chip select, connector and 3 or 4 wire interface for command */
