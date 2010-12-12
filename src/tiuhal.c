@@ -273,7 +273,7 @@ static irqreturn_t test_irq_handler(int i, void *data)
 }
 
 /* FUNCTION: TODO, NEED CAREFULL REVIEW */
-int tnetv1050_tid_writebyte(int a) {
+int tnetv1050_tid_writebyte(int byte) {
 	int a0, a1;
 	long long tmp1, ltmp2;
 	int tmp2, tmp3, tmp4, tmp9, tmp10;
@@ -285,7 +285,7 @@ int tnetv1050_tid_writebyte(int a) {
 /*
      450:	308400ff 	andi	$a0,$a0,0xff
 */
-	byte = a&0xff;
+	//byte = a&0xff;
 /*
      454:	3c080000 	lui	$t0,0x0
      458:	8d080000 	lw	$t0,0($t0)
@@ -324,7 +324,7 @@ int tnetv1050_tid_writebyte(int a) {
      4a0:	00431025 	or	$v0,$v0,$v1
      4a4:	acc20000 	sw	$v0,0($a2)
 */
-	tmp2 = ((dsp_freq * 0x431bde83) >> 32) & 0xffffffff;
+	tmp2 = (unsigned int)(((long long)(dsp_freq * 0x431bde83) >> 32)); // & 0xffffffff;
 	tmp3 = (((tmp2 >> 0x14) - 1) | 0x81480000);
 	*(volatile int *)DSP_REG_SPCR1 = tmp3;
 
@@ -467,7 +467,7 @@ int tnetv1050_tid_writebyte(int a) {
 }
 
 /* FUNCTION: TODO, NEED CAREFULL REVIEW */
-int tnetv1050_tid_readbyte(char *ptr)
+int tnetv1050_tid_readbyte(char *pbuffer)
 {
 	int tmp;
 	int tmp_t0, tmp_t1;
@@ -680,7 +680,7 @@ int tnetv1050_tid_readbyte(char *ptr)
      710:	00001021 	move	$v0,$zero
 */
 	if(tmp_a2 != 0) {
-		*ptr = tmp_v1;		
+		*pbuffer = tmp_v1;		
 		return 1;
 	} 
 	return 0;

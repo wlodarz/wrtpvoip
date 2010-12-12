@@ -10,6 +10,10 @@
 
 Disassembly of section .text:
 
+*/
+void tcb_by_name()
+{
+/*
 0000000000000000 <tcb_by_name>:
        0:	27bdffe0 	addiu	$sp,$sp,-32
        4:	afbf001c 	sw	$ra,28($sp)
@@ -44,7 +48,10 @@ Disassembly of section .text:
       78:	8fb00010 	lw	$s0,16($sp)
       7c:	03e00008 	jr	$ra
       80:	27bd0020 	addiu	$sp,$sp,32
-
+*/
+void mxp_tcb_identify()
+{
+/*
 0000000000000084 <mxp_tcb_identify>:
       84:	27bdffe0 	addiu	$sp,$sp,-32
       88:	afbf0018 	sw	$ra,24($sp)
@@ -88,7 +95,11 @@ Disassembly of section .text:
      130:	8fb00010 	lw	$s0,16($sp)
      134:	03e00008 	jr	$ra
      138:	27bd0020 	addiu	$sp,$sp,32
+*/
 
+void mxp_tcb_alloc()
+{
+/*
 000000000000013c <mxp_tcb_alloc>:
      13c:	27bdffe0 	addiu	$sp,$sp,-32
      140:	afbf001c 	sw	$ra,28($sp)
@@ -162,7 +173,11 @@ Disassembly of section .text:
      268:	8fb00010 	lw	$s0,16($sp)
      26c:	03e00008 	jr	$ra
      270:	27bd0020 	addiu	$sp,$sp,32
+*/
 
+void mxp_tcb_free()
+{
+/*
 0000000000000274 <mxp_tcb_free>:
      274:	40056000 	mfc0	$a1,$12
      278:	00000000 	nop
@@ -203,7 +218,11 @@ Disassembly of section .text:
 	...
      318:	03e00008 	jr	$ra
      31c:	00001021 	move	$v0,$zero
+*/
 
+void mxp_task_wakeup()
+{
+/*
 0000000000000320 <mxp_task_wakeup>:
      320:	27bdffe8 	addiu	$sp,$sp,-24
      324:	afbf0010 	sw	$ra,16($sp)
@@ -220,7 +239,12 @@ Disassembly of section .text:
      350:	8fbf0010 	lw	$ra,16($sp)
      354:	03e00008 	jr	$ra
      358:	27bd0018 	addiu	$sp,$sp,24
+*/
+}
 
+void mxp_task_sleep()
+{
+/*
 000000000000035c <mxp_task_sleep>:
      35c:	27bdffd8 	addiu	$sp,$sp,-40
      360:	afbf0020 	sw	$ra,32($sp)
@@ -1499,7 +1523,13 @@ Disassembly of section .text:
     1844:	8fb10024 	lw	$s1,36($sp)
     1848:	03e00008 	jr	$ra
     184c:	27bd0038 	addiu	$sp,$sp,56
+*/
+}
 
+
+void mxl_tmr_init()
+{
+/*
 0000000000001850 <mxl_tmr_init>:
     1850:	27bdffe8 	addiu	$sp,$sp,-24
     1854:	afbf0010 	sw	$ra,16($sp)
@@ -1664,7 +1694,12 @@ Disassembly of section .text:
     1af0:	8fb00040 	lw	$s0,64($sp)
     1af4:	03e00008 	jr	$ra
     1af8:	27bd0050 	addiu	$sp,$sp,80
+*/
+}
 
+void mxp_tmrStart()
+{
+/*
 0000000000001afc <mxp_tmrStart>:
     1afc:	27bdffe8 	addiu	$sp,$sp,-24
     1b00:	afbf0014 	sw	$ra,20($sp)
@@ -1725,7 +1760,12 @@ Disassembly of section .text:
     1bec:	8fb00010 	lw	$s0,16($sp)
     1bf0:	03e00008 	jr	$ra
     1bf4:	27bd0018 	addiu	$sp,$sp,24
+*/
+}
 
+void mxp_tmrAbort()
+{
+/*
 0000000000001bf8 <mxp_tmrAbort>:
     1bf8:	27bdffd0 	addiu	$sp,$sp,-48
     1bfc:	afbf0028 	sw	$ra,40($sp)
@@ -1806,7 +1846,12 @@ Disassembly of section .text:
     1d38:	8fb00010 	lw	$s0,16($sp)
     1d3c:	03e00008 	jr	$ra
     1d40:	27bd0030 	addiu	$sp,$sp,48
+*/
+}
 
+void mxp_tmrDelete()
+{
+/*
 0000000000001d44 <mxp_tmrDelete>:
     1d44:	27bdffe0 	addiu	$sp,$sp,-32
     1d48:	afbf0018 	sw	$ra,24($sp)
@@ -1869,7 +1914,11 @@ Disassembly of section .text:
     1e3c:	ac820018 	sw	$v0,24($a0)
     1e40:	03e00008 	jr	$ra
     1e44:	00001021 	move	$v0,$zero
+*/
 
+void mxp_syscall()
+{
+/*
 0000000000001e48 <mxp_syscall>:
     1e48:	27bdffe8 	addiu	$sp,$sp,-24
     1e4c:	afbf0010 	sw	$ra,16($sp)
@@ -2064,6 +2113,7 @@ Disassembly of section .text:
     2140:	03e00008 	jr	$ra
     2144:	27bd0018 	addiu	$sp,$sp,24
 */
+}
 
 // irqreturn_t mxp_timer_irq_handler(int i, void *data)
 /*
