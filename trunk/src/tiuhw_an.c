@@ -1267,7 +1267,10 @@ int tiumcb_init(char *ptr)
     1278:	00001021 	move	$v0,$zero
     127c:	03e00008 	jr	$ra
     1280:	27bd0018 	addiu	$sp,$sp,24
-
+*/
+void tiuhw_open()
+{
+/*
 0000000000001284 <tiuhw_open>:
     1284:	24020001 	li	$v0,1
     1288:	3c030000 	lui	$v1,0x0
@@ -1282,7 +1285,13 @@ int tiumcb_init(char *ptr)
     12ac:	ac620004 	sw	$v0,4($v1)
     12b0:	03e00008 	jr	$ra
     12b4:	00001021 	move	$v0,$zero
+*/
+	return 0;
+}
 
+void tiuhw_close()
+{
+/*
 00000000000012b8 <tiuhw_close>:
     12b8:	24020001 	li	$v0,1
     12bc:	3c030000 	lui	$v1,0x0
@@ -1297,6 +1306,10 @@ int tiumcb_init(char *ptr)
     12e0:	ac620004 	sw	$v0,4($v1)
     12e4:	03e00008 	jr	$ra
     12e8:	00001021 	move	$v0,$zero
+*/
+	return 0;
+}
+/*
     12ec:	27bdffb0 	addiu	$sp,$sp,-80
     12f0:	afbf0048 	sw	$ra,72($sp)
     12f4:	afb50044 	sw	$s5,68($sp)
