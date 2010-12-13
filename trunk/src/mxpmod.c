@@ -254,11 +254,16 @@ void mxp_task_sleep()
      370:	afb00010 	sw	$s0,16($sp)
      374:	00801021 	move	$v0,$a0
      378:	8c470004 	lw	$a3,4($v0)
+*/
+/*
      37c:	40136000 	mfc0	$s3,$12
      380:	00000000 	nop
      384:	36610001 	ori	$at,$s3,0x1
      388:	38210001 	xori	$at,$at,0x1
      38c:	40816000 	mtc0	$at,$12
+*/
+		//cli();
+/*
      390:	00000040 	sll	$zero,$zero,0x1
      394:	00000040 	sll	$zero,$zero,0x1
      398:	00000040 	sll	$zero,$zero,0x1
@@ -273,13 +278,18 @@ void mxp_task_sleep()
      3bc:	24422e70 	addiu	$v0,$v0,11888
      3c0:	0040f809 	jalr	$v0
      3c4:	02402021 	move	$a0,$s2
+*/
+/*
      3c8:	40016000 	mfc0	$at,$12
      3cc:	32730001 	andi	$s3,$s3,0x1
      3d0:	34210001 	ori	$at,$at,0x1
      3d4:	38210001 	xori	$at,$at,0x1
      3d8:	02619825 	or	$s3,$s3,$at
      3dc:	40936000 	mtc0	$s3,$12
+*/
+	// restore_irq
 	...
+/*
      3ec:	2610fff4 	addiu	$s0,$s0,-12
      3f0:	3c020000 	lui	$v0,0x0
      3f4:	24420000 	addiu	$v0,$v0,0
@@ -2115,7 +2125,8 @@ void mxp_syscall()
 */
 }
 
-// irqreturn_t mxp_timer_irq_handler(int i, void *data)
+irqreturn_t mxp_timer_irq_handler(int i, void *data)
+{
 /*
 0000000000002148 <mxp_timer_irq_handle>:
     2148:	27bdffe8 	addiu	$sp,$sp,-24
@@ -2208,6 +2219,9 @@ void mxp_syscall()
     22a4:	03e00008 	jr	$ra
     22a8:	27bd0018 	addiu	$sp,$sp,24
 */
+}
+
+
 /*
     22ac:	27bdffc0 	addiu	$sp,$sp,-64
     22b0:	afbf003c 	sw	$ra,60($sp)
