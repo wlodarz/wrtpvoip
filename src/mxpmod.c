@@ -2,6 +2,7 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/compiler.h>
+#include <linux/interrupt.h>
 #include <asm/mach-ar7/ar7.h>
 
 
@@ -49,6 +50,8 @@ void tcb_by_name()
       7c:	03e00008 	jr	$ra
       80:	27bd0020 	addiu	$sp,$sp,32
 */
+}
+
 void mxp_tcb_identify()
 {
 /*
@@ -96,6 +99,7 @@ void mxp_tcb_identify()
      134:	03e00008 	jr	$ra
      138:	27bd0020 	addiu	$sp,$sp,32
 */
+}
 
 void mxp_tcb_alloc()
 {
@@ -174,6 +178,7 @@ void mxp_tcb_alloc()
      26c:	03e00008 	jr	$ra
      270:	27bd0020 	addiu	$sp,$sp,32
 */
+}
 
 void mxp_tcb_free()
 {
@@ -219,6 +224,7 @@ void mxp_tcb_free()
      318:	03e00008 	jr	$ra
      31c:	00001021 	move	$v0,$zero
 */
+}
 
 void mxp_task_wakeup()
 {
@@ -288,7 +294,7 @@ void mxp_task_sleep()
      3dc:	40936000 	mtc0	$s3,$12
 */
 	// restore_irq
-	...
+	//...
 /*
      3ec:	2610fff4 	addiu	$s0,$s0,-12
      3f0:	3c020000 	lui	$v0,0x0
@@ -1925,6 +1931,7 @@ void mxp_tmrDelete()
     1e40:	03e00008 	jr	$ra
     1e44:	00001021 	move	$v0,$zero
 */
+}
 
 void mxp_syscall()
 {
@@ -2125,7 +2132,7 @@ void mxp_syscall()
 */
 }
 
-irqreturn_t mxp_timer_irq_handler(int i, void *data)
+static irqreturn_t mxp_timer_irq_handler(int i, void *data)
 {
 /*
 0000000000002148 <mxp_timer_irq_handle>:
@@ -2443,6 +2450,7 @@ irqreturn_t mxp_timer_irq_handler(int i, void *data)
     2610:	03e00008 	jr	$ra
     2614:	00001021 	move	$v0,$zero
 */
+
 
 static int __init mxpmod_init_module(void) {
 /*
@@ -3150,4 +3158,3 @@ static void __exit mxpmod_cleanup_module(void)
 
 module_init(mxpmod_init_module);
 module_exit(mxpmod_cleanup_module);
-

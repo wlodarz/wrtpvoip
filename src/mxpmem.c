@@ -738,7 +738,11 @@ void func2()
 	...
  be8:	03e00008 	jr	$ra
  bec:	24020016 	li	$v0,22
+*/
 
+void mxp_mem_syscall()
+{
+/*
 0000000000000bf0 <mxp_mem_syscall>:
  bf0:	27bdffe8 	addiu	$sp,$sp,-24
  bf4:	8c820000 	lw	$v0,0($a0)
@@ -865,7 +869,10 @@ void func2()
  dd8:	03e00008 	jr	$ra
  ddc:	27bd0038 	addiu	$sp,$sp,56
 */
+}
 
+void init_module()
+{
 /*
 0000000000000de0 <init_module>:
  de0:	27bdffe8 	addiu	$sp,$sp,-24
@@ -892,7 +899,8 @@ void func2()
  e10:	0040f809 	jalr	$v0
  e14:	00002821 	move	$a1,$zero
 */
-	create_proc_entry(devname, 0, mxp_proc_dir);
+	if (create_proc_entry(devname, 0, mxp_proc_dir) != 0) {
+	
 /*
  e18:	00401821 	move	$v1,$v0
  e1c:	10600005 	beqz	$v1,e34 <init_module+0x54>
@@ -901,22 +909,36 @@ void func2()
  e28:	24420d08 	addiu	$v0,$v0,3336
  e2c:	ac62003c 	sw	$v0,60($v1)
  e30:	ac600038 	sw	$zero,56($v1)
- e34:	3c020000 	lui	$v0,0x0
+*/
+	}
+
+/*
+ e34:	3c020000 	lui	$v0,0x0 // text
  e38:	24420bf0 	addiu	$v0,$v0,3056
- e3c:	3c010000 	lui	$at,0x0
+ e3c:	3c010000 	lui	$at,0x0 // ti_syscall
  e40:	ac220010 	sw	$v0,16($at)
- e44:	3c040000 	lui	$a0,0x0
+*/
+	ti_syscalls = 0; 
+/*
+ e44:	3c040000 	lui	$a0,0x0 // rodata
  e48:	2484012c 	addiu	$a0,$a0,300
- e4c:	3c020000 	lui	$v0,0x0
+ e4c:	3c020000 	lui	$v0,0x0 //printk
  e50:	24420000 	addiu	$v0,$v0,0
  e54:	0040f809 	jalr	$v0
  e58:	00000000 	nop
+*/
+	printk(KERN_ERR "mem.MXP memory module loaded\n");
+/*
  e5c:	8fbf0010 	lw	$ra,16($sp)
  e60:	00001021 	move	$v0,$zero
  e64:	03e00008 	jr	$ra
  e68:	27bd0018 	addiu	$sp,$sp,24
 */
+	return;
+}
 
+void cleanup_module()
+{
 /*
 0000000000000e6c <cleanup_module>:
  e6c:	27bdffe8 	addiu	$sp,$sp,-24
@@ -965,3 +987,4 @@ void func2()
  f18:	03e00008 	jr	$ra
  f1c:	a0800000 	sb	$zero,0($a0)
 */
+}
