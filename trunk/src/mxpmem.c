@@ -72,19 +72,34 @@ void func1()
   ec:	24420000 	addiu	$v0,$v0,0
   f0:	0040f809 	jalr	$v0
   f4:	24060120 	li	$a2,288
+*/
+	// memset(base, 0, 288);
+/*
   f8:	00002821 	move	$a1,$zero
   fc:	24040007 	li	$a0,7
+*/
+  i = 7
+  j = 0;
+  {
+/*
  100:	00b01821 	addu	$v1,$a1,$s0
  104:	2402ffff 	li	$v0,-1
  108:	ac620000 	sw	$v0,0($v1)
  10c:	2484ffff 	addiu	$a0,$a0,-1
  110:	0481fffb 	bgez	$a0,100 <mxp_segGetName-0x234>
  114:	24a50024 	addiu	$a1,$a1,36
+ */
+ 	dev = base[i];
+	dev->f1 = -1;
+ } while(--i >=0);
+
+ /*
  118:	8fbf0014 	lw	$ra,20($sp)
  11c:	8fb00010 	lw	$s0,16($sp)
  120:	03e00008 	jr	$ra
  124:	27bd0018 	addiu	$sp,$sp,24
 */
+	return;
 }
 void func2()
 {
@@ -183,6 +198,9 @@ void func2()
  2a0:	8fb00010 	lw	$s0,16($sp)
  2a4:	03e00008 	jr	$ra
  2a8:	27bd0028 	addiu	$sp,$sp,40
+ */
+}
+/*
  2ac:	27bdffe0 	addiu	$sp,$sp,-32
  2b0:	afbf0018 	sw	$ra,24($sp)
  2b4:	afb10014 	sw	$s1,20($sp)
@@ -578,6 +596,9 @@ void func2()
 	...
  928:	03e00008 	jr	$ra
  92c:	24020018 	li	$v0,24
+ */
+ void syscall_fync1
+ /*
  930:	8c820008 	lw	$v0,8($a0)
  934:	00021c02 	srl	$v1,$v0,0x10
  938:	3045ffff 	andi	$a1,$v0,0xffff
@@ -760,6 +781,7 @@ void mxp_mem_syscall()
  c24:	24420930 	addiu	$v0,$v0,2352
  c28:	0040f809 	jalr	$v0
  c2c:	00000000 	nop
+
  c30:	08000340 	j	d00 <mxp_mem_syscall+0x110>
  c34:	8fbf0010 	lw	$ra,16($sp)
  c38:	3c020000 	lui	$v0,0x0
@@ -810,10 +832,15 @@ void mxp_mem_syscall()
  cec:	00000000 	nop
  cf0:	0800033f 	j	cfc <mxp_mem_syscall+0x10c>
  cf4:	00001021 	move	$v0,$zero
+ 	}
  cf8:	2402fffe 	li	$v0,-2
  cfc:	8fbf0010 	lw	$ra,16($sp)
  d00:	03e00008 	jr	$ra
  d04:	27bd0018 	addiu	$sp,$sp,24
+ */
+ 	return;
+}
+/*
  d08:	27bdffc8 	addiu	$sp,$sp,-56
  d0c:	afbf0034 	sw	$ra,52($sp)
  d10:	afb40030 	sw	$s4,48($sp)
@@ -889,7 +916,6 @@ void init_module()
  df8:	3c040000 	lui	$a0,0x0
  dfc:	24840128 	addiu	$a0,$a0,296
 */
-	string = devname;
 
 /*
  e00:	3c060000 	lui	$a2,0x0
@@ -918,7 +944,7 @@ void init_module()
  e3c:	3c010000 	lui	$at,0x0 // ti_syscall
  e40:	ac220010 	sw	$v0,16($at)
 */
-	ti_syscalls = 0; 
+	ti_syscalls = mxp_mem_syscall; 
 /*
  e44:	3c040000 	lui	$a0,0x0 // rodata
  e48:	2484012c 	addiu	$a0,$a0,300

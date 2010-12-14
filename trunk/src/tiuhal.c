@@ -782,7 +782,7 @@ int func21(void)
 }
 
 // 0x8b0
-/* TODO: 'magic number sections' -some DSP settings? */
+/* TODO: 'magic number sections' - some TELE_IF settings? */
 /* FUNCTION: TODO, need review */
 int func22(int tid, int if_type)
 {
