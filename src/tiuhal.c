@@ -10,6 +10,8 @@
 #include "tiuhw.h"
 #include "tiuhal.h"
 
+#define GPIO_51 51
+
 #define DRV_VERSION "0.0.1"
 #define DRV_DESC "TIUHal driver"
 
@@ -934,20 +936,27 @@ int tiuhw_init_hal(tiuhw_device *a, int b)
 			reg |= 0x01;
 			*(volatile int *)0xa8611660 = reg;
 
+#if 1
 			// gpio - set direction 1
-			reg = *(volatile int *)0xa8610914; // a0
+			reg = *(volatile int *)0xa8610914; // a0 TITAN_GPIO_DIR_1
 			reg &= 0xfff7ffff; // 0xfff7ffff is in a3
 			*(volatile int *)0xa8610914 = reg;
 
 			// gpio - data out 1
-			reg = *(volatile int *)0xa861090c; // a1
+			reg = *(volatile int *)0xa861090c; // a1 TITAN_GPIO_OUTPUT_1
 			reg &= 0xfff7ffff;
 			*(volatile int *)0xa861090c = reg;
+#else
+			gpio_direction_output(GPIO_51, 0);
+#endif
 
+#if 1
 			// gpio - enable 1
 			reg = *(volatile int *)0xa861091c; // t0
 			reg |= 0x00080000;
-			*(volatile int *)0xa861091c = reg; // t0
+			*(volatile int *)0xa861091c = reg; // t0 TITAN_GPIO_ENBL_1
+#else
+#endif
 
 			// reset TELE_RESET (telephony interface) - PIN_SEL_14
 			reg = *(volatile int *)0xa8611640; // a2
@@ -1420,7 +1429,7 @@ int tiuhw_get_dsp_mult(int interface)
 }
 
 /* DONE */
-/* FUNCTION: DONE, need review */
+/* FUNCTION: DONE, need tests */
 int tiuhw_reset_tid(char tid, int cmd)
 {
 	int reg;
@@ -1428,9 +1437,9 @@ int tiuhw_reset_tid(char tid, int cmd)
 	printk(KERN_ERR "tiuhw_reset_tid: %u %u\n", tid & 0xff, cmd);
 
 	if(cmd) {
-		gpio_set_value(19, 0);
+		gpio_set_value(GPIO_51, 0);
 	} else {
-		gpio_set_value(19, 1);
+		gpio_set_value(GPIO_51, 1);
 	}
 
 	return 0;

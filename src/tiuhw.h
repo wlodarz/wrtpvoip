@@ -15,6 +15,11 @@
 
 #define DSP_MAX_CLOCK_SPEED 125000000
 
+#define TITAN_RESET_BIT_DSP 19
+
+
+#define TITAN_IRQ_TELEIF 40
+
 
 void hwu_lin_register_halt_hooks(void *, void *);
 void VpMpiCmd(VpDeviceIdType deviceId,    /**< Chip select, connector and 3 or 4 wire interface for command */
