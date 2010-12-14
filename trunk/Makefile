@@ -8,30 +8,30 @@
 include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/kernel.mk
 
-PKG_NAME:=ar7voip
+PKG_NAME:=titanvoip
 PKG_RELEASE:=1
 
 include $(INCLUDE_DIR)/package.mk
 
-define KernelPackage/ar7voip
-  SUBMENU:=AR7VOIP support
-  TITLE:=AR7VOIP subsystem support
+define KernelPackage/titanvoip
+  SUBMENU:=TitanVOIP support
+  TITLE:=TitanVOIP subsystem support
   DEPENDS:=
   FILES:= \
-  	$(PKG_BUILD_DIR)/ar7dsp.$(LINUX_KMOD_SUFFIX) \
-  	$(PKG_BUILD_DIR)/ar7hal.$(LINUX_KMOD_SUFFIX) \
-  	$(PKG_BUILD_DIR)/ar7mxpmod.$(LINUX_KMOD_SUFFIX) \
-  	$(PKG_BUILD_DIR)/ar7hwan.$(LINUX_KMOD_SUFFIX) \
+  	$(PKG_BUILD_DIR)/titan_dsp.$(LINUX_KMOD_SUFFIX) \
+  	$(PKG_BUILD_DIR)/titan_tiuhal.$(LINUX_KMOD_SUFFIX) \
+  	$(PKG_BUILD_DIR)/titan_mxpmod.$(LINUX_KMOD_SUFFIX) \
+  	$(PKG_BUILD_DIR)/titan_hwan.$(LINUX_KMOD_SUFFIX) \
   	$(PKG_BUILD_DIR)/legerity/le88x.$(LINUX_KMOD_SUFFIX)
-  AUTOLOAD:=$(call AutoLoad,55,ar7mxpmod ar7hal ar7dsp ar7hwan le88x testapp)
+  AUTOLOAD:=$(call AutoLoad,55,titan_mxpmod titan_tiuhal titan_dsp titan_hwan le88x testapp)
 endef
 
-define KernelPackage/ar7voip/description
- Kernel module to register a ar7voip platform device.
+define KernelPackage/titanvoip/description
+ Kernel module to register a titan_voip platform device.
 endef
 
 EXTRA_KCONFIG:= \
-	CONFIG_AR7VOIP=m
+	CONFIG_TITANVOIP=m
 
 EXTRA_CFLAGS:= \
 	$(patsubst CONFIG_%, -DCONFIG_%=1, $(patsubst %=m,%,$(filter %=m,$(EXTRA_KCONFIG)))) \
@@ -57,5 +57,5 @@ define Build/Compile
 		modules
 endef
 
-$(eval $(call KernelPackage,ar7voip))
+$(eval $(call KernelPackage,titanvoip))
 

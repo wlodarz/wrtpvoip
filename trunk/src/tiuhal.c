@@ -15,8 +15,8 @@
 
 
 int tnetv1050_tid_init(tiuhw_device *a);
-int tnetv1050_tid_read(int tid, int ecval_arg, int data, int len);
-int tnetv1050_tid_write(int tid_arg, int ecval_arg, char *data, int len);
+int tnetv1050_tid_read(char tid, int ecval_arg, int data, int len);
+int tnetv1050_tid_write(char tid_arg, int ecval_arg, char *data, int len);
 int func03(void);
 int func10(void);
 int func11(void);
@@ -26,18 +26,18 @@ int func20(void);
 int func21(void);
 int func22(int a, int b);
 int func23(int a, int b);
-int tnetv1050_get_tid_type(int a, int b);
+int tnetv1050_get_tid_type(char a, int b);
 
 char *prom_getenv(char *);
 static irqreturn_t tnetv1050_tid_interrupt_handler(int i, void *data);
 static irqreturn_t test_irq_handler(int i, void *data);
 int hwu_get_tiuhw_if(void);
-int tiuhw_reset_tid(int a, int cmd);
-void tiuhw_select_tid(int tid);
-void tiuhw_deselect_tid(int tid);
+int tiuhw_reset_tid(char tid, int cmd);
+void tiuhw_select_tid(char tid);
+void tiuhw_deselect_tid(char tid);
 int tiuhw_get_tnetv1050_tid_type(void);
-int tnetv1050_get_tid_type(int tid, int tid_type);
-int tiuhw_get_tid_type(int tid);
+int tnetv1050_get_tid_type(char tid, int tid_type);
+int tiuhw_get_tid_type(char tid);
 
 
 #define DSP_CORE_0 0
@@ -279,7 +279,6 @@ int tnetv1050_tid_writebyte(int byte) {
 	int tmp2, tmp3, tmp4, tmp9, tmp10;
 	int reg;
 	int tmp_s3;
-	char byte;
 	unsigned int dsp_mult, dsp_speed;
 	unsigned long dsp_freq;
 /*
@@ -690,7 +689,7 @@ int tnetv1050_tid_readbyte(char *pbuffer)
 /* DONE, TODO: magic numbers, magic functions */
 /* FUNCTION: DONE, need review */
 // 0x714
-int tnetv1050_tid_read(int tid, int ecval, int ptr, int count)
+int tnetv1050_tid_read(char tid, int ecval, int ptr, int count)
 {
 	int ret = 1;
 
@@ -706,7 +705,7 @@ int tnetv1050_tid_read(int tid, int ecval, int ptr, int count)
 
 // 0x7c8
 /* FUNCTION: DONE, need review */
-int tnetv1050_tid_write(int tid, int ecval, char *data, int len)
+int tnetv1050_tid_write(char tid, int ecval, char *data, int len)
 {
 	int tmp1;
 	int cnt = len;
@@ -806,11 +805,10 @@ int func22(int tid, int if_type)
 // 0x904
 // something like get_type
 /* FUNCTION: DONE, need review */
-int tnetv1050_get_tid_type(int tid, int if_type)
+int tnetv1050_get_tid_type(char tid, int if_type)
 {
 	int ret;
 
-	tid = tid&0xffff;
 	if(if_type != TIHW_INTERNAL) {
 		ret = 0;
 	} else {
@@ -987,14 +985,14 @@ int tiuhw_init_hal(tiuhw_device *a, int b)
 
 /* DONE */
 /* FUNCTION: DONE, need review */
-void tiuhw_select_tid(int tid)
+void tiuhw_select_tid(char tid)
 {
 	return;
 }
 
 /* DONE */
 /* FUNCTION: DONE, need review */
-void tiuhw_deselect_tid(int tid)
+void tiuhw_deselect_tid(char tid)
 {
 	return;
 }
@@ -1002,12 +1000,12 @@ void tiuhw_deselect_tid(int tid)
 /* TODO: implement */
 /* FUNCTION: TODO, need review */
 /* This functions should be checked. It checks undefined variable. tmp_variable0 */
-int tiuhw_get_tid_type(int tid)
+int tiuhw_get_tid_type(char tid)
 {
 	int ret = -1;
 	char *num_tids_str = NULL;
 	int num_tids = 0;
-	int tmp0, tmp1, tmp3;
+	int tmp0, tmp3;
 	char *tele_id = NULL, *tmp_tele_id = NULL, *end_buf = NULL;
 	int some_tmp;
 	char *str1 = NULL;
@@ -1034,7 +1032,6 @@ int tiuhw_get_tid_type(int tid)
      e3c:	309600ff 	andi	$s6,$a0,0xff
 */
 	num_tids = 1; // s3
-	tmp1 = tid & 0xff; // s6
 
 /*
      e40:	3c040000 	lui	$a0,0x0
@@ -1374,7 +1371,8 @@ out:
     1150:	03e00008 	jr	$ra
     1154:	27bd00b0 	addiu	$sp,$sp,176
 */
-	ret += tmp1;
+	ret += tid;
+
 	return ret; // something from structure
 }
 
@@ -1423,7 +1421,7 @@ int tiuhw_get_dsp_mult(int interface)
 
 /* DONE */
 /* FUNCTION: DONE, need review */
-int tiuhw_reset_tid(int tid, int cmd)
+int tiuhw_reset_tid(char tid, int cmd)
 {
 	int reg;
 
