@@ -42,13 +42,13 @@ int tnetv1050_get_tid_type(char tid, int tid_type);
 int tiuhw_get_tid_type(char tid);
 
 
-#define DSP_CORE_0 0
-#define DSP_RESET_ON 1
-#define DSP_RESET_OFF 0
+#define TIU_IF_0 0
+#define TIU_RESET_ON 1
+#define TIU_RESET_OFF 0
 
-#define DSP_REG_PCMCR1 	0xa5081000
-#define DSP_REG_SPCR1 	0xa5081010
-#define DSP_REG_DXR1    0xa5081018
+#define MCBSP_REG_PCMCR1 	0xa5081000
+#define MCBSP_REG_SPCR1 	0xa5081010
+#define MCBSP_REG_DXR1    0xa5081018
 
 /* pointers from data + 0x0000 */
 api_type tnetv1050_api = {
@@ -202,8 +202,8 @@ int tnetv1050_tid_init(tiuhw_device *tiddev)
 	dsp_freq = dsp_clock_mult * dsp_input_clock_speed;
 	dsp_freq = (dsp_freq & 0xffffffff) * 0x431bde83;
 	tmp_v0 = ((((dsp_freq >> 32) & 0xffffffff) >> 0x14) - 1) | 0x81080000;
-	*(volatile int *)DSP_REG_SPCR1 = tmp_v0;
-	reg = *(volatile int *)DSP_REG_SPCR1; // SPCR1
+	*(volatile int *)MCBSP_REG_SPCR1 = tmp_v0;
+	reg = *(volatile int *)MCBSP_REG_SPCR1; // SPCR1
 	printk(KERN_ERR "SPCR1 = %08lx\n", reg);
 	// ----
 
@@ -233,9 +233,9 @@ int tnetv1050_tid_init(tiuhw_device *tiddev)
 	tmp_v1 >>= 0x12;
 	tmp_v1 -= 1;
 	tmp_v1 = tmp_v1 | 0x00ff8000;
-	*(volatile int *)DSP_REG_PCMCR1 = tmp_v1;
+	*(volatile int *)MCBSP_REG_PCMCR1 = tmp_v1;
 
-	reg = *(volatile int *)DSP_REG_PCMCR1;
+	reg = *(volatile int *)MCBSP_REG_PCMCR1;
 	printk(KERN_ERR "PCMCR1 = %08lx\n", reg);
 
 	index = 0;
@@ -311,12 +311,12 @@ int tnetv1050_tid_writebyte(int byte) {
      47c:	3c07a508 	lui	$a3,0xa508
      480:	34e71018 	ori	$a3,$a3,0x1018  // a3 = 0xa5081018
      484:	3c06a508 	lui	$a2,0xa508
-     488:	34c61010 	ori	$a2,$a2,0x1010  // a2 = DSP_REG_SPCR1
+     488:	34c61010 	ori	$a2,$a2,0x1010  // a2 = MCBSP_REG_SPCR1
      48c:	3c038148 	lui	$v1,0x8148	// v1 = 0x8148
      490:	00002810 	mfhi	$a1 		// a1 - tmp2
      494:	ace40000 	sw	$a0,0($a3)
 */
-	*(volatile int *)DSP_REG_DXR1 = byte;
+	*(volatile int *)MCBSP_REG_DXR1 = byte;
 
 
 /*
@@ -327,7 +327,7 @@ int tnetv1050_tid_writebyte(int byte) {
 */
 	tmp2 = (unsigned int)(((long long)(dsp_freq * 0x431bde83) >> 32)); // & 0xffffffff;
 	tmp3 = (((tmp2 >> 0x14) - 1) | 0x81480000);
-	*(volatile int *)DSP_REG_SPCR1 = tmp3;
+	*(volatile int *)MCBSP_REG_SPCR1 = tmp3;
 
 /*
      4a8:	00052cc2 	srl	$a1,$a1,0x13
@@ -364,7 +364,7 @@ int tnetv1050_tid_writebyte(int byte) {
      4d0:	00022100 	sll	$a0,$v0,0x4
 */
 	a1 = tmp3 << 0x04;
-	reg = *(volatile int *)DSP_REG_DXR1;
+	reg = *(volatile int *)MCBSP_REG_DXR1;
 	a0 = reg;
 	if(reg<0) {
 
@@ -448,7 +448,7 @@ int tnetv1050_tid_writebyte(int byte) {
      560:	04410004 	bgez	$v0,574 <init_module-0x3c8>
      564:	2402ffff 	li	$v0,-1
 */
-			reg = *(volatile int *)DSP_REG_DXR1;
+			reg = *(volatile int *)MCBSP_REG_DXR1;
 			if(reg < 0) {
 				a0 = -1;
 				break;
@@ -539,7 +539,7 @@ int tnetv1050_tid_readbyte(char *pbuffer)
 	tmp_v0 = tmp_a0 | 0x81280000;
 	reg = tmp_v0;
 	// 0x8128 - (2) read operation
-	*(volatile int *)DSP_REG_SPCR1 = reg;
+	*(volatile int *)MCBSP_REG_SPCR1 = reg;
 	tmp_a3 = 0;
 /*
      5f4:	10800012 	beqz	$a0,640 <init_module-0x2fc>
@@ -963,7 +963,7 @@ int tiuhw_init_hal(tiuhw_device *a, int b)
 			reg |= 0x00003000;
 			*(volatile int *)0xa8611640 = reg; // a2
 
-			tiuhw_reset_tid(DSP_CORE_0, DSP_RESET_ON);
+			tiuhw_reset_tid(TIU_IF_0, TIU_RESET_ON);
 		}
 
 		tiuhw_api = &hw_apis;
@@ -979,7 +979,7 @@ int tiuhw_init_hal(tiuhw_device *a, int b)
 		while(cnt1--);
 
      		if(should_reset_tid) {
-     				tiuhw_reset_tid(DSP_CORE_0, DSP_RESET_OFF);
+     				tiuhw_reset_tid(TIU_IF_0, TIU_RESET_OFF);
 		}
 	} else if(if_type == TIHW_EXTERNAL) {
 		// not necessery - cause we have INTERNAL (no-FPGA)
