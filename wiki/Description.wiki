@@ -14,7 +14,7 @@ Modules:
 
 
 Future:
-  * implement some MIPS<->DSP msg exchange system (dspgateway?). It should be "timer" based, since there's no interrupt from DSP to MIPS.
+  * implement some MIPS to DSP msg exchange system (dspgateway?). It should be "timer" based, since there's no interrupt from DSP to MIPS.
   * run and test the whole Legerity API.
   * write some "external" API, and asterisk module for it, or use some existing kernel api (telephony api?).
 
