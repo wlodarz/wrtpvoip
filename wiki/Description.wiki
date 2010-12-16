@@ -1,0 +1,21 @@
+#labels Featured,Phase-Requirements
+#Drivers for TNETV1050 C55x DSP, telephony interface, etc.
+
+= Introduction =
+
+The drivers are done using reverse engineering technique.
+
+
+= Details =
+
+Modules:
+  * hwdsp: initialization, reset, and "tight loop" functions for C55x module. Mostly completed, not tested. I think hwu_lin_dsp_loop shows how to execute code on DSP.
+  * tiuhal: TNETV1050's mcbsp module driver. Fairly completed, big parts not "decompiled" completely. Not tested. First test should use tnetv1050_tid_init/read/write to read Legerity chip ID.
+
+
+Future:
+  * implement some MIPS<->DSP msg exchange system (dspgateway?). It should be "timer" based, since there's no interrupt from DSP to MIPS.
+  * run and test the whole Legerity API.
+  * write some "external" API, and asterisk module for it, or use some existing kernel api (telephony api?).
+
+Any help would be really appreciated
