@@ -1,5 +1,5 @@
 #labels Featured,Phase-Requirements
-#Drivers for TNETV1050 C55x DSP, telephony interface, etc.
+Drivers for TNETV1050 C55x DSP, telephony interface, etc.
 
 = Introduction =
 
