@@ -275,7 +275,7 @@ static irqreturn_t test_irq_handler(int i, void *data)
 }
 
 /* FUNCTION: TODO, NEED CAREFULL REVIEW */
-int tnetv1050_tid_writebyte(int byte) {
+int tnetv1050_tid_writebyte(char byte) {
 	int a0, a1;
 	long long tmp1, ltmp2;
 	int tmp2, tmp3, tmp4, tmp9, tmp10;
@@ -300,7 +300,7 @@ int tnetv1050_tid_writebyte(int byte) {
 /*
      464:	01090018 	mult	$t0,$t1
 */
-	dsp_freq = dsp_mult * dsp_speed;
+	dsp_freq = (long long)dsp_mult * (long long)dsp_speed;
 
 /*
      468:	3c02431b 	lui	$v0,0x431b
@@ -312,7 +312,7 @@ int tnetv1050_tid_writebyte(int byte) {
      480:	34e71018 	ori	$a3,$a3,0x1018  // a3 = 0xa5081018
      484:	3c06a508 	lui	$a2,0xa508
      488:	34c61010 	ori	$a2,$a2,0x1010  // a2 = MCBSP_REG_SPCR1
-     48c:	3c038148 	lui	$v1,0x8148	// v1 = 0x8148
+     48c:	3c038148 	lui	$v1,0x8148	// v1 = 0x81480000
      490:	00002810 	mfhi	$a1 		// a1 - tmp2
      494:	ace40000 	sw	$a0,0($a3)
 */
@@ -325,7 +325,7 @@ int tnetv1050_tid_writebyte(int byte) {
      4a0:	00431025 	or	$v0,$v0,$v1
      4a4:	acc20000 	sw	$v0,0($a2)
 */
-	tmp2 = (unsigned int)(((long long)(dsp_freq * 0x431bde83) >> 32)); // & 0xffffffff;
+	tmp2 = (unsigned int)(((long long)dsp_freq * (long long)0x431bde83) >> 32); // & 0xffffffff;
 	tmp3 = (((tmp2 >> 0x14) - 1) | 0x81480000);
 	*(volatile int *)MCBSP_REG_SPCR1 = tmp3;
 
@@ -392,8 +392,7 @@ int tnetv1050_tid_writebyte(int byte) {
      4fc:	00000000 	nop
 */
 			dsp_mult = tmp2;
-			tmp9 = dsp_speed;
-			ltmp2 = dsp_mult * tmp9;
+			ltmp2 = (long long)dsp_mult * (long long)dsp_speed;
 			
 /*
      500:	00620019 	multu	$v1,$v0
@@ -402,7 +401,7 @@ int tnetv1050_tid_writebyte(int byte) {
      50c:	2442ffff 	addiu	$v0,$v0,-1
      510:	00021100 	sll	$v0,$v0,0x4
 */
-			tmp10 = ((((ltmp2 >> 32) & 0xffffffff)) * 0x431bde83);
+			tmp10 = ((long long)(((ltmp2 >> 32) & 0xffffffff)) * (long long)0x431bde83);
 			tmp10 >>= 0x14;
 			tmp10 -= 1;
 			tmp10 <<= 0x04;
@@ -420,7 +419,7 @@ int tnetv1050_tid_writebyte(int byte) {
      528:	3442de83 	ori	$v0,$v0,0xde83
      52c:	00000000 	nop
 */
-				ltmp2 = dsp_mult * tmp9;
+				ltmp2 = (long long)dsp_mult * (long long)dsp_speed;
 /*
      530:	00620019 	multu	$v1,$v0
      534:	00001010 	mfhi	$v0
@@ -429,7 +428,7 @@ int tnetv1050_tid_writebyte(int byte) {
      540:	2442ffff 	addiu	$v0,$v0,-1
      544:	00021100 	sll	$v0,$v0,0x4
 */
-				tmp10 = ((((ltmp2 >> 32) & 0xffffffff)) * 0x431bde83);
+				tmp10 = ((long long)((ltmp2 >> 32) & 0xffffffff) * (long long)0x431bde83);
 				tmp10 >>= 0x14;
 				tmp10 -= 1;
 				tmp10 <<= 0x04;
@@ -498,8 +497,8 @@ int tnetv1050_tid_readbyte(char *pbuffer)
      5a0:	00000000 	nop
      5a4:	00820019 	multu	$a0,$v0
 */
-	ltmp1 = dsp_clock_mult * dsp_input_clock_speed;
-	ltmp1 = (ltmp1 & 0xffffffff) * 0x431bde83;
+	ltmp1 = (long long)dsp_clock_mult * (long long)dsp_input_clock_speed;
+	ltmp1 = (long long)(ltmp1 & 0xffffffff) * (long long)0x431bde83;
 /*
      5a8:	3c05a508 	lui	$a1,0xa508
      5ac:	34a51010 	ori	$a1,$a1,0x1010
@@ -567,9 +566,9 @@ int tnetv1050_tid_readbyte(char *pbuffer)
      638:	00850018 	mult	$a0,$a1
      63c:	3c02a508 	lui	$v0,0xa508
 */
-			ltmp1 = dsp_clock_mult * dsp_input_clock_speed;
+			ltmp1 = (long long)dsp_clock_mult * (long long)dsp_input_clock_speed;
 			tmp_v1 = ltmp1 & 0xffffffff;
-			ltmp1 = tmp_v1 * 0x431bde83;
+			ltmp1 = (long long)tmp_v1 * (long long)0x431bde83;
 			tmp_v0 = (ltmp1 >> 32) & 0xffffffff;
 			tmp_a3 += 1;
 			tmp_v0 >>= 0x14;
@@ -617,9 +616,9 @@ int tnetv1050_tid_readbyte(char *pbuffer)
      69c:	1040000f 	beqz	$v0,6dc <init_module-0x260>
      6a0:	00002021 	move	$a0,$zero
 */
-			ltmp1 = dsp_clock_mult * dsp_input_clock_speed;
+			ltmp1 = (long long)dsp_clock_mult * (long long)dsp_input_clock_speed;
 			tmp_v1 = ltmp1 & 0xffffffff;
-			ltmp1 = tmp_v1 * 0x431bde83;
+			ltmp1 = (long long)tmp_v1 * (long long)0x431bde83;
 			tmp_v0 = (ltmp1 >> 32) & 0xffffffff;
 			tmp_v0 >>= 0x14;
 			tmp_v0 -= 1;
@@ -643,9 +642,9 @@ int tnetv1050_tid_readbyte(char *pbuffer)
      6d4:	1440fff4 	bnez	$v0,6a8 <init_module-0x294>
      6d8:	00e50018 	mult	$a3,$a1
 */
-					ltmp1 = dsp_clock_mult * dsp_input_clock_speed;
+					ltmp1 = (long long)dsp_clock_mult * (long long)dsp_input_clock_speed;
 					tmp_v1 = ltmp1 & 0xffffffff;
-					ltmp1 = tmp_v1 * 0x431bde83;
+					ltmp1 = (long long)tmp_v1 * (long long)0x431bde83;
 					tmp_v0 = (ltmp1 >> 32) & 0xffffffff;
 					tmp_a0 += 1;
 					tmp_v0 >>= 0x14;
