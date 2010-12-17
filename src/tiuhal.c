@@ -1,4 +1,4 @@
-// loops_per_jiffy = 429496
+// loops_per_jiffy = 429496 // 747520
 
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -845,7 +845,7 @@ static int __init tihw_hal_init_module(void) {
 	other_pointer_dst = other_pointer_src;
 
 	ret = request_irq(TITAN_IRQ_TELEIF, tnetv1050_tid_interrupt_handler, IRQF_SHARED, stub_text, 0);
-	ret = request_irq(13, test_irq_handler, IRQF_SHARED, "test", 0);
+	//ret = request_irq(13, test_irq_handler, IRQF_SHARED, "test", 0);
 
 	printk(KERN_ERR "HAL initializing DONE\n");
 
@@ -964,23 +964,29 @@ int tiuhw_init_hal(tiuhw_device *a, int b)
 			*(volatile int *)0xa8611640 = reg; // a2
 
 			tiuhw_reset_tid(TIU_IF_0, TIU_RESET_ON);
+			printk(KERN_ERR "tiuhw_reset_tid done\n");
 		}
 
 		tiuhw_api = &hw_apis;
 
 		init_function = hw_apis.init;
+		printk(KERN_ERR "a1\n");
 		ret = init_function(a,b);
+		printk(KERN_ERR "a1\n");
 
 		ret = 0x1ffffc70;
 		tmp = loops_per_jiffy;
 
-		ltmp1 = ret * tmp;
+		ltmp1 = (long long)ret * (long long)tmp;
 		cnt1 = (ltmp1 >> 23) & 0xffffffff;
+		printk(KERN_ERR "waiting %d\n", cnt1);
 		while(cnt1--);
+		printk(KERN_ERR "a1\n");
 
      		if(should_reset_tid) {
      				tiuhw_reset_tid(TIU_IF_0, TIU_RESET_OFF);
 		}
+		printk(KERN_ERR "a1\n");
 	} else if(if_type == TIHW_EXTERNAL) {
 		// not necessery - cause we have INTERNAL (no-FPGA)
 		printk("UNSUPPORTED if_type - EXTERNAL\n");
@@ -1074,12 +1080,14 @@ int tiuhw_get_tid_type(char tid)
 */
 		num_tids &= 0xff;
 		if(num_tids < 2) num_tids = 1;
+		printk(KERN_ERR  "tiuhw_get_tid_type: num_tids: %d\n", num_tids);
 	}
 /*
      e84:	3c030000 	lui	$v1,0x0
      e88:	8c6300ac 	lw	$v1,172($v1)
 */
-	tmp0 = tmp_variable0;
+	//tmp0 = tmp_variable0;
+	tmp0 = TIHW_INTERNAL; // tmp_variable0;
 
 /*
      e8c:	24020001 	li	$v0,1
@@ -1158,14 +1166,15 @@ int tiuhw_get_tid_type(char tid)
      f18:	10a00082 	beqz	$a1,1124 <tiuhw_get_tid_type+0x310>
      f1c:	00000000 	nop
 */
-			// tmp_tele_id now holds reference to 'AUTO' string (WRTP54G)
-			if(tmp_tele_id == NULL) goto out;
+				// tmp_tele_id now holds reference to 'AUTO' string (WRTP54G)
+				printk(KERN_ERR "str1: %s tmp_tele_id = %s\n", str1, tmp_tele_id);
+				//if(str1 == NULL) goto out;
 
 /*
      f20:	12600080 	beqz	$s3,1124 <tiuhw_get_tid_type+0x310>
      f24:	00008821 	move	$s1,$zero
 */
-     		if(num_tids == 0) goto out;
+     				if(num_tids == 0) goto out;
 
 /*
      f28:	080003cd 	j	f34 <tiuhw_get_tid_type+0x120>
@@ -1184,8 +1193,8 @@ int tiuhw_get_tid_type(char tid)
      f4c:	00a02021 	move	$a0,$a1
 */
 
-			index = 0;
-			while(tidname2type[index].tidtype && strcmp(tidname2type[index].tidname, str1)) {
+				index = 0;
+				while(tidname2type[index].tidtype && strcmp(tidname2type[index].tidname, str1)) {
 /*
      f50:	8e020000 	lw	$v0,0($s0)
      f54:	00401821 	move	$v1,$v0 // pointer to 
@@ -1203,14 +1212,17 @@ int tiuhw_get_tid_type(char tid)
      f7c:	1440ffec 	bnez	$v0,f30 <tiuhw_get_tid_type+0x11c>
      f80:	26220001 	addiu	$v0,$s1,1 // index++
 while */
-				index++;
-			}
+					index++;
+				}
+				printk(KERN_ERR "index=%d\n", index);
 /*
      f84:	241100ff 	li	$s1,255
      f88:	14d1001d 	bne	$a2,$s1,1000 <tiuhw_get_tid_type+0x1ec>
      f8c:	02402021 	move	$a0,$s2
 */
-			if(tidname2type[index].tidtype == 255) {
+				tmp_tid_type = tidname2type[index].tidtype;
+				if(tidname2type[index].tidtype == 255) {
+					printk(KERN_ERR "tidtype=%d\n", tidname2type[index].tidtype);
 /*
      f90:	24050001 	li	$a1,1
      f94:	3c020000 	lui	$v0,0x0 // tiuhw_api
@@ -1221,8 +1233,8 @@ while */
      fa8:	00003821 	move	$a3,$zero
 */
 //				func_ptr = tiuhw_api[2]->field3; /// check this out
-//				ret = func_ptr(index, 1, 0, 0);
-				ret = 4;
+//				ret = func_ptr(index, 1, 0, 0); // this returns 4
+					reg = 4;
 /*
      fac:	304300ff 	andi	$v1,$v0,0xff
      fb0:	24020003 	li	$v0,3
@@ -1248,20 +1260,21 @@ while */
      ff8:	08000414 	j	1050 <tiuhw_get_tid_type+0x23c>
      ffc:	24020002 	li	$v0,2
 */
-				reg &= 0xffff;
-				if(reg == 3) { // fe8
-					ret = 5;
-				} else if(reg >= 4) { // fd4
-					if(reg == 4) {
-						ret = 12;
-					} else ret = 255;
-				} else if(reg == 1) { // ff8
-					ret = 2;
-				} else {
-					ret = 255;
-				}
-
-			} else { //tidtype == 255
+					reg &= 0xff;
+					if(reg == 3) { // fe8
+						ret = 5;
+					} else if(reg >= 4) { // fd4
+						if(reg == 4) {
+							ret = 12;
+						} else ret = 255;
+					} else if(reg == 1) { // ff8
+						ret = 2;
+					} else {
+						ret = 255;
+					}
+					break;
+				} else { //tidtype == 255
+					printk(KERN_ERR "Tid Type: %d\n", tmp_tid_type);
 /*
     1000:	54c0000c 	0x54c0000c
     1004:	02402821 	move	$a1,$s2
@@ -1272,38 +1285,43 @@ while */
     1018:	0040f809 	jalr	$v0
     101c:	00000000 	nop
 */
-				if(tmp_tid_type == 0) {
-					printk(KERN_ERR "Unrecognized TID ID string detected: %s\n", tmp_s2);
+					if(tmp_tid_type == 0) {
+						printk(KERN_ERR "Unrecognized TID ID string detected: %s\n", tmp_s2);
 
 /*
-    1020:	3c010000 	lui	$at,0x0
+    1020:	3c010000 	lui	$at,0x0			// bss
     1024:	00320821 	addu	$at,$at,$s2
 
     1028:	a0310010 	sb	$s1,16($at)
     102c:	08000418 	j	1060 <tiuhw_get_tid_type+0x24c>
     1030:	26420001 	addiu	$v0,$s2,1
+*/
+						goto out;
+					} else {
+/*
     
 
-    1034:	3c040000 	lui	$a0,0x0
+    1034:	3c040000 	lui	$a0,0x0		// rodata
     1038:	248403ec 	addiu	$a0,$a0,1004
     103c:	3c020000 	lui	$v0,0x0
     1040:	24420000 	addiu	$v0,$v0,0
     1044:	0040f809 	jalr	$v0
     1048:	8e060000 	lw	$a2,0($s0)
 */
-#warning ALA
-		// printk(KERN_ERR "TID(M) %u is a %s\n", 0, str);
+						printk(KERN_ERR "TID(M) %u is a %s\n", 0, str1);
+						ret = 12;
+						break;
 /*
     104c:	92020004 	lbu	$v0,4($s0)
 */
-			}
+					}
 /*
     1050:	3c010000 	lui	$at,0x0
     1054:	00320821 	addu	$at,$at,$s2
     1058:	a0220010 	sb	$v0,16($at)
     105c:	26420001 	addiu	$v0,$s2,1
 */
-    	}
+    				}
 /*
     1060:	305200ff 	andi	$s2,$v0,0xff
     1064:	00002021 	move	$a0,$zero
@@ -1317,7 +1335,7 @@ while */
     107c:	1440ffad 	bnez	$v0,f34 <tiuhw_get_tid_type+0x120>
     1080:	00008821 	move	$s1,$zero
 */
-		}
+			}
 /*
     1084:	08000449 	j	1124 <tiuhw_get_tid_type+0x310>
     1088:	00000000 	nop
@@ -1369,6 +1387,8 @@ out:
     1124:	3c020000 	lui	$v0,0x0
     1128:	00561021 	addu	$v0,$v0,$s6
     112c:	90420010 	lbu	$v0,16($v0)
+*/
+/*
     1130:	8fbf00ac 	lw	$ra,172($sp)
     1134:	8fb600a8 	lw	$s6,168($sp)
     1138:	8fb500a4 	lw	$s5,164($sp)
