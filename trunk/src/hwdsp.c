@@ -73,6 +73,7 @@ void hwu_lin_titan_dsp_reset(int core, int cmd) {
         status = *(volatile unsigned int *) (DSP_RST_REG);
         status |= 0x00fb;
     }
+    printk(KERN_ERR "a1\n");
     *(volatile unsigned int *) (DSP_RST_REG) = status;
 
     return;
@@ -99,10 +100,9 @@ void hwu_lin_register_halt_hooks(void *prehook, void *posthook) {
 }
 
 void hwu_lin_titan_dsp_halt(int core) {
-//    volatile int cnt1, cnt2;
     int tmp;
     int ret;
-    int status;
+    unsigned int status;
     int i;
 
     printk(KERN_ERR "hwu_lin_titan_dsp_halt(%d)\n", core);
@@ -114,23 +114,41 @@ void hwu_lin_titan_dsp_halt(int core) {
     for(i=0; i<100; i++) udelay(1000);
     ar7_device_enable(TITAN_RESET_BIT_DSP);
 
+	printk(KERN_ERR "a1\n");
+
 #warning LEARN : addesses & constants meaning
 
+	printk(KERN_ERR "a1\n");
+	printk(KERN_ERR "a1\n");
+	printk(KERN_ERR "a1\n");
+	printk(KERN_ERR "a1\n");
     *(volatile unsigned int *) (DSP_REG_UNKNOWN_0) = 80;
+	printk(KERN_ERR "a1\n");
+	printk(KERN_ERR "a1\n");
+	printk(KERN_ERR "a1\n");
+	printk(KERN_ERR "a1\n");
     tmp = *(volatile unsigned int *) (DSP_RST_REG);
+	printk(KERN_ERR "a1\n");
+	printk(KERN_ERR "a1\n");
+	printk(KERN_ERR "a1\n");
+	printk(KERN_ERR "a1\n");
     printk(KERN_ERR "hwu_lin_titan_dsp_halt() Before: DSP_RST_REG=0x%08x\n", tmp);
 
+	printk(KERN_ERR "a1\n");
     ret = hwu_get_tiuhw_if();
+	printk(KERN_ERR "a1\n");
     printk(KERN_ERR "hwu_get_tiuhw_if = %d\n", ret);
 
 #warning TO LEARN : what those constants mean
 
+	printk(KERN_ERR "a1\n");
     if (ret != TIHW_INTERNAL)
         status = 0x300; // with FPGA - only software reset?
     else
         status = 0x304; // internal - so software reset with peripherals?
 
     *(volatile unsigned int *) (DSP_RST_REG) = status;
+	printk(KERN_ERR "a1\n");
 
     status = *(volatile unsigned int *) (DSP_RST_REG);
     printk(KERN_ERR "hwu_lin_titan_dsp_halt() After: DSP_RST_REG=0x%08x\n", status);
