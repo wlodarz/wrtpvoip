@@ -66,6 +66,7 @@
 #define VP_GETSTR(objType, obj) \
     VpGetString_ ## objType (obj)
 
+#if 0
 /* Basic debug output macro: */
 #define VP_DOUT_(msgType, msgColor, objType, pObj, printf_args) \
     if (VpDebugEnabled_ ## objType (VP_DBG_ ## msgType, color_fg(msgColor) #msgType, pObj)) { \
@@ -73,6 +74,14 @@
         VP_SHOW_LOC(); \
         VpSysDebugPrintf(color_reset "\n"); \
     }
+#else
+/* Basic debug output macro: */
+#define VP_DOUT_(msgType, msgColor, objType, pObj, printf_args) \
+    if (VpDebugEnabled_ ) { \
+        VpSysDebugPrintf printf_args; \
+        VP_SHOW_LOC(); \
+    }
+#endif
 
 /* Conditionally compile in various types of debug messages: */
 #if (VP_CC_DEBUG_SELECT & VP_DBG_ERROR)
@@ -107,16 +116,25 @@
 #endif
 
 /* Basic assert macro: */
-#include <stdlib.h> /* exit() */
+//#include <stdlib.h> /* exit() */
+#if 0
 #define VP_ASSERT(condition) \
     if (!(condition)) { \
         VP_ERROR(None, VP_NULL, ("Assertion failed: %s\n", #condition)); \
         exit(-1); \
     }
+#else
+#define VP_ASSERT(condition) \
+    if (!(condition)) { \
+        VP_ERROR(None, VP_NULL, ("Assertion failed: %s\n", #condition)); \
+        panic("aaaa"); \
+    }
+#endif
 
 /* OLD_DEBUG authorize the old debug (1 = on / 0 = off) */
 #define OLD_DEBUG 1
 
+#if 0
 /* Support old-style debug output: */
 #define VP_DOUT(msgType, printf_args) \
     if ((vpDebugSelectMask & msgType) && OLD_DEBUG) { \
@@ -125,11 +143,20 @@
         VP_SHOW_LOC(); \
         VpSysDebugPrintf("\n" color_reset); \
     }
+#else
+/* Support old-style debug output: */
+#define VP_DOUT(msgType, printf_args) \
+    if ((vpDebugSelectMask & msgType) && OLD_DEBUG) { \
+        VpSysDebugPrintf printf_args; \
+        VP_SHOW_LOC(); \
+    }
+#endif
 
 /* Global debug select mask (for messages that are not specific to a particular
    line or device): */
 EXTERN uint32 vpDebugSelectMask;
 
+#if 0
 EXTERN bool
 VpDebugEnabled_VpVcp2DeviceObjectType(
     uint32 msgType,
@@ -153,6 +180,7 @@ VpDebugEnabled_Vp890LineObjectType(
     uint32 msgType,
     char *msgTypeStr,
     Vp890LineObjectType *pLineObj);
+#endif
 
 EXTERN bool
 VpDebugEnabled_VpDeviceIdType(

@@ -17,6 +17,7 @@
 #include "vp_api_int.h"
 #include "vp880_api.h"
 #include "vp880_api_int.h"
+#include "vp_debug.h"
 #include "vp_hal.h"
 #include "sys_service.h"
 

@@ -16,6 +16,8 @@
 
 #include <linux/timer.h>
 
+#include "boot_image_880_mpi.h"
+
 #include "leg_vp_dvr.h"
 
 #define DRV_VERSION "0.0.1"
@@ -2132,6 +2134,7 @@ static int LegVpDvrRelease(
 static int __init LegVpDvr_init(void)
 {
     int result = 0;
+    int deviceId = 0;
 
     /* Initialize the drivers info structs */
     LegVpDvrInitDvrInfo();
@@ -2161,7 +2164,22 @@ static int __init LegVpDvr_init(void)
     printk(KERN_ERR "Allocated...\n");
 
     printk(KERN_ALERT "VoicePath module initialization successful!!!\n");
-    return result; /* sucess */
+
+    printk(KERN_ALERT "Creating Device Objects...\n");
+    result = VpMakeDeviceObject(VP_DEV_880_SERIES, deviceId, gLegVpDvrInfo[0].pDevCtx, &gLegVpDvrInfo[0].pDevObj);
+    if ( 0 > result) goto fail_make;
+    printk(KERN_ALERT "done\n");
+
+    printk(KERN_ALERT "Loading bootimage\n");
+    result = VpBootLoad(gLegVpDvrInfo[0].pDevCtx, VP_BOOT_STATE_FIRSTLAST, (VpImagePtrType)mpiTestBootImage, 104192, VP_NULL, VP_BOOT_MODE_VERIFY);
+    if (result != VP_STATUS_SUCCESS) {
+    	printk(KERN_ALERT "Load failed %d\n", result);
+        goto fail_make;
+    }
+    printk(KERN_ALERT "done\n");
+
+    //return result; /* sucess */
+    return 0; /* sucess */
 
     fail_make:  LegVpDvrKfree();
     fail_reg:   LegVpDvrUnRegMajorNums();
