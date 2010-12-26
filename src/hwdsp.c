@@ -23,14 +23,18 @@
 #define DSP_ADDR104 		(DSP_PROGRAM_AREA + 0x00000104)
 
 
-// some opcodes
-#define OPC_NOP 0x20
-#define OPC_B   0x6a
+// some C55x DSP opcodes
+#define OPC_NOP     0x20
+#define OPC_B_L24   0x6a
+#define OPC_MOV_K16 0x7a
+#define OPC_MOV_A   0xbc  
 
 // more complex opcode sequences
-#define NOP_NOP_NOP_NOP ((OPC_NOP << 24) | (OPC_NOP << 16) | (OPC_NOP << 8) | (OPC_NOP))
-#define BRANCH_0x100    ((OPC_B   << 24) | (0x100))
-#define BRANCH_0x4000    ((OPC_B   << 24) | (0x4000))
+#define NOP_NOP_NOP_NOP ((OPC_NOP     << 24) | (OPC_NOP << 16) | (OPC_NOP << 8) | (OPC_NOP))
+#define BRANCH_0x100    ((OPC_B_L24   << 24) | (0x100))
+#define BRANCH_0x4000   ((OPC_B_L24   << 24) | (0x4000))
+#define MOV_K		((OPC_MOV_K16 << 24) | (0x1234 << 8) | (0))
+#define MOV_SK		((OPC_MOV_A   << 8)  | (0 << 8) | (0x10))
 
 /* I hope I understand it correctly. */
 #define DSP_GO_INTO_TIGHT_LOOP 1
@@ -73,7 +77,6 @@ void hwu_lin_titan_dsp_reset(int core, int cmd) {
         status = *(volatile unsigned int *) (DSP_RST_REG);
         status |= 0x00fb;
     }
-    printk(KERN_ERR "a1\n");
     *(volatile unsigned int *) (DSP_RST_REG) = status;
 
     return;
@@ -114,41 +117,24 @@ void hwu_lin_titan_dsp_halt(int core) {
     for(i=0; i<100; i++) udelay(1000);
     ar7_device_enable(TITAN_RESET_BIT_DSP);
 
-	printk(KERN_ERR "a1\n");
 
 #warning LEARN : addesses & constants meaning
 
-	printk(KERN_ERR "a1\n");
-	printk(KERN_ERR "a1\n");
-	printk(KERN_ERR "a1\n");
-	printk(KERN_ERR "a1\n");
     *(volatile unsigned int *) (DSP_REG_UNKNOWN_0) = 80;
-	printk(KERN_ERR "a1\n");
-	printk(KERN_ERR "a1\n");
-	printk(KERN_ERR "a1\n");
-	printk(KERN_ERR "a1\n");
     tmp = *(volatile unsigned int *) (DSP_RST_REG);
-	printk(KERN_ERR "a1\n");
-	printk(KERN_ERR "a1\n");
-	printk(KERN_ERR "a1\n");
-	printk(KERN_ERR "a1\n");
     printk(KERN_ERR "hwu_lin_titan_dsp_halt() Before: DSP_RST_REG=0x%08x\n", tmp);
 
-	printk(KERN_ERR "a1\n");
     ret = hwu_get_tiuhw_if();
-	printk(KERN_ERR "a1\n");
     printk(KERN_ERR "hwu_get_tiuhw_if = %d\n", ret);
 
 #warning TO LEARN : what those constants mean
 
-	printk(KERN_ERR "a1\n");
     if (ret != TIHW_INTERNAL)
         status = 0x300; // with FPGA - only software reset?
     else
         status = 0x304; // internal - so software reset with peripherals?
 
     *(volatile unsigned int *) (DSP_RST_REG) = status;
-	printk(KERN_ERR "a1\n");
 
     status = *(volatile unsigned int *) (DSP_RST_REG);
     printk(KERN_ERR "hwu_lin_titan_dsp_halt() After: DSP_RST_REG=0x%08x\n", status);
@@ -176,11 +162,21 @@ void hwu_lin_dsp_loop(int core, int flag) {
 
 	// just small loop, (NOP? , JUMP to 0x100
         //*(volatile unsigned int *) (DSP_ADDR100) = 0x20202020; // 0x00100:
+#if 0
         *(volatile unsigned int *) (DSP_ADDR100) = NOP_NOP_NOP_NOP; // 0x001000:
-							       //   NOP; NOP; NOP; NOP;
+        *(volatile unsigned int *) (DSP_ADDR100+4) = NOP_NOP_NOP_NOP; // 0x001000:
+        *(volatile unsigned int *) (DSP_ADDR100 + 8) = BRANCH_0x100; // 0x00104:
+#endif
+        *(volatile unsigned int *)(DSP_ADDR100+0) = BRANCH_0x100; // 0x00104:
+        *(volatile unsigned int *)(DSP_ADDR100+4) = BRANCH_0x100; // 0x00104:
+
         //*(volatile unsigned int *) (DSP_ADDR104) = 0x6a000100; // 0x00104:
-        *(volatile unsigned int *) (DSP_ADDR104) = BRANCH_0x100; // 0x00104:
+#if 0
+	*(volatile unsigned int *) (DSP_ADDR100 + 16) = MOV_K;
+	*(volatile unsigned short *) (DSP_ADDR100 + 20) = MOV_SK;
+        *(volatile unsigned int *) (DSP_ADDR100 + 24) = BRANCH_0x100; // 0x00104:
 							       //   B 0x000100;
+#endif
 
         printk(KERN_ERR "putting dsp in tight loop status=%d\n", flag);
 
@@ -285,6 +281,8 @@ static int __init tidsp_init_module(void) {
     chipid = ar7_get_chip_version_info();
 
     printk(KERN_ERR "Silicon revision = %0x\n", chipid);
+
+    printk(KERN_ERR "addr = 0x%08x\n", *(volatile unsigned int *)(TITAN_DSP_SUBSYSTEM_MEM_BASE + 0x10));
 
     return 0;
 }

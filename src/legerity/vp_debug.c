@@ -58,7 +58,6 @@ VpDebugEnabled_VpVcp2DeviceObjectType(
     VpDeviceIdType deviceId;
 
     if (pDevObj == VP_NULL) {
-        VpSysDebugPrintf(color_fg(red) "(pDevObj == VP_NULL) ");
         return VpDebugEnabled_None(msgType, msgTypeStr, VP_NULL);
     }
     debugSelectMask = pDevObj->debugSelectMask;
@@ -77,7 +76,6 @@ VpDebugEnabled_VpVcp2LineObjectType(
     VpLineIdType lineId;
 
     if (pLineObj == VP_NULL) {
-        VpSysDebugPrintf(color_fg(red) "(pLineObj == VP_NULL) ");
         return VpDebugEnabled_None(msgType, msgTypeStr, VP_NULL);
     }
     debugSelectMask = pLineObj->debugSelectMask;
@@ -98,7 +96,6 @@ VpDebugEnabled_Vp890DeviceObjectType(
     VpDeviceIdType deviceId;
 
     if (pDevObj == VP_NULL) {
-        VpSysDebugPrintf(color_fg(red) "(pDevObj == VP_NULL) ");
         return VpDebugEnabled_None(msgType, msgTypeStr, VP_NULL);
     }
     debugSelectMask = pDevObj->debugSelectMask;
@@ -117,7 +114,6 @@ VpDebugEnabled_Vp890LineObjectType(
     VpLineIdType lineId;
 
     if (pLineObj == VP_NULL) {
-        VpSysDebugPrintf(color_fg(red) "(pLineObj == VP_NULL) ");
         return VpDebugEnabled_None(msgType, msgTypeStr, VP_NULL);
     }
     debugSelectMask = pLineObj->debugSelectMask;
@@ -159,7 +155,6 @@ VpDebugEnabled_VpDevCtxType(
     VpDevCtxType *pDevCtx)
 {
     if (pDevCtx == VP_NULL) {
-        VpSysDebugPrintf(color_fg(red) "(pDevCtx == VP_NULL) ");
         return VpDebugEnabled_None(msgType, msgTypeStr, VP_NULL);
     }
 
@@ -189,12 +184,10 @@ VpDebugEnabled_VpLineCtxType(
     VpLineCtxType *pLineCtx)
 {
     if (pLineCtx == VP_NULL) {
-        VpSysDebugPrintf(color_fg(red) "(pLineCtx == VP_NULL) ");
         return VpDebugEnabled_None(msgType, msgTypeStr, VP_NULL);
     }
 
     if (pLineCtx->pDevCtx == VP_NULL) {
-        VpSysDebugPrintf(color_fg(red) "(pDevCtx == VP_NULL) ");
         return VpDebugEnabled_None(msgType, msgTypeStr, VP_NULL);
     }
 

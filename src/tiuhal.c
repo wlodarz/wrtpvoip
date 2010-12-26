@@ -17,8 +17,8 @@
 
 
 int tnetv1050_tid_init(tiuhw_device *a);
-int tnetv1050_tid_read(char tid, int ecval_arg, int data, int len);
-int tnetv1050_tid_write(char tid_arg, int ecval_arg, char *data, int len);
+int tnetv1050_tid_read(unsigned short  tid, char cmd, char * data, int len);
+int tnetv1050_tid_write(char tid, int ecval, char *data, int len);
 int func03(void);
 int func10(void);
 int func11(void);
@@ -48,7 +48,8 @@ int tiuhw_get_tid_type(char tid);
 
 #define MCBSP_REG_PCMCR1 	0xa5081000
 #define MCBSP_REG_SPCR1 	0xa5081010
-#define MCBSP_REG_DXR1    0xa5081018
+#define MCBSP_REG_DXR1    	0xa5081018
+#define MCBSP_REG_UNKNW1    	0xa508101c
 
 /* pointers from data + 0x0000 */
 api_type tnetv1050_api = {
@@ -99,7 +100,7 @@ void *other_pointer_dst = 0;
 #define WAIT_LOOP \
 	index = 0; \
         do { \
-		ltmp1 = dsp_clock_mult * dsp_input_clock_speed; \
+		ltmp1 = (unsigned long long)dsp_clock_mult * (unsigned long long)dsp_input_clock_speed; \
 		tmp_v1 = ltmp1 & 0xffffffff; \
 		ltmp1 = (unsigned long long)(tmp_v1) * (unsigned long long)0x431bde83; \
 		tmp_v0 = ((((ltmp1 >> 0x20) >> 0x14) - 1) << 0x02); \
@@ -116,18 +117,18 @@ Disassembly of section .text:
 /* probably init function */
 int tnetv1050_tid_init(tiuhw_device *tiddev)
 {
-	int reg;
-	int tmp0, tmp1, tmp3, tmp5, tmp6;
-	int tmp;
-	int tmp_v0, tmp_v1;
-	int tmp_a1;
+	volatile int reg;
+	volatile int tmp0, tmp1, tmp3, tmp5, tmp6;
+	volatile int tmp;
+	volatile int tmp_v0, tmp_v1;
+	volatile int tmp_a1;
 	int tid_type = 0;
 	int tid=0;
 	int index = 0;
 	int dsp_clock_mult;
 	int dsp_input_clock_speed;
-	long long dsp_freq;
-	long long ltmp1, ltmp2;
+	volatile long long dsp_freq;
+	volatile long long ltmp1, ltmp2;
 	//int tmp_s0, tmp_s3;
 	int ret = 1;
 	int const_0x4;
@@ -176,8 +177,8 @@ int tnetv1050_tid_init(tiuhw_device *tiddev)
 	dsp_clock_mult = tiuhw_dsp_clock_mult; // t2
 	dsp_input_clock_speed = tiuhw_dsp_input_clock_speed; // t3
 
-	dsp_freq = dsp_clock_mult * dsp_input_clock_speed; // a1
-	dsp_freq = (dsp_freq & 0xffffffff) * const_0x4; // a1 * v1
+	dsp_freq = (long long)dsp_clock_mult * (long long)dsp_input_clock_speed; // a1
+	dsp_freq = (long long)(dsp_freq & 0xffffffff) * (long long)const_0x4; // a1 * v1
 	*(volatile int *)0xa5080104 = (((dsp_clock_mult-1) << 12)|0x0000027e);
 	reg = *(volatile int *)0xa5080000;
 	reg |= 0x00000004;
@@ -188,8 +189,8 @@ int tnetv1050_tid_init(tiuhw_device *tiddev)
 		dsp_clock_mult = tiuhw_dsp_clock_mult; // t2
 		dsp_input_clock_speed = tiuhw_dsp_input_clock_speed; // t3
 
-		dsp_freq = dsp_clock_mult * dsp_input_clock_speed; // a1
-		dsp_freq = (dsp_freq & 0xffffffff) * const_0x4; // a1 * v1
+		dsp_freq = (long long)dsp_clock_mult * (long long)dsp_input_clock_speed; // a1
+		dsp_freq = (long long)(dsp_freq & 0xffffffff) * (long long)const_0x4; // a1 * v1
 
 		tmp5 = ((((dsp_freq >> 32) & 0xffffffff) >> 0x14) - 1) << 0x02;
 	} while(tmp5>index++);
@@ -199,8 +200,8 @@ int tnetv1050_tid_init(tiuhw_device *tiddev)
 	// ----
 	dsp_clock_mult = tiuhw_dsp_clock_mult;
 	dsp_input_clock_speed = tiuhw_dsp_input_clock_speed;
-	dsp_freq = dsp_clock_mult * dsp_input_clock_speed;
-	dsp_freq = (dsp_freq & 0xffffffff) * 0x431bde83;
+	dsp_freq = (long long)dsp_clock_mult * (long long)dsp_input_clock_speed;
+	dsp_freq = (long long)(dsp_freq & 0xffffffff) * (long long)0x431bde83;
 	tmp_v0 = ((((dsp_freq >> 32) & 0xffffffff) >> 0x14) - 1) | 0x81080000;
 	*(volatile int *)MCBSP_REG_SPCR1 = tmp_v0;
 	reg = *(volatile int *)MCBSP_REG_SPCR1; // SPCR1
@@ -214,21 +215,21 @@ int tnetv1050_tid_init(tiuhw_device *tiddev)
 	// ----
 
 	// ----
-	dsp_freq = dsp_clock_mult * dsp_input_clock_speed;
-	ltmp1 = dsp_freq * 0x431bde83;
+	dsp_freq = (long long)dsp_clock_mult * (long long)dsp_input_clock_speed;
+	ltmp1 = (long long)dsp_freq * (long long)0x431bde83;
 	*(volatile int *)0xa5081004 = 0x1;
 	tmp_v0 = ((((ltmp1 >> 32) & 0xffffffff) >> 0x14) - 1) >> 0x02;
 	index = 0;
 	{
-		dsp_freq = dsp_clock_mult * dsp_input_clock_speed;
-		ltmp1 = dsp_freq * 0x431bde83;
+		dsp_freq = (long long)dsp_clock_mult * (long long)dsp_input_clock_speed;
+		ltmp1 = (long long)dsp_freq * (long long)0x431bde83;
 		tmp_v0 = ((((ltmp1 >> 32) & 0xffffffff) >> 0x14) - 1) >> 0x02;
 	} while (tmp_v0 > ++index);
 	// ----
 
 	// ----
-	dsp_freq = dsp_clock_mult * dsp_input_clock_speed;	
-	ltmp1 = dsp_freq * 0x10624dd3;
+	dsp_freq =(long long) dsp_clock_mult * (long long)dsp_input_clock_speed;	
+	ltmp1 = (long long)dsp_freq * (long long)0x10624dd3;
 	tmp_v1 = (ltmp1 >> 32) & 0xffffffff;
 	tmp_v1 >>= 0x12;
 	tmp_v1 -= 1;
@@ -242,8 +243,8 @@ int tnetv1050_tid_init(tiuhw_device *tiddev)
 	{
 		dsp_clock_mult = tiuhw_dsp_clock_mult;
 		dsp_input_clock_speed = tiuhw_dsp_input_clock_speed;
-		dsp_freq = dsp_clock_mult * dsp_input_clock_speed;
-		ltmp1 = dsp_freq * 0x431bde83;
+		dsp_freq = (long long)dsp_clock_mult * (long long)dsp_input_clock_speed;
+		ltmp1 = (long long)dsp_freq * (long long)0x431bde83;
 		tmp_v0 = (((((ltmp1 >> 32) & 0xffffffff) >> 0x14) - 1) >> 0x02);
 	} while (tmp_v0 > ++index);
 	*(volatile int *)0xa5081020 = 0;
@@ -276,13 +277,14 @@ static irqreturn_t test_irq_handler(int i, void *data)
 
 /* FUNCTION: TODO, NEED CAREFULL REVIEW */
 int tnetv1050_tid_writebyte(char byte) {
-	int a0, a1;
-	long long tmp1, ltmp2;
-	int tmp2, tmp3, tmp4, tmp9, tmp10;
-	int reg;
-	int tmp_s3;
-	unsigned int dsp_mult, dsp_speed;
-	unsigned long dsp_freq;
+	volatile int a0, a1;
+	volatile long long tmp1, ltmp2;
+	volatile int tmp2, tmp3, tmp4, tmp9, tmp10;
+	signed int reg;
+	volatile int tmp_s3;
+	volatile unsigned int dsp_mult, dsp_speed;
+	volatile unsigned long dsp_freq;
+	int cnt = 0;
 /*
      450:	308400ff 	andi	$a0,$a0,0xff
 */
@@ -316,6 +318,7 @@ int tnetv1050_tid_writebyte(char byte) {
      490:	00002810 	mfhi	$a1 		// a1 - tmp2
      494:	ace40000 	sw	$a0,0($a3)
 */
+	byte &= 0x000000ff;
 	*(volatile int *)MCBSP_REG_DXR1 = byte;
 
 
@@ -366,6 +369,7 @@ int tnetv1050_tid_writebyte(char byte) {
 	a1 = tmp3 << 0x04;
 	reg = *(volatile int *)MCBSP_REG_DXR1;
 	a0 = reg;
+	cnt = 0;
 	if(reg<0) {
 
 /*
@@ -448,6 +452,7 @@ int tnetv1050_tid_writebyte(char byte) {
      564:	2402ffff 	li	$v0,-1
 */
 			reg = *(volatile int *)MCBSP_REG_DXR1;
+			//printk(KERN_ERR "reg = 0x%08x\n", reg);
 			if(reg < 0) {
 				a0 = -1;
 				break;
@@ -457,8 +462,11 @@ int tnetv1050_tid_writebyte(char byte) {
      56c:	1482ffde 	bne	$a0,$v0,4e8 <init_module-0x454>
      570:	00a04021 	move	$t0,$a1
 */
+		cnt++;
+		if (cnt==100) {printk(KERN_ERR "cnt break\n"); break; }
 		}
 	}
+	//printk(KERN_ERR "tnetv1050_tid_writebyte exit with a0 = %d\n", a0);
 /*
      574:	03e00008 	jr	$ra
      578:	0004102b 	sltu	$v0,$zero,$a0
@@ -470,12 +478,13 @@ int tnetv1050_tid_writebyte(char byte) {
 int tnetv1050_tid_readbyte(char *pbuffer)
 {
 	int tmp;
-	int tmp_t0, tmp_t1;
+	volatile int tmp_t0, tmp_t1;
 	signed int reg;
-	long long ltmp1;
-	int tmp_v0, tmp_v1;
-	int dsp_clock_mult, dsp_input_clock_speed;
-	int tmp_a0, tmp_a2, tmp_a3;
+	volatile long long ltmp1;
+	volatile int tmp_v0, tmp_v1;
+	volatile int dsp_clock_mult, dsp_input_clock_speed;
+	volatile int tmp_a0, tmp_a2, tmp_a3;
+	int cnt=0;
 /*
      57c:	00805021 	move	$t2,$a0
 */
@@ -546,7 +555,7 @@ int tnetv1050_tid_readbyte(char *pbuffer)
 */
 	tmp_a0 <<= 0x04;
 	if(tmp_a0) {
-		{
+		while (tmp_a3 < tmp_v0) {
 /*
      5fc:	01002021 	move	$a0,$t0
      600:	01202821 	move	$a1,$t1
@@ -574,7 +583,7 @@ int tnetv1050_tid_readbyte(char *pbuffer)
 			tmp_v0 >>= 0x14;
 			tmp_v0 -= 1; 
 			tmp_v0 <<= 0x04;
-		} while(tmp_a3 < tmp_v0);
+		}
 	}
 /*
      640:	3442101c 	ori	$v0,$v0,0x101c
@@ -585,7 +594,8 @@ int tnetv1050_tid_readbyte(char *pbuffer)
      654:	10c20029 	beq	$a2,$v0,6fc <init_module-0x240>
      658:	00000000 	nop
 */
-	reg = *(volatile int *)0xa508101c;
+	reg = *(volatile int *)MCBSP_REG_UNKNW1;
+	//printk(KERN_ERR "tnetv1050_tid_read reg=0x%08x\n", reg);
 	tmp_v0 = -1;
 	if(reg < 0) {
 		tmp_a2 -= 1;
@@ -625,7 +635,8 @@ int tnetv1050_tid_readbyte(char *pbuffer)
 			tmp_v0 <<= 0x04;
 			tmp_a0 = 0;
 			if(tmp_v0 != 0) {
-				{
+				cnt = 0;
+				while (tmp_a0 < tmp_v0) {
 /*
      6a4:	00e50018 	mult	$a3,$a1
      6a8:	3c02431b 	lui	$v0,0x431b
@@ -650,7 +661,7 @@ int tnetv1050_tid_readbyte(char *pbuffer)
 					tmp_v0 >>= 0x14;
 					tmp_v0 -= 1;
 					tmp_v0 <<= 0x04;
-				} while(tmp_a0 < tmp_v0);
+				}
 			}
 /*
      6dc:	3c02a508 	lui	$v0,0xa508
@@ -663,7 +674,7 @@ int tnetv1050_tid_readbyte(char *pbuffer)
      6f8:	01203821 	move	$a3,$t1
 */
 #warning MUST BE SIGNED
-			reg = *(volatile int *)0xa508101c;
+			reg = *(volatile int *)MCBSP_REG_UNKNW1;
 			if(reg < 0) {
 				tmp_v0 = -1;
 				tmp_a2 -= 1;
@@ -680,26 +691,28 @@ int tnetv1050_tid_readbyte(char *pbuffer)
      710:	00001021 	move	$v0,$zero
 */
 	if(tmp_a2 != 0) {
-		*pbuffer = tmp_v1;		
+		*pbuffer = reg;		
 		return 1;
 	} 
 	return 0;
 }
 
-/* probably read function */
-/* DONE, TODO: magic numbers, magic functions */
-/* FUNCTION: DONE, need review */
+/* read function */
+/* FUNCTION: DONE, need to know if arg1 is ECVAL or CMD */
 // 0x714
-int tnetv1050_tid_read(char tid, int ecval, int ptr, int count)
+//int tnetv1050_tid_read(char tid, int ecval, char * ptr, int count)
+//int tnetv1050_tid_read(unsigned short tid, int ecval, int cmd, char * data, int len)
+int tnetv1050_tid_read(unsigned short tid, char cmd, char * data, int len)
 {
 	int ret = 1;
 
-	tiuhw_select_tid(tid & 0xffff);
+	tiuhw_select_tid(tid);
 
-	tnetv1050_tid_writebyte(ecval & 0xff);
-	while(count !=0  && ((ret = tnetv1050_tid_readbyte(ptr)) != 0)) { ptr++; count--; }
+	printk(KERN_ERR "read cmd: 0x%02x data:%p len:%d\n", cmd, data, len);
+	tnetv1050_tid_writebyte(cmd);
+	while(len !=0  && ((ret = tnetv1050_tid_readbyte(data)) != 0)) { data++; len--; }
 
-	tiuhw_deselect_tid(tid & 0xffff);
+	tiuhw_deselect_tid(tid);
 
 	return ret;
 }
@@ -969,9 +982,7 @@ int tiuhw_init_hal(tiuhw_device *a, int b)
 		tiuhw_api = &hw_apis;
 
 		init_function = hw_apis.init;
-		printk(KERN_ERR "a1\n");
 		ret = init_function(a,b);
-		printk(KERN_ERR "a1\n");
 
 		ret = 0x1ffffc70;
 		tmp = loops_per_jiffy;
@@ -980,12 +991,10 @@ int tiuhw_init_hal(tiuhw_device *a, int b)
 		cnt1 = (ltmp1 >> 23) & 0xffffffff;
 		printk(KERN_ERR "waiting %d\n", cnt1);
 		while(cnt1--);
-		printk(KERN_ERR "a1\n");
 
      		if(should_reset_tid) {
      				tiuhw_reset_tid(TIU_IF_0, TIU_RESET_OFF);
 		}
-		printk(KERN_ERR "a1\n");
 	} else if(if_type == TIHW_EXTERNAL) {
 		// not necessery - cause we have INTERNAL (no-FPGA)
 		printk("UNSUPPORTED if_type - EXTERNAL\n");

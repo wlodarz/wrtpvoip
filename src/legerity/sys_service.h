@@ -8,6 +8,8 @@
 #ifndef SYS_SERVICE_H
 #define SYS_SERVICE_H
 #include "vp_api_types.h"
+
+#define VpSysDebugPrintf printk
 /* Critical section types */
 typedef enum {
 	VP_MPI_CRITICAL_SEC, 	/* MPI access critical code section */

@@ -19,7 +19,7 @@
  *
  */
 
-#undef  VP_DEBUG
+#define  VP_DEBUG
 
 /******************************************************************************
  * COMPILE-TIME OPTIONS:: Conditionally-Compiled API Libraries                *
@@ -281,7 +281,7 @@ typedef uint8 VpScratchMemType;
 /*
  * Options related to BootLoad() decompression
  */
-#undef VP_NO_COMPRESS
+#define VP_NO_COMPRESS
     /* Define this option to exclude all decompression code from VpBootLoad().*/
 #define VP_COMPRESS_FAST
     /*

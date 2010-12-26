@@ -25,6 +25,10 @@
 #define DRV_VERSION "0.0.1"
 #define DRV_DESC "TIUHw_An driver"
 
+#define CSLAC_EC_REG_RD    0x4B   /* Same for all CSLAC devices */
+#define CSLAC_EC_REG_WRT   0x4A   /* Same for all CSLAC devices */
+#define CSLAC_EC_REG_LEN   0x01   /* Same for all CSLAC devices */
+
 #define WRITE_COMMAND 0
 #define READ_COMMAND 1
 static uint8 tempBuf[512]; /* All zero buffer */
@@ -1517,6 +1521,7 @@ static int __init tiuhw_an_init_module(void)
 	int ret;
 	int major;
 	char *somepointer;
+	char cmdptr[32];
 /* prologue
 00000000000015d8 <init_module>:
     15d8:	27bdffc8 	addiu	$sp,$sp,-56
@@ -1699,6 +1704,28 @@ static int __init tiuhw_an_init_module(void)
 */
 // WK: test
 	tiuhw_powerup();
+
+	// test
+	printk(KERN_ERR "let's test\n");
+	VpMpiCmd(0, CSLAC_EC_REG_RD, 0x06, 4, cmdptr);
+	printk(KERN_ERR "cmdptr[0] = 0x%02x cmdptr[1] = 0x%02x cmdptr[2] = 0x%02x cmdptr[3] = 0x%02x\n", cmdptr[0], cmdptr[1], cmdptr[2], cmdptr[3]);
+	VpMpiCmd(0, CSLAC_EC_REG_RD, 0x06, 4, cmdptr);
+	printk(KERN_ERR "cmdptr[0] = 0x%02x cmdptr[1] = 0x%02x cmdptr[2] = 0x%02x cmdptr[3] = 0x%02x\n", cmdptr[0], cmdptr[1], cmdptr[2], cmdptr[3]);
+	VpMpiCmd(0, CSLAC_EC_REG_RD, 0x06, 4, cmdptr);
+	printk(KERN_ERR "cmdptr[0] = 0x%02x cmdptr[1] = 0x%02x cmdptr[2] = 0x%02x cmdptr[3] = 0x%02x\n", cmdptr[0], cmdptr[1], cmdptr[2], cmdptr[3]);
+	VpMpiCmd(0, CSLAC_EC_REG_RD, 0x06, 4, cmdptr);
+	printk(KERN_ERR "cmdptr[0] = 0x%02x cmdptr[1] = 0x%02x cmdptr[2] = 0x%02x cmdptr[3] = 0x%02x\n", cmdptr[0], cmdptr[1], cmdptr[2], cmdptr[3]);
+	cmdptr[0] = 0xFF;
+	cmdptr[1] = 0xFF;
+	VpMpiCmd(0, CSLAC_EC_REG_RD, 0x73, 8, cmdptr);
+	printk(KERN_ERR "cmdptr[0] = 0x%02x cmdptr[1] = 0x%02x cmdptr[2] = 0x%02x cmdptr[3] = 0x%02x cmdptr[4] = 0x%02x cmdptr[5] = 0x%02x cmdptr[6] = 0x%02x cmdptr[7] = 0x%02x\n", cmdptr[0], cmdptr[1], cmdptr[2], cmdptr[3], cmdptr[4], cmdptr[5], cmdptr[6], cmdptr[7]);
+	VpMpiCmd(0, CSLAC_EC_REG_RD, 0x73, 8, cmdptr);
+	printk(KERN_ERR "cmdptr[0] = 0x%02x cmdptr[1] = 0x%02x cmdptr[2] = 0x%02x cmdptr[3] = 0x%02x cmdptr[4] = 0x%02x cmdptr[5] = 0x%02x cmdptr[6] = 0x%02x cmdptr[7] = 0x%02x\n", cmdptr[0], cmdptr[1], cmdptr[2], cmdptr[3], cmdptr[4], cmdptr[5], cmdptr[6], cmdptr[7]);
+	VpMpiCmd(0, CSLAC_EC_REG_RD, 0x06, 4, cmdptr);
+	printk(KERN_ERR "cmdptr[0] = 0x%02x cmdptr[1] = 0x%02x cmdptr[2] = 0x%02x cmdptr[3] = 0x%02x\n", cmdptr[0], cmdptr[1], cmdptr[2], cmdptr[3]);
+	VpMpiCmd(0, CSLAC_EC_REG_RD, 0x06, 4, cmdptr);
+	printk(KERN_ERR "cmdptr[0] = 0x%02x cmdptr[1] = 0x%02x cmdptr[2] = 0x%02x cmdptr[3] = 0x%02x\n", cmdptr[0], cmdptr[1], cmdptr[2], cmdptr[3]);
+
 	return ret;
 }
 
@@ -4711,17 +4738,19 @@ void tuihw_write_reg()
     6fc0:	27bd0020 	addiu	$sp,$sp,32
 */
 
+//VpMpiCmd(0, CSLAC_EC_REG_RD, 0x73, 1, cmdptr);
 void
-VpMpiCmd(
+_VpMpiCmd(
 		VpDeviceIdType deviceId,    /**< Chip select, connector and 3 or 4 wire interface for command */
-		uint8 ecVal,        	    /**< Value to write to the EC register */
+//		uint8 ecVal,        	    /**< Value to write to the EC register */
 		uint8 cmd,                  /**< Command number */
 		uint8 cmdLen,               /**< Number of bytes used by command (cmd) */
 		uint8 *dataPtr)             /**< Pointer to the data location */
+// a0 - device, a1 - ecVal, a2 - cmd, a3 - len, a4 - ptr
 {
 	uint8 byteCnt;
 	uint8 isRead = (cmd & READ_COMMAND); 
-	void (*function)(int8, int8, int8, int8, int8);
+	void (*function)(unsigned short, char, char*, int);
 
 
 /*
@@ -4741,12 +4770,9 @@ VpMpiCmd(
     6ff4:	32330001 	andi	$s3,$s1,0x1
 */
 	deviceId &= 0xff;
-	ecVal &= 0xff;
+	//ecVal &= 0xff;
 	cmd &= 0xff;
 
-#define CSLAC_EC_REG_RD    0x4B   /* Same for all CSLAC devices */
-#define CSLAC_EC_REG_WRT   0x4A   /* Same for all CSLAC devices */
-#define CSLAC_EC_REG_LEN   0x01   /* Same for all CSLAC devices */
 
 
 /*
@@ -4788,7 +4814,8 @@ VpMpiCmd(
 */
 
 		function = tiuhw_api->read;
-		function(deviceId, ecVal, cmdLen, cmd, dataPtr);
+		//function(deviceId, ecVal, cmd, dataPtr, cmdLen);
+		function(deviceId, cmd, dataPtr, cmdLen);
 		
 	} else {
 /* write command
@@ -4802,7 +4829,8 @@ VpMpiCmd(
 */
 		// convert it to something better (init/read/write fields)
 		function = tiuhw_api->write;
-		function(deviceId, ecVal, cmdLen, cmd, dataPtr);
+		//function(deviceId, ecVal, cmd, dataPtr, cmdLen);
+		function(deviceId, cmd, dataPtr, cmdLen);
 	}
 /*
     707c:	24020001 	li	$v0,1
@@ -4832,6 +4860,16 @@ VpMpiCmd(
     70d0:	27bd0030 	addiu	$sp,$sp,48
 */
   	VpSysExitCritical(deviceId, VP_MPI_CRITICAL_SEC);
+}
+void
+VpMpiCmd(
+		VpDeviceIdType deviceId,    /**< Chip select, connector and 3 or 4 wire interface for command */
+		uint8 ecVal,        	    /**< Value to write to the EC register */
+		uint8 cmd,                  /**< Command number */
+		uint8 cmdLen,               /**< Number of bytes used by command (cmd) */
+		uint8 *dataPtr)             /**< Pointer to the data location */
+{
+	_VpMpiCmd(deviceId, cmd, cmdLen, dataPtr);
 }
 
 /*
