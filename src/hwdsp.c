@@ -162,13 +162,13 @@ void hwu_lin_dsp_loop(int core, int flag) {
 
 	// just small loop, (NOP? , JUMP to 0x100
         //*(volatile unsigned int *) (DSP_ADDR100) = 0x20202020; // 0x00100:
-#if 0
+#if 1
         *(volatile unsigned int *) (DSP_ADDR100) = NOP_NOP_NOP_NOP; // 0x001000:
-        *(volatile unsigned int *) (DSP_ADDR100+4) = NOP_NOP_NOP_NOP; // 0x001000:
-        *(volatile unsigned int *) (DSP_ADDR100 + 8) = BRANCH_0x100; // 0x00104:
-#endif
+        *(volatile unsigned int *) (DSP_ADDR100 + 4) = BRANCH_0x100; // 0x00104:
+#else
         *(volatile unsigned int *)(DSP_ADDR100+0) = BRANCH_0x100; // 0x00104:
         *(volatile unsigned int *)(DSP_ADDR100+4) = BRANCH_0x100; // 0x00104:
+#endif
 
         //*(volatile unsigned int *) (DSP_ADDR104) = 0x6a000100; // 0x00104:
 #if 0

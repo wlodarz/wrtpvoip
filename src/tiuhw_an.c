@@ -1707,6 +1707,9 @@ static int __init tiuhw_an_init_module(void)
 
 	// test
 	printk(KERN_ERR "let's test\n");
+	VpMpiCmd(0, CSLAC_EC_REG_RD, 0x73, 4, cmdptr);
+	printk(KERN_ERR "cmdptr[0] = 0x%02x cmdptr[1] = 0x%02x cmdptr[2] = 0x%02x cmdptr[3] = 0x%02x\n", (unsigned char)cmdptr[0], (unsigned char)cmdptr[1], (unsigned char)cmdptr[2], (unsigned char)cmdptr[3]);
+/*
 	VpMpiCmd(0, CSLAC_EC_REG_RD, 0x06, 4, cmdptr);
 	printk(KERN_ERR "cmdptr[0] = 0x%02x cmdptr[1] = 0x%02x cmdptr[2] = 0x%02x cmdptr[3] = 0x%02x\n", cmdptr[0], cmdptr[1], cmdptr[2], cmdptr[3]);
 	VpMpiCmd(0, CSLAC_EC_REG_RD, 0x06, 4, cmdptr);
@@ -1725,6 +1728,7 @@ static int __init tiuhw_an_init_module(void)
 	printk(KERN_ERR "cmdptr[0] = 0x%02x cmdptr[1] = 0x%02x cmdptr[2] = 0x%02x cmdptr[3] = 0x%02x\n", cmdptr[0], cmdptr[1], cmdptr[2], cmdptr[3]);
 	VpMpiCmd(0, CSLAC_EC_REG_RD, 0x06, 4, cmdptr);
 	printk(KERN_ERR "cmdptr[0] = 0x%02x cmdptr[1] = 0x%02x cmdptr[2] = 0x%02x cmdptr[3] = 0x%02x\n", cmdptr[0], cmdptr[1], cmdptr[2], cmdptr[3]);
+*/
 
 	return ret;
 }
