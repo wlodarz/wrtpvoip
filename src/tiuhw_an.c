@@ -8,6 +8,7 @@
 #include <linux/types.h>
 #include <linux/errno.h>
 #include <linux/device.h>
+#include <linux/proc_fs.h>
 
 #include <asm/mach-ar7/ar7.h>
 #include <asm/mach-ar7/gpio.h>
@@ -49,6 +50,19 @@ static const struct file_operations tiuhw_fops = {
 };
 
 extern api_type *tiuhw_api;
+
+struct proc_dir_entry *tiu_proc_dir, *tiu_proc_file;
+
+static int proc_read_mpi(struct file *file, const char *buffer, unsigned long count, void *data)
+{
+  char cmdptr[16];
+
+	VpMpiCmd(0, CSLAC_EC_REG_RD, 0x73, 4, cmdptr);
+        printk(KERN_ERR "cmdptr[0] = 0x%02x cmdptr[1] = 0x%02x cmdptr[2] = 0x%02x cmdptr[3] = 0x%02x\n", (unsigned char)cmdptr[0], (unsigned char)cmdptr[1], (unsigned char)cmdptr[2], (unsigned char)cmdptr[3]);
+
+
+	return 1;
+}
 
 /*
 ../../../wrtp300-rootfs/lib/modules/2.4.17_mvl21-malta-mips_fp_le/kernel/drivers/tiuhw_an.o:     file format elf32-tradlittlemips
@@ -1729,6 +1743,16 @@ static int __init tiuhw_an_init_module(void)
 	VpMpiCmd(0, CSLAC_EC_REG_RD, 0x06, 4, cmdptr);
 	printk(KERN_ERR "cmdptr[0] = 0x%02x cmdptr[1] = 0x%02x cmdptr[2] = 0x%02x cmdptr[3] = 0x%02x\n", cmdptr[0], cmdptr[1], cmdptr[2], cmdptr[3]);
 */
+
+	tiu_proc_dir = proc_mkdir("voip", NULL);
+	if (tiu_proc_dir != NULL) {
+		//tiu_proc_dir->owner = THIS_MODULE;
+		tiu_proc_file = create_proc_read_entry("mpi", 0x444, tiu_proc_dir, proc_read_mpi, NULL);
+		if (tiu_proc_file == NULL) printk(KERN_ERR "error creating proc_read_entry\n");
+	} else {
+		if (tiu_proc_file == NULL) printk(KERN_ERR "error creating proc_mkdir\n");
+	}
+	
 
 	return ret;
 }
