@@ -33,9 +33,10 @@ endef
 EXTRA_KCONFIG:= \
 	CONFIG_TITANVOIP=m
 
-EXTRA_CFLAGS:= \
+EXTRA_CFLAGS:= -O0 \
 	$(patsubst CONFIG_%, -DCONFIG_%=1, $(patsubst %=m,%,$(filter %=m,$(EXTRA_KCONFIG)))) \
-	$(patsubst CONFIG_%, -DCONFIG_%=1, $(patsubst %=y,%,$(filter %=y,$(EXTRA_KCONFIG))))
+	$(patsubst CONFIG_%, -DCONFIG_%=1, $(patsubst %=y,%,$(filter %=y,$(EXTRA_KCONFIG)))) 
+	
 
 MAKE_OPTS:= \
 	ARCH="$(LINUX_KARCH)" \
@@ -47,6 +48,7 @@ MAKE_OPTS:= \
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
 	$(CP) ./src/* $(PKG_BUILD_DIR)/
+	$(CP) -r ./apps/ $(PKG_BUILD_DIR)/
 	echo Preparing
 endef
 
@@ -55,6 +57,7 @@ define Build/Compile
 	$(MAKE) -C "$(LINUX_DIR)" \
 		$(MAKE_OPTS) \
 		modules
+	$(MAKE) -C "$(PKG_BUILD_DIR)/apps/"
 endef
 
 $(eval $(call KernelPackage,titanvoip))

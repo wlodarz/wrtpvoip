@@ -97,15 +97,6 @@ char *stub_text = "tele_if_stub";
 void *other_pointer_src = 0;
 void *other_pointer_dst = 0;
 
-#define WAIT_LOOP \
-	index = 0; \
-        do { \
-		ltmp1 = (unsigned long long)dsp_clock_mult * (unsigned long long)dsp_input_clock_speed; \
-		tmp_v1 = ltmp1 & 0xffffffff; \
-		ltmp1 = (unsigned long long)(tmp_v1) * (unsigned long long)0x431bde83; \
-		tmp_v0 = ((((ltmp1 >> 0x20) >> 0x14) - 1) << 0x02); \
-	} while(++index < tmp_v0); 
-
 
 /*
 tiuhal.o:     file format elf32-tradlittlemips
@@ -125,13 +116,12 @@ int tnetv1050_tid_init(tiuhw_device *tiddev)
 	int tid_type = 0;
 	int tid=0;
 	int index = 0;
-	int dsp_clock_mult;
-	int dsp_input_clock_speed;
+	volatile int dsp_clock_mult;
+	volatile int dsp_input_clock_speed;
 	volatile unsigned long long dsp_freq;
 	volatile unsigned long long ltmp1, ltmp2;
-	//int tmp_s0, tmp_s3;
 	int ret = 1;
-	int const_0x4;
+	volatile int const_0x4;
 
 	tiddev->field2 = 11;
 	tiddev->field0 = 1;
@@ -184,24 +174,15 @@ int tnetv1050_tid_init(tiuhw_device *tiddev)
 	reg |= 0x00000004;
 	*(volatile int *)0xa5080000 = reg;
 
-	const_0x4 = 0x431bde83;
-	dsp_clock_mult = tiuhw_dsp_clock_mult; // t2
-	dsp_input_clock_speed = tiuhw_dsp_input_clock_speed; // t3
-
-	dsp_freq = (long long)dsp_clock_mult * (long long)dsp_input_clock_speed; // a1
-	dsp_freq = (long long)(dsp_freq & 0xffffffff) * (long long)const_0x4; // a1 * v1
-
-	tmp5 = ((((dsp_freq >> 32) & 0xffffffff) >> 0x14) - 1) << 0x02;
-	index = 0;
-	for (index=0; index<tmp5; index++) {
+	for (index=0; index<=tmp5; index++) {
 		const_0x4 = 0x431bde83;
 		dsp_clock_mult = tiuhw_dsp_clock_mult; // t2
 		dsp_input_clock_speed = tiuhw_dsp_input_clock_speed; // t3
 
-		dsp_freq = (long long)dsp_clock_mult * (long long)dsp_input_clock_speed; // a1
-		dsp_freq = (long long)(dsp_freq & 0xffffffff) * (long long)const_0x4; // a1 * v1
+		dsp_freq = (unsigned long long)dsp_clock_mult * (unsigned long long)dsp_input_clock_speed; // a1
+		dsp_freq = (unsigned long long)(dsp_freq & 0xffffffff) * (unsigned long long)const_0x4; // a1 * v1
 
-		tmp5 = ((((dsp_freq >> 32) & 0xffffffff) >> 0x14) - 1) << 0x02;
+		tmp5 = ((((dsp_freq >> 32) & 0xffffffff) >> 0x14) - 1) << 0x02; // should be 0x74
 	}
 	// ----
 
@@ -211,7 +192,7 @@ int tnetv1050_tid_init(tiuhw_device *tiddev)
 	dsp_input_clock_speed = tiuhw_dsp_input_clock_speed;
 	dsp_freq = (unsigned long long)dsp_clock_mult * (unsigned long long)dsp_input_clock_speed;
 	dsp_freq = (unsigned long long)(dsp_freq & 0xffffffff) * (unsigned long long)0x431bde83;
-	tmp_v0 = ((((dsp_freq >> 32) & 0xffffffff) >> 0x14) - 1) | 0x81080000;
+	tmp_v0 = ((((dsp_freq >> 32) & 0xffffffff) >> 0x14) - 1) | 0x81080000; // 0x1D | 0x81080000
 	*(volatile int *)MCBSP_REG_SPCR1 = tmp_v0;
 	reg = *(volatile int *)MCBSP_REG_SPCR1; // SPCR1
 	printk(KERN_ERR "SPCR1 = %08lx\n", reg);
@@ -220,42 +201,37 @@ int tnetv1050_tid_init(tiuhw_device *tiddev)
 	// ----
 	dsp_clock_mult = tiuhw_dsp_clock_mult;
 	dsp_input_clock_speed = tiuhw_dsp_input_clock_speed;
-	WAIT_LOOP
-	// ----
+        for(index=0; index<tmp_v0; index++) {
+		dsp_freq = (unsigned long long)dsp_clock_mult * (unsigned long long)dsp_input_clock_speed;
+		dsp_freq = (unsigned long long)(dsp_freq & 0xffffffff) * (unsigned long long)0x431bde83;
+		tmp_v0 = ((((dsp_freq >> 32) >> 0x14) - 1) << 0x02);
+	}
 
-	// ----
-	dsp_freq = (unsigned long long)dsp_clock_mult * (unsigned long long)dsp_input_clock_speed;
-	ltmp1 = (unsigned long long)dsp_freq * (unsigned long long)0x431bde83;
 	*(volatile int *)0xa5081004 = 0x1;
-	tmp_v0 = ((((ltmp1 >> 32) & 0xffffffff) >> 0x14) - 1) >> 0x02;
-	index = 0;
-	{
+
+	for (index=0; index<=tmp_v0; index++) {
 		dsp_freq = (unsigned long long)dsp_clock_mult * (unsigned long long)dsp_input_clock_speed;
 		ltmp1 = (unsigned long long)dsp_freq * (unsigned long long)0x431bde83;
 		tmp_v0 = ((((ltmp1 >> 32) & 0xffffffff) >> 0x14) - 1) >> 0x02;
-	} while (tmp_v0 > ++index);
-	// ----
+	}
 
-	// ----
 	dsp_freq =(unsigned long long) dsp_clock_mult * (unsigned long long)dsp_input_clock_speed;	
-	ltmp1 = (unsigned long long)dsp_freq * (unsigned long long)0x10624dd3;
-	tmp_v1 = (ltmp1 >> 32) & 0xffffffff;
-	tmp_v1 >>= 0x12;
-	tmp_v1 -= 1;
+	dsp_freq = (unsigned long long)dsp_freq * (unsigned long long)0x10624dd3;
+	tmp_v1 = ((((dsp_freq >> 32) & 0xffffffff) >> 0x12) -1); // 0x1d
 	tmp_v1 = tmp_v1 | 0x00ff8000;
 	*(volatile int *)MCBSP_REG_PCMCR1 = tmp_v1;
 
 	reg = *(volatile int *)MCBSP_REG_PCMCR1;
 	printk(KERN_ERR "PCMCR1 = %08lx\n", reg);
 
-	index = 0;
-	{
+	tmp_v0 = 1;
+	for (index=0; index<tmp_v0; index++) {
 		dsp_clock_mult = tiuhw_dsp_clock_mult;
 		dsp_input_clock_speed = tiuhw_dsp_input_clock_speed;
 		dsp_freq = (unsigned long long)dsp_clock_mult * (unsigned long long)dsp_input_clock_speed;
 		ltmp1 = (unsigned long long)dsp_freq * (unsigned long long)0x431bde83;
 		tmp_v0 = (((((ltmp1 >> 32) & 0xffffffff) >> 0x14) - 1) >> 0x02);
-	} while (tmp_v0 > ++index);
+	}
 	*(volatile int *)0xa5081020 = 0;
 	// ----
 
@@ -286,7 +262,6 @@ static irqreturn_t test_irq_handler(int i, void *data)
 
 /* FUNCTION: TODO, NEED CAREFULL REVIEW */
 int tnetv1050_tid_writebyte(char byte) {
-	//volatile int a0, a1;
 	volatile unsigned long long ltmp1, ltmp2;
 	volatile int tmp2, tmp3, tmp4, tmp9, tmp10;
 	signed int reg;
@@ -299,9 +274,6 @@ int tnetv1050_tid_writebyte(char byte) {
 	int i;
 /*
      450:	308400ff 	andi	$a0,$a0,0xff
-*/
-	//byte = a&0xff;
-/*
      454:	3c080000 	lui	$t0,0x0
      458:	8d080000 	lw	$t0,0($t0)
 */
@@ -331,116 +303,72 @@ int tnetv1050_tid_writebyte(char byte) {
      494:	ace40000 	sw	$a0,0($a3)
 */
 	*(volatile unsigned int *)MCBSP_REG_DXR1 = b;
-
-
 /*
      498:	00051502 	srl	$v0,$a1,0x14
      49c:	2442ffff 	addiu	$v0,$v0,-1
      4a0:	00431025 	or	$v0,$v0,$v1
      4a4:	acc20000 	sw	$v0,0($a2)
 */
-	tmp2 = (unsigned int)(((unsigned long long)dsp_freq * (unsigned long long)0x431bde83) >> 32); // & 0xffffffff;
-	tmp3 = (((tmp2 >> 0x14) - 1) | 0x81480000);
+	tmp2 = (unsigned int)(((unsigned long long)dsp_freq * (unsigned long long)0x431bde83) >> 32); // & 0xffffffff; = 0x1EB851E
+	/* tmp3 = (((tmp2 >> 0x14) - 1) | 0x81480000); */
+	tmp3 = tmp2 >> 0x14;	// = 0x1E
+	tmp3 -= 1;	// = 0x1D
+	tmp3 |= 0x81480000;
+	printk(KERN_ERR "tnetv1050_tid_writebyte: should be 0x8148001d is 0x%08x\n", tmp3);
 	*(unsigned volatile int *)MCBSP_REG_SPCR1 = tmp3;
 
 /*
      4a8:	00052cc2 	srl	$a1,$a1,0x13
      4ac:	24a50001 	addiu	$a1,$a1,1
-*/
-	tmp2 >>= 0x13;
-	tmp2 += 1;
-
-/*
      4b0:	00051080 	sll	$v0,$a1,0x2
      4b4:	00451021 	addu	$v0,$v0,$a1
-*/
-	tmp3 = (tmp2 << 2);
-	tmp3 += tmp2;
-	
-
-/*
      4b8:	000210c0 	sll	$v0,$v0,0x3
      4bc:	00451023 	subu	$v0,$v0,$a1
-*/
-	tmp3 <<= 0x03;
-	tmp3 -= tmp2;
-
-/*
      4c0:	00021100 	sll	$v0,$v0,0x4
      4c4:	00451021 	addu	$v0,$v0,$a1
 */
-	tmp3 <<= 0x04;
-	tmp3 += tmp2;
-
+	tmp2 = (tmp2 >> 0x13) + 1;
+	tmp3 = (tmp2 << 2) + tmp2;
+	tmp3 = (tmp3 << 0x03) - tmp2;
+	tmp3 = (tmp3 << 0x04) + tmp2;
 /*
      4c8:	8ce30000 	lw	$v1,0($a3)
      4cc:	04610029 	bgez	$v1,574 <init_module-0x3c8>
      4d0:	00022100 	sll	$a0,$v0,0x4
 */
-	/* ret <= $a0 */
 	ret = tmp3 << 0x04;
-	reg = *(volatile signed int *)MCBSP_REG_DXR1;
-	cnt = 0;
-	//if(reg<0) {
-	if(0) {
-
-/*
+	while(((reg = *(volatile signed int*)MCBSP_REG_DXR1) < 0) && ((ret--) > -1)) {
+/* 
      4d4:	2484ffff 	addiu	$a0,$a0,-1
-*/
-		ret -= 1;
-
-/*
-     4d8:	2402ffff 	li	$v0,-1
+     4d8:	2402ffff 	li	$v0,-1 
      4dc:	10820025 	beq	$a0,$v0,574 <init_module-0x3c8>
-     4e0:	01002821 	move	$a1,$t0
-*/
-		tmp2 = dsp_mult;
-		while(ret > -1) {
-
-/*
-     4e4:	00a04021 	move	$t0,$a1
-     4e8:	01203821 	move	$a3,$t1
-     4ec:	01070018 	mult	$t0,$a3
-     4f0:	3c02431b 	lui	$v0,0x431b
-     4f4:	00001812 	mflo	$v1
-     4f8:	3442de83 	ori	$v0,$v0,0xde83
-     4fc:	00000000 	nop
-*/
-			dsp_mult = tmp2;
-			ltmp1 = (unsigned long long)dsp_mult * (unsigned long long)dsp_speed;
-			tmp10 = ltmp1 & 0xffffffff;
+     4e0:	01002821 	move	$a1,$t0 - dsp_mult
+     4e4:	00a04021 	move	$t0,$a1 
+     4e8:	01203821 	move	$a3,$t1 - dsp_speed
+     4ec:	01070018 	mult	$t0,$a3 
+     4f0:	3c02431b 	lui	$v0,0x431b 
+     4f4:	00001812 	mflo	$v1 
+     4f8:	3442de83 	ori	$v0,$v0,0xde83 
+     4fc:	00000000 	nop 
 			
-/*
      500:	00620019 	multu	$v1,$v0
      504:	00001010 	mfhi	$v0
      508:	00021502 	srl	$v0,$v0,0x14
      50c:	2442ffff 	addiu	$v0,$v0,-1
      510:	00021100 	sll	$v0,$v0,0x4
 */
-			ltmp1 = ((unsigned long long)tmp10 * (unsigned long long)0x431bde83);
-			tmp10 = (ltmp1 >> 32);
-
-			tmp10 >>= 0x14;
-			tmp10 -= 1;
-			tmp10 <<= 0x04;
 /*
      514:	1040000f 	beqz	$v0,554 <init_module-0x3e8>
      518:	00003021 	move	$a2,$zero
 */
-			// a2 = 0; - i
-// #error ALA
-			for(i=0; i<tmp10; i++) {
-			//if(tmp10 != 0) {
+		tmp10 = 1;
+		for(i=0; i<tmp10; i++) {
 /*
      51c:	01070018 	mult	$t0,$a3
      520:	3c02431b 	lui	$v0,0x431b
      524:	00001812 	mflo	$v1
      528:	3442de83 	ori	$v0,$v0,0xde83
      52c:	00000000 	nop
-*/
-				ltmp1 = ((unsigned long long)tmp10 * (unsigned long long)0x431bde83);
-				tmp10 = (ltmp1 >> 32);
-/*
      530:	00620019 	multu	$v1,$v0
      534:	00001010 	mfhi	$v0
      538:	24c60001 	addiu	$a2,$a2,1
@@ -449,11 +377,12 @@ int tnetv1050_tid_writebyte(char byte) {
      544:	00021100 	sll	$v0,$v0,0x4
 */
 				// a2++
-				ltmp1 = ((unsigned long long)tmp10 * (unsigned long long)0x431bde83);
-				tmp10 = (ltmp1 >> 32);
-				tmp10 >>= 0x14;
-				tmp10 -= 1;
-				tmp10 <<= 0x04;
+			ltmp1 = ((unsigned long long)dsp_mult * (unsigned long long)dsp_speed);
+			ltmp1 = ((((unsigned long long)ltmp1) & 0xffffffff) * (unsigned long long)0x431bde83);
+			tmp10 = (ltmp1 >> 32);
+			tmp10 >>= 0x14;
+			tmp10 -= 1;
+			tmp10 <<= 0x04;
 /*
      548:	00c2102b 	sltu	$v0,$a2,$v0
 */
@@ -461,7 +390,6 @@ int tnetv1050_tid_writebyte(char byte) {
      54c:	1440fff4 	bnez	$v0,520 <init_module-0x41c>
      550:	01070018 	mult	$t0,$a3
 */
-			}
 /*
      554:	3c02a508 	lui	$v0,0xa508
      558:	34421018 	ori	$v0,$v0,0x1018
@@ -469,17 +397,11 @@ int tnetv1050_tid_writebyte(char byte) {
      560:	04410004 	bgez	$v0,574 <init_module-0x3c8>
      564:	2402ffff 	li	$v0,-1
 */
-			reg = *(volatile signed int *)MCBSP_REG_DXR1;
-			//printk(KERN_ERR "reg = 0x%08x\n", reg);
-			if(reg < 0) { break; }
 /*
      568:	2484ffff 	addiu	$a0,$a0,-1
      56c:	1482ffde 	bne	$a0,$v0,4e8 <init_module-0x454>
      570:	00a04021 	move	$t0,$a1
 */
-			cnt++;
-			if (cnt==5000) {printk(KERN_ERR "cnt break\n"); break; }
-			ret--;
 		}
 	}
 	//printk(KERN_ERR "tnetv1050_tid_writebyte exit with a0 = %d\n", a0);
@@ -487,6 +409,7 @@ int tnetv1050_tid_writebyte(char byte) {
      574:	03e00008 	jr	$ra
      578:	0004102b 	sltu	$v0,$zero,$a0
 */
+	if (ret <= 0) printk(KERN_ERR "timeout thils writebyte\n");
 	return (ret > 0);
 }
 
@@ -523,8 +446,12 @@ int tnetv1050_tid_readbyte(char *pbuffer)
      5a0:	00000000 	nop
      5a4:	00820019 	multu	$a0,$v0
 */
-	ltmp1 = (unsigned long long)dsp_clock_mult * (unsigned long long)dsp_input_clock_speed;
-	ltmp1 = (unsigned long long)(ltmp1 & 0xffffffff) * (unsigned long long)0x431bde83;
+	ltmp1 = (unsigned long long)dsp_clock_mult * (unsigned long long)dsp_input_clock_speed; /* 0x7530000 */
+	printk(KERN_ERR "mult: 0x%08x speed: 0x%08x\n", dsp_clock_mult, dsp_input_clock_speed);
+	printk(KERN_ERR "readbyte: long: 0x%16llx\n", ltmp1);
+
+	ltmp1 = (unsigned long long)(ltmp1 & 0xffffffff) * (unsigned long long)0x431bde83;      /* 0x01EB851EB9790000 */
+	printk(KERN_ERR "readbyte: long: 0x%16llx\n", ltmp1);
 /*
      5a8:	3c05a508 	lui	$a1,0xa508
      5ac:	34a51010 	ori	$a1,$a1,0x1010
@@ -549,21 +476,22 @@ int tnetv1050_tid_readbyte(char *pbuffer)
      5ec:	aca20000 	sw	$v0,0($a1)
      5f0:	00042100 	sll	$a0,$a0,0x4
 */
-	tmp_a0 = (ltmp1 >> 32) & 0xffffffff;
-	tmp_v1 = tmp_a0 >> 0x13;
-	tmp_v1 += 1;
-	tmp_v0 = tmp_v1 << 0x02;
-	tmp_v0 = tmp_v0 + tmp_v1;
-	tmp_v0 = tmp_v0 << 0x03;
-	tmp_v0 = tmp_v0 - tmp_v1;
-	tmp_v0 = tmp_v0 << 0x04;
-	tmp_v0 = tmp_v0 + tmp_v1;
-	tmp_a2 = tmp_v0 << 0x04;
-	tmp_a0 = tmp_a0 >> 0x14;
-	tmp_a0 -= 1;
-	tmp_v0 = tmp_a0 | 0x81280000;
+	tmp_a0 = (ltmp1 >> 32) & 0xffffffff;	/* 0x01EB851E */
+	tmp_v1 = tmp_a0 >> 0x13;		/* 0x03D */
+	tmp_v1 += 1;				/* 0x03E */
+	tmp_v0 = tmp_v1 << 0x02;		/* 0x0F8 */
+	tmp_v0 = tmp_v0 + tmp_v1;		/* 0x136 */
+	tmp_v0 = tmp_v0 << 0x03;		/* 0x9B0 */
+	tmp_v0 = tmp_v0 - tmp_v1;		/* 0x972 */
+	tmp_v0 = tmp_v0 << 0x04;		/* 0x9720 */
+	tmp_v0 = tmp_v0 + tmp_v1;		/* 0x975E */
+	tmp_a2 = tmp_v0 << 0x04;		/* 0x975E0 */
+	tmp_a0 = tmp_a0 >> 0x14;		/* 0x1E */
+	tmp_a0 -= 1;				/* 0x1D */
+	tmp_v0 = tmp_a0 | 0x81280000;		/* 0x8128001D */
 	reg = tmp_v0;
 	// 0x8128 - (2) read operation
+	printk(KERN_ERR "tnetv1050_tid_readbyte: should be 0x8128001d is 0x%08x\n", reg);
 	*(volatile int *)MCBSP_REG_SPCR1 = reg;
 	tmp_a3 = 0;
 /*
@@ -592,9 +520,9 @@ int tnetv1050_tid_readbyte(char *pbuffer)
      638:	00850018 	mult	$a0,$a1
      63c:	3c02a508 	lui	$v0,0xa508
 */
-			ltmp1 = (long long)dsp_clock_mult * (long long)dsp_input_clock_speed;
+			ltmp1 = (unsigned long long)dsp_clock_mult * (unsigned long long)dsp_input_clock_speed;
 			tmp_v1 = ltmp1 & 0xffffffff;
-			ltmp1 = (long long)tmp_v1 * (long long)0x431bde83;
+			ltmp1 = (unsigned long long)tmp_v1 * (unsigned long long)0x431bde83;
 			tmp_v0 = (ltmp1 >> 32) & 0xffffffff;
 			tmp_a3 += 1;
 			tmp_v0 >>= 0x14;
@@ -613,8 +541,7 @@ int tnetv1050_tid_readbyte(char *pbuffer)
 	reg = *(volatile int *)MCBSP_REG_UNKNW1;
 	//printk(KERN_ERR "tnetv1050_tid_read reg=0x%08x\n", reg);
 	tmp_v0 = -1;
-	while((reg < 0) && (tmp_a2 >= 0)) {
-		tmp_a2 -= 1;
+	while((reg < 0) && ((tmp_a2--) >= 0)) {
 /*
      65c:	3c090000 	lui	$t1,0x0
      660:	8d290000 	lw	$t1,0($t1)
@@ -685,7 +612,6 @@ int tnetv1050_tid_readbyte(char *pbuffer)
      6f4:	54c2ffde 	0x54c2ffde
      6f8:	01203821 	move	$a3,$t1
 */
-#warning MUST BE SIGNED
 		reg = *(volatile signed int *)MCBSP_REG_UNKNW1;
 	}
 /*
@@ -696,10 +622,11 @@ int tnetv1050_tid_readbyte(char *pbuffer)
      70c:	03e00008 	jr	$ra
      710:	00001021 	move	$v0,$zero
 */
-	if(tmp_a2 != 0) {
+	if(tmp_a2 >= 0) {
 		*pbuffer = reg;		
 		return 1;
 	} 
+	printk(KERN_ERR "readbyte: read timeout\n");
 	return 0;
 }
 
@@ -802,19 +729,19 @@ int func21(void)
 // 0x8b0
 /* TODO: 'magic number sections' - some TELE_IF settings? */
 /* FUNCTION: TODO, need review */
-int func22(int tid, int if_type)
+int func22(int tid, int cmd)
 {
 	int reg;
 
 	tid &= 0xffff;
 	if(tid < 4) {
-		if(if_type == TIHW_INTERNAL) {
+		if(cmd == TIHW_INTERNAL) {
 			reg = *(volatile int *)0xa5081020;
 			reg |= (1 << tid);
 			*(volatile int *)0xa5081020 = reg;
 		} else {
 			reg = *(volatile int *)0xa5081020;
-			reg &= (~(1 << if_type));
+			reg &= (~(1 << tid));
 			*(volatile int *)0xa5081020 = reg;
 		}
 	}
