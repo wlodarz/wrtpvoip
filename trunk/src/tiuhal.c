@@ -1,4 +1,4 @@
-// loops_per_jiffy = 429496 // 747520
+// loops_per_jiffy = 429498 // 747520
 
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -46,10 +46,10 @@ int tiuhw_get_tid_type(char tid);
 #define TIU_RESET_ON 1
 #define TIU_RESET_OFF 0
 
-#define MCBSP_REG_PCMCR1 	0xa5081000
-#define MCBSP_REG_SPCR1 	0xa5081010
-#define MCBSP_REG_DXR1    	0xa5081018
-#define MCBSP_REG_UNKNW1    	0xa508101c
+#define TELE_REG_PCMCR1 	0xa5081000
+#define TELE_REG_SPCR1 	0xa5081010
+#define TELE_REG_TX1    	0xa5081018
+#define TELE_REG_RX1    	0xa508101c
 
 /* pointers from data + 0x0000 */
 api_type tnetv1050_api = {
@@ -116,8 +116,6 @@ int tnetv1050_tid_init(tiuhw_device *tiddev)
 	int tid_type = 0;
 	int tid=0;
 	int index = 0;
-	volatile int dsp_clock_mult;
-	volatile int dsp_input_clock_speed;
 	volatile unsigned long long dsp_freq;
 	volatile unsigned long long ltmp1, ltmp2;
 	int ret = 1;
@@ -164,71 +162,59 @@ int tnetv1050_tid_init(tiuhw_device *tiddev)
 
 	// ----
 	const_0x4 = 0x431bde83;
-	dsp_clock_mult = tiuhw_dsp_clock_mult; // t2
-	dsp_input_clock_speed = tiuhw_dsp_input_clock_speed; // t3
-
-	dsp_freq = (unsigned long long)dsp_clock_mult * (unsigned long long)dsp_input_clock_speed; // -> a1
+	dsp_freq = (unsigned long long)tiuhw_dsp_clock_mult * (unsigned long long)tiuhw_dsp_input_clock_speed; // -> a1
 	dsp_freq = (unsigned long long)(dsp_freq & 0xffffffff) * (unsigned long long)const_0x4; // a1 * v1 -> 
-	*(volatile int *)0xa5080104 = (((dsp_clock_mult-1) << 12)|0x0000027e);
+	*(volatile int *)0xa5080104 = (((tiuhw_dsp_clock_mult-1) << 12)|0x0000027e);
+
 	reg = *(volatile int *)0xa5080000;
 	reg |= 0x00000004;
 	*(volatile int *)0xa5080000 = reg;
 
+	tmp5 = 1;
 	for (index=0; index<=tmp5; index++) {
 		const_0x4 = 0x431bde83;
-		dsp_clock_mult = tiuhw_dsp_clock_mult; // t2
-		dsp_input_clock_speed = tiuhw_dsp_input_clock_speed; // t3
-
-		dsp_freq = (unsigned long long)dsp_clock_mult * (unsigned long long)dsp_input_clock_speed; // a1
+		dsp_freq = (unsigned long long)tiuhw_dsp_clock_mult * (unsigned long long)tiuhw_dsp_input_clock_speed; // a1
 		dsp_freq = (unsigned long long)(dsp_freq & 0xffffffff) * (unsigned long long)const_0x4; // a1 * v1
 
 		tmp5 = ((((dsp_freq >> 32) & 0xffffffff) >> 0x14) - 1) << 0x02; // should be 0x74
 	}
-	// ----
 
 
-	// ----
-	dsp_clock_mult = tiuhw_dsp_clock_mult;
-	dsp_input_clock_speed = tiuhw_dsp_input_clock_speed;
-	dsp_freq = (unsigned long long)dsp_clock_mult * (unsigned long long)dsp_input_clock_speed;
+	dsp_freq = (unsigned long long)tiuhw_dsp_clock_mult * (unsigned long long)tiuhw_dsp_input_clock_speed;
 	dsp_freq = (unsigned long long)(dsp_freq & 0xffffffff) * (unsigned long long)0x431bde83;
 	tmp_v0 = ((((dsp_freq >> 32) & 0xffffffff) >> 0x14) - 1) | 0x81080000; // 0x1D | 0x81080000
-	*(volatile int *)MCBSP_REG_SPCR1 = tmp_v0;
-	reg = *(volatile int *)MCBSP_REG_SPCR1; // SPCR1
+	*(volatile int *)TELE_REG_SPCR1 = tmp_v0;
+	reg = *(volatile int *)TELE_REG_SPCR1; // SPCR1
 	printk(KERN_ERR "SPCR1 = %08lx\n", reg);
-	// ----
 
-	// ----
-	dsp_clock_mult = tiuhw_dsp_clock_mult;
-	dsp_input_clock_speed = tiuhw_dsp_input_clock_speed;
+	tmp_v0 = 1;
         for(index=0; index<tmp_v0; index++) {
-		dsp_freq = (unsigned long long)dsp_clock_mult * (unsigned long long)dsp_input_clock_speed;
+		dsp_freq = (unsigned long long)tiuhw_dsp_clock_mult * (unsigned long long)tiuhw_dsp_input_clock_speed;
 		dsp_freq = (unsigned long long)(dsp_freq & 0xffffffff) * (unsigned long long)0x431bde83;
 		tmp_v0 = ((((dsp_freq >> 32) >> 0x14) - 1) << 0x02);
 	}
 
 	*(volatile int *)0xa5081004 = 0x1;
 
+	tmp_v0 = 1;
 	for (index=0; index<=tmp_v0; index++) {
-		dsp_freq = (unsigned long long)dsp_clock_mult * (unsigned long long)dsp_input_clock_speed;
+		dsp_freq = (unsigned long long)tiuhw_dsp_clock_mult * (unsigned long long)tiuhw_dsp_input_clock_speed;
 		ltmp1 = (unsigned long long)dsp_freq * (unsigned long long)0x431bde83;
 		tmp_v0 = ((((ltmp1 >> 32) & 0xffffffff) >> 0x14) - 1) >> 0x02;
 	}
 
-	dsp_freq =(unsigned long long) dsp_clock_mult * (unsigned long long)dsp_input_clock_speed;	
+	dsp_freq =(unsigned long long) tiuhw_dsp_clock_mult * (unsigned long long)tiuhw_dsp_input_clock_speed;	
 	dsp_freq = (unsigned long long)dsp_freq * (unsigned long long)0x10624dd3;
 	tmp_v1 = ((((dsp_freq >> 32) & 0xffffffff) >> 0x12) -1); // 0x1d
 	tmp_v1 = tmp_v1 | 0x00ff8000;
-	*(volatile int *)MCBSP_REG_PCMCR1 = tmp_v1;
+	*(volatile int *)TELE_REG_PCMCR1 = tmp_v1;
 
-	reg = *(volatile int *)MCBSP_REG_PCMCR1;
+	reg = *(volatile int *)TELE_REG_PCMCR1;
 	printk(KERN_ERR "PCMCR1 = %08lx\n", reg);
 
 	tmp_v0 = 1;
 	for (index=0; index<tmp_v0; index++) {
-		dsp_clock_mult = tiuhw_dsp_clock_mult;
-		dsp_input_clock_speed = tiuhw_dsp_input_clock_speed;
-		dsp_freq = (unsigned long long)dsp_clock_mult * (unsigned long long)dsp_input_clock_speed;
+		dsp_freq = (unsigned long long)tiuhw_dsp_clock_mult * (unsigned long long)tiuhw_dsp_input_clock_speed;
 		ltmp1 = (unsigned long long)dsp_freq * (unsigned long long)0x431bde83;
 		tmp_v0 = (((((ltmp1 >> 32) & 0xffffffff) >> 0x14) - 1) >> 0x02);
 	}
@@ -276,18 +262,11 @@ int tnetv1050_tid_writebyte(char byte) {
      450:	308400ff 	andi	$a0,$a0,0xff
      454:	3c080000 	lui	$t0,0x0
      458:	8d080000 	lw	$t0,0($t0)
-*/
-	dsp_mult = tiuhw_dsp_clock_mult;
-/*
      45c:	3c090000 	lui	$t1,0x0
      460:	8d290000 	lw	$t1,0($t1)
-*/
-	dsp_speed = tiuhw_dsp_input_clock_speed;
-/*
      464:	01090018 	mult	$t0,$t1
 */
-	dsp_freq = (unsigned long long)dsp_mult * (unsigned long long)dsp_speed;
-
+	dsp_freq = (unsigned long long)tiuhw_dsp_clock_mult * (unsigned long long)tiuhw_dsp_input_clock_speed;
 /*
      468:	3c02431b 	lui	$v0,0x431b
      46c:	00002812 	mflo	$a1
@@ -297,12 +276,12 @@ int tnetv1050_tid_writebyte(char byte) {
      47c:	3c07a508 	lui	$a3,0xa508
      480:	34e71018 	ori	$a3,$a3,0x1018  // a3 = 0xa5081018
      484:	3c06a508 	lui	$a2,0xa508
-     488:	34c61010 	ori	$a2,$a2,0x1010  // a2 = MCBSP_REG_SPCR1
+     488:	34c61010 	ori	$a2,$a2,0x1010  // a2 = TELE_REG_SPCR1
      48c:	3c038148 	lui	$v1,0x8148	// v1 = 0x81480000
      490:	00002810 	mfhi	$a1 		// a1 - tmp2
      494:	ace40000 	sw	$a0,0($a3)
 */
-	*(volatile unsigned int *)MCBSP_REG_DXR1 = b;
+	*(volatile unsigned int *)TELE_REG_TX1 = b;
 /*
      498:	00051502 	srl	$v0,$a1,0x14
      49c:	2442ffff 	addiu	$v0,$v0,-1
@@ -310,13 +289,9 @@ int tnetv1050_tid_writebyte(char byte) {
      4a4:	acc20000 	sw	$v0,0($a2)
 */
 	tmp2 = (unsigned int)(((unsigned long long)dsp_freq * (unsigned long long)0x431bde83) >> 32); // & 0xffffffff; = 0x1EB851E
-	/* tmp3 = (((tmp2 >> 0x14) - 1) | 0x81480000); */
-	tmp3 = tmp2 >> 0x14;	// = 0x1E
-	tmp3 -= 1;	// = 0x1D
-	tmp3 |= 0x81480000;
-	printk(KERN_ERR "tnetv1050_tid_writebyte: should be 0x8148001d is 0x%08x\n", tmp3);
-	*(unsigned volatile int *)MCBSP_REG_SPCR1 = tmp3;
-
+	tmp3 = ((tmp2 >> 0x14) - 1) | 0x81480000;	// = 0x8148001D
+	//printk(KERN_ERR "tnetv1050_tid_writebyte: should be 0x8148001d is 0x%08x\n", tmp3);
+	*(unsigned volatile int *)TELE_REG_SPCR1 = tmp3;
 /*
      4a8:	00052cc2 	srl	$a1,$a1,0x13
      4ac:	24a50001 	addiu	$a1,$a1,1
@@ -337,7 +312,7 @@ int tnetv1050_tid_writebyte(char byte) {
      4d0:	00022100 	sll	$a0,$v0,0x4
 */
 	ret = tmp3 << 0x04;
-	while(((reg = *(volatile signed int*)MCBSP_REG_DXR1) < 0) && ((ret--) > -1)) {
+	while(((reg = *(volatile signed int*)TELE_REG_TX1) < 0) && ((ret--) > -1)) {
 /* 
      4d4:	2484ffff 	addiu	$a0,$a0,-1
      4d8:	2402ffff 	li	$v0,-1 
@@ -377,7 +352,7 @@ int tnetv1050_tid_writebyte(char byte) {
      544:	00021100 	sll	$v0,$v0,0x4
 */
 				// a2++
-			ltmp1 = ((unsigned long long)dsp_mult * (unsigned long long)dsp_speed);
+			ltmp1 = ((unsigned long long)tiuhw_dsp_clock_mult * (unsigned long long)tiuhw_dsp_input_clock_speed);
 			ltmp1 = ((((unsigned long long)ltmp1) & 0xffffffff) * (unsigned long long)0x431bde83);
 			tmp10 = (ltmp1 >> 32);
 			tmp10 >>= 0x14;
@@ -409,7 +384,7 @@ int tnetv1050_tid_writebyte(char byte) {
      574:	03e00008 	jr	$ra
      578:	0004102b 	sltu	$v0,$zero,$a0
 */
-	if (ret <= 0) printk(KERN_ERR "timeout thils writebyte\n");
+	if (ret <= 0) printk(KERN_ERR "timeout while writebyte\n");
 	return (ret > 0);
 }
 
@@ -421,24 +396,15 @@ int tnetv1050_tid_readbyte(char *pbuffer)
 	signed int reg;
 	volatile unsigned long long ltmp1;
 	volatile int tmp_v0, tmp_v1;
-	volatile unsigned int dsp_clock_mult, dsp_input_clock_speed;
 	volatile int tmp_a0, tmp_a2, tmp_a3;
 	int cnt=0;
 	int i;
 /*
      57c:	00805021 	move	$t2,$a0
-*/
-/*
      580:	3c080000 	lui	$t0,0x0
      584:	8d080000 	lw	$t0,0($t0)
-*/
-	dsp_clock_mult = tiuhw_dsp_clock_mult;
-/*
      588:	3c090000 	lui	$t1,0x0
      58c:	8d290000 	lw	$t1,0($t1)
-*/
-	dsp_input_clock_speed = tiuhw_dsp_input_clock_speed;
-/*
      590:	01090018 	mult	$t0,$t1
      594:	3c02431b 	lui	$v0,0x431b
      598:	00002012 	mflo	$a0
@@ -446,12 +412,12 @@ int tnetv1050_tid_readbyte(char *pbuffer)
      5a0:	00000000 	nop
      5a4:	00820019 	multu	$a0,$v0
 */
-	ltmp1 = (unsigned long long)dsp_clock_mult * (unsigned long long)dsp_input_clock_speed; /* 0x7530000 */
-	printk(KERN_ERR "mult: 0x%08x speed: 0x%08x\n", dsp_clock_mult, dsp_input_clock_speed);
-	printk(KERN_ERR "readbyte: long: 0x%16llx\n", ltmp1);
+	ltmp1 = (unsigned long long)tiuhw_dsp_clock_mult * (unsigned long long)tiuhw_dsp_input_clock_speed; /* 0x7530000 */
+	//printk(KERN_ERR "mult: 0x%08x speed: 0x%08x\n", tiuhw_dsp_clock_mult, tiuhw_dsp_input_clock_speed);
+	//printk(KERN_ERR "readbyte: long: 0x%16llx\n", ltmp1);
 
 	ltmp1 = (unsigned long long)(ltmp1 & 0xffffffff) * (unsigned long long)0x431bde83;      /* 0x01EB851EB9790000 */
-	printk(KERN_ERR "readbyte: long: 0x%16llx\n", ltmp1);
+	//printk(KERN_ERR "readbyte: long: 0x%16llx\n", ltmp1);
 /*
      5a8:	3c05a508 	lui	$a1,0xa508
      5ac:	34a51010 	ori	$a1,$a1,0x1010
@@ -491,8 +457,8 @@ int tnetv1050_tid_readbyte(char *pbuffer)
 	tmp_v0 = tmp_a0 | 0x81280000;		/* 0x8128001D */
 	reg = tmp_v0;
 	// 0x8128 - (2) read operation
-	printk(KERN_ERR "tnetv1050_tid_readbyte: should be 0x8128001d is 0x%08x\n", reg);
-	*(volatile int *)MCBSP_REG_SPCR1 = reg;
+	//printk(KERN_ERR "tnetv1050_tid_readbyte: should be 0x8128001d is 0x%08x\n", reg);
+	*(volatile int *)TELE_REG_SPCR1 = reg;
 	tmp_a3 = 0;
 /*
      5f4:	10800012 	beqz	$a0,640 <init_module-0x2fc>
@@ -520,7 +486,7 @@ int tnetv1050_tid_readbyte(char *pbuffer)
      638:	00850018 	mult	$a0,$a1
      63c:	3c02a508 	lui	$v0,0xa508
 */
-			ltmp1 = (unsigned long long)dsp_clock_mult * (unsigned long long)dsp_input_clock_speed;
+			ltmp1 = (unsigned long long)tiuhw_dsp_clock_mult * (unsigned long long)tiuhw_dsp_input_clock_speed;
 			tmp_v1 = ltmp1 & 0xffffffff;
 			ltmp1 = (unsigned long long)tmp_v1 * (unsigned long long)0x431bde83;
 			tmp_v0 = (ltmp1 >> 32) & 0xffffffff;
@@ -538,21 +504,15 @@ int tnetv1050_tid_readbyte(char *pbuffer)
      654:	10c20029 	beq	$a2,$v0,6fc <init_module-0x240>
      658:	00000000 	nop
 */
-	reg = *(volatile int *)MCBSP_REG_UNKNW1;
+	reg = *(volatile int *)TELE_REG_RX1;
 	//printk(KERN_ERR "tnetv1050_tid_read reg=0x%08x\n", reg);
 	tmp_v0 = -1;
 	while((reg < 0) && ((tmp_a2--) >= 0)) {
 /*
      65c:	3c090000 	lui	$t1,0x0
      660:	8d290000 	lw	$t1,0($t1)
-*/
-		dsp_clock_mult = tiuhw_dsp_clock_mult;
-/*
      664:	3c080000 	lui	$t0,0x0
      668:	8d080000 	lw	$t0,0($t0)
-*/
-		dsp_input_clock_speed = tiuhw_dsp_input_clock_speed;
-/*
      66c:	01203821 	move	$a3,$t1
      670:	01002821 	move	$a1,$t0
      674:	00e50018 	mult	$a3,$a1
@@ -568,7 +528,7 @@ int tnetv1050_tid_readbyte(char *pbuffer)
      69c:	1040000f 	beqz	$v0,6dc <init_module-0x260>
      6a0:	00002021 	move	$a0,$zero
 */
-		ltmp1 = (unsigned long long)dsp_clock_mult * (unsigned long long)dsp_input_clock_speed;
+		ltmp1 = (unsigned long long)tiuhw_dsp_clock_mult * (unsigned long long)tiuhw_dsp_input_clock_speed;
 		tmp_v1 = ltmp1 & 0xffffffff;
 		ltmp1 = (unsigned long long)tmp_v1 * (unsigned long long)0x431bde83;
 		tmp_v0 = (ltmp1 >> 32) & 0xffffffff;
@@ -593,7 +553,7 @@ int tnetv1050_tid_readbyte(char *pbuffer)
      6d4:	1440fff4 	bnez	$v0,6a8 <init_module-0x294>
      6d8:	00e50018 	mult	$a3,$a1
 */
-				ltmp1 = (unsigned long long)dsp_clock_mult * (unsigned long long)dsp_input_clock_speed;
+				ltmp1 = (unsigned long long)tiuhw_dsp_clock_mult * (unsigned long long)tiuhw_dsp_input_clock_speed;
 				tmp_v1 = ltmp1 & 0xffffffff;
 				ltmp1 = (unsigned long long)tmp_v1 * (unsigned long long)0x431bde83;
 				tmp_v0 = (ltmp1 >> 32) & 0xffffffff;
@@ -612,7 +572,7 @@ int tnetv1050_tid_readbyte(char *pbuffer)
      6f4:	54c2ffde 	0x54c2ffde
      6f8:	01203821 	move	$a3,$t1
 */
-		reg = *(volatile signed int *)MCBSP_REG_UNKNW1;
+		reg = *(volatile signed int *)TELE_REG_RX1;
 	}
 /*
      6fc:	10c00003 	beqz	$a2,70c <init_module-0x230>

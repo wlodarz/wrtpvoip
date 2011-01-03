@@ -57,7 +57,7 @@ static int proc_read_mpi(struct file *file, const char *buffer, unsigned long co
 {
   char cmdptr[16];
 
-	VpMpiCmd(0, CSLAC_EC_REG_RD, 0x73, 4, cmdptr);
+	VpMpiCmd(0, CSLAC_EC_REG_RD, 0x73, 2, cmdptr);
         printk(KERN_ERR "cmdptr[0] = 0x%02x cmdptr[1] = 0x%02x cmdptr[2] = 0x%02x cmdptr[3] = 0x%02x\n", (unsigned char)cmdptr[0], (unsigned char)cmdptr[1], (unsigned char)cmdptr[2], (unsigned char)cmdptr[3]);
 
 
@@ -691,6 +691,7 @@ int tiumcb_init(char *ptr)
      980:	24060020 	li	$a2,32
 */
 	memset(ptr, 0, 32);
+#if 0
 
 /*
      984:	24100002 	li	$s0,2
@@ -704,11 +705,14 @@ int tiumcb_init(char *ptr)
      99c:	0240f809 	jalr	$s2
      9a0:	02202021 	move	$a0,$s1
 */
-	//prom_getenv;
+	hw_comp_str = prom_getenv("HW_COMPANDING");;
 /*
      9a4:	00402821 	move	$a1,$v0
      9a8:	10a0003b 	beqz	$a1,a98 <tiuhw_sys_call+0x9dc>
      9ac:	00a02021 	move	$a0,$a1
+*/
+	if (hw_comp_str) {
+/*
      9b0:	3c020000 	lui	$v0,0x0
      9b4:	2442030c 	addiu	$v0,$v0,780
      9b8:	00401821 	move	$v1,$v0
@@ -767,15 +771,27 @@ int tiumcb_init(char *ptr)
      a8c:	24420000 	addiu	$v0,$v0,0
      a90:	0040f809 	jalr	$v0
      a94:	02202821 	move	$a1,$s1
+*/
+	}
+/*
      a98:	24110010 	li	$s1,16
      a9c:	a6710016 	sh	$s1,22($s3)
+*/
+	ptr+22 = 16;		// writting to a structure/magic numbers
+/*
      aa0:	3c100000 	lui	$s0,0x0
      aa4:	26100340 	addiu	$s0,$s0,832
      aa8:	0240f809 	jalr	$s2
      aac:	02002021 	move	$a0,$s0
+*/
+	fsx_fsr_str = prom_getenv("FSX_FSR");
+/*
      ab0:	00402821 	move	$a1,$v0
      ab4:	10a00012 	beqz	$a1,b00 <tiuhw_sys_call+0xa44>
      ab8:	00a02021 	move	$a0,$a1
+*/
+	if (fsx_fsr_str) {
+/*
      abc:	00002821 	move	$a1,$zero
      ac0:	3c020000 	lui	$v0,0x0
      ac4:	24420000 	addiu	$v0,$v0,0
@@ -793,12 +809,17 @@ int tiumcb_init(char *ptr)
      af4:	0040f809 	jalr	$v0
      af8:	02002821 	move	$a1,$s0
      afc:	a6710016 	sh	$s1,22($s3)
+*/
+/*
      b00:	24100001 	li	$s0,1
      b04:	a6700014 	sh	$s0,20($s3)
      b08:	3c040000 	lui	$a0,0x0
      b0c:	24840360 	addiu	$a0,$a0,864
      b10:	0240f809 	jalr	$s2
      b14:	a2700009 	sb	$s0,9($s3)
+*/
+	num_tids_str = prom_getenv("NUM_TIDS");
+/*
      b18:	00402821 	move	$a1,$v0
      b1c:	50a0000d 	0x50a0000d
      b20:	240501f2 	li	$a1,498
@@ -1189,6 +1210,7 @@ int tiumcb_init(char *ptr)
     1124:	03e00008 	jr	$ra
     1128:	27bd0030 	addiu	$sp,$sp,48
 */
+#endif
 }
 
 /*
@@ -1719,10 +1741,6 @@ static int __init tiuhw_an_init_module(void)
 // WK: test
 	tiuhw_powerup();
 
-	// test
-	printk(KERN_ERR "let's test\n");
-	VpMpiCmd(0, CSLAC_EC_REG_RD, 0x73, 4, cmdptr);
-	printk(KERN_ERR "cmdptr[0] = 0x%02x cmdptr[1] = 0x%02x cmdptr[2] = 0x%02x cmdptr[3] = 0x%02x\n", (unsigned char)cmdptr[0], (unsigned char)cmdptr[1], (unsigned char)cmdptr[2], (unsigned char)cmdptr[3]);
 /*
 	VpMpiCmd(0, CSLAC_EC_REG_RD, 0x06, 4, cmdptr);
 	printk(KERN_ERR "cmdptr[0] = 0x%02x cmdptr[1] = 0x%02x cmdptr[2] = 0x%02x cmdptr[3] = 0x%02x\n", cmdptr[0], cmdptr[1], cmdptr[2], cmdptr[3]);
