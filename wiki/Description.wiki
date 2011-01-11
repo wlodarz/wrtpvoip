@@ -9,8 +9,8 @@ The drivers are done using reverse engineering technique.
 = Details =
 
 Modules:
-  * hwdsp: initialization, reset, and "tight loop" functions for C55x module. Mostly completed, not tested. I think hwu_lin_dsp_loop shows how to execute code on DSP.
-  * tiuhal: TNETV1050's mcbsp module driver. Fairly completed, big parts not "decompiled" completely. Not tested. First test should use tnetv1050_tid_init/read/write to read Legerity chip ID.
+  * hwdsp: initialization, reset, and "tight loop" functions for C55x module. Mostly completed, not tested. I think hwu_lin_dsp_loop shows how to execute code on DSP (code should be mmap'ed).
+  * tiuhal: TNETV1050's TELEPHONY module driver. Fairly completed. First test with osciloscope. Tx works, Rx not.
 
 
 Future:
