@@ -58,7 +58,19 @@ static int proc_read_mpi(struct file *file, const char *buffer, unsigned long co
   char cmdptr[16];
 
 	VpMpiCmd(0, CSLAC_EC_REG_RD, 0x73, 2, cmdptr);
-        printk(KERN_ERR "cmdptr[0] = 0x%02x cmdptr[1] = 0x%02x cmdptr[2] = 0x%02x cmdptr[3] = 0x%02x\n", (unsigned char)cmdptr[0], (unsigned char)cmdptr[1], (unsigned char)cmdptr[2], (unsigned char)cmdptr[3]);
+	//VpMpiCmd(0, CSLAC_EC_REG_RD, 0xAA, 2, cmdptr);
+        printk(KERN_ERR "cmdptr[0] = 0x%02x cmdptr[1] = 0x%02x\n",
+		(unsigned char)cmdptr[0], (unsigned char)cmdptr[1]);
+#if 0
+        printk(KERN_ERR "cmdptr[0] = 0x%02x cmdptr[1] = 0x%02x cmdptr[2] = 0x%02x cmdptr[3] = 0x%02x " 
+        		"cmdptr[0] = 0x%02x cmdptr[1] = 0x%02x cmdptr[2] = 0x%02x cmdptr[3] = 0x%02x " 
+        		"cmdptr[0] = 0x%02x cmdptr[1] = 0x%02x cmdptr[2] = 0x%02x cmdptr[3] = 0x%02x " 
+        		"cmdptr[0] = 0x%02x cmdptr[1] = 0x%02x cmdptr[2] = 0x%02x cmdptr[3] = 0x%02x\n", 
+		(unsigned char)cmdptr[0], (unsigned char)cmdptr[1], (unsigned char)cmdptr[2], (unsigned char)cmdptr[3],
+		(unsigned char)cmdptr[4], (unsigned char)cmdptr[5], (unsigned char)cmdptr[6], (unsigned char)cmdptr[7],
+		(unsigned char)cmdptr[8], (unsigned char)cmdptr[9], (unsigned char)cmdptr[10], (unsigned char)cmdptr[11],
+		(unsigned char)cmdptr[12], (unsigned char)cmdptr[13], (unsigned char)cmdptr[14], (unsigned char)cmdptr[15]);
+#endif
 
 
 	return 1;
@@ -4846,6 +4858,7 @@ _VpMpiCmd(
     7034:	1260000a 	beqz	$s3,7060 <VpMpiCmd+0x9c>
     7038:	02402021 	move	$a0,$s2		// tid
 */
+	printk(KERN_ERR "isRead = %d\n", isRead);
 	if(isRead) {
 /* read command
     703c:	02202821 	move	$a1,$s1
